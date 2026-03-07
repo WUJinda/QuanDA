@@ -1,0 +1,109 @@
+// 全局样式
+:root {
+  --primary-color: #1890ff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --danger-color: #f5222d;
+  --info-color: #1890ff;
+  --text-color: #333;
+  --border-color: #e8e8e8;
+  --bg-color: #f0f2f5;
+}
+
+// 滚动条样式
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+// 卡片样式
+.card {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+// 工具栏样式
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #fff;
+  border-radius: 4px;
+  
+  .toolbar-left,
+  .toolbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+}
+
+// 统计卡片
+.stat-card {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .stat-title {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    
+    &.up {
+      color: var(--danger-color);
+    }
+    
+    &.down {
+      color: var(--success-color);
+    }
+  }
+  
+  .stat-change {
+    font-size: 12px;
+    margin-top: 8px;
+    
+    &.up {
+      color: var(--danger-color);
+    }
+    
+    &.down {
+      color: var(--success-color);
+    }
+  }
+}
+
+// 表格样式增强
+.el-table {
+  .up {
+    color: var(--danger-color);
+  }
+  
+  .down {
+    color: var(--success-color);
+  }
+}
