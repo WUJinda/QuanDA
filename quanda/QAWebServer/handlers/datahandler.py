@@ -18,7 +18,7 @@ def get_future_list_safe():
         from qaenv import mongo_ip
         from pymongo import MongoClient
         client = MongoClient(mongo_ip)
-        db = client.quantaxis
+        db = client.quanda
         data = list(db.future_list.find({}, {'code': 1, '_id': 0}))
         if data:
             return [item['code'] for item in data]
@@ -53,7 +53,7 @@ def get_future_data_safe(code, start, end, frequence='day'):
         from qaenv import mongo_ip
         from pymongo import MongoClient
         client = MongoClient(mongo_ip)
-        db = client.quantaxis
+        db = client.quanda
         
         query = {
             'code': code,

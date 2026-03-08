@@ -2,13 +2,27 @@ import datetime
 import re
 import warnings
 
-import empyrical as em
+try:
+    import empyrical as em
+except ImportError:
+    try:
+        import empyrical_reloaded as em
+    except ImportError:
+        em = None
+        warnings.warn("empyrical or empyrical-reloaded not installed, some features may not work")
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-with warnings.catch_warnings():
-    warnings.filterwarnings('ignore', message='.*zipline.assets.*not found.*')
-    import pyfolio as pf
+
+try:
+    with warnings.catch_warnings():
+        warnings.filterwarnings('ignore', message='.*zipline.assets.*not found.*')
+        import pyfolio as pf
+except ImportError:
+    pf = None
+    warnings.warn("pyfolio not installed, some portfolio analysis features may not work")
+
 import pymongo
 import quanda as QA
 from qaenv import mongo_ip
@@ -36,7 +50,7 @@ class QA_QIFIMANAGER():
 
     """
 
-    def __init__(self, account_cookie, mongo_ip=mongo_ip, database='quantaxis', collection='history'):
+    def __init__(self, account_cookie, mongo_ip=mongo_ip, database='quanda', collection='history'):
         self.database = self.change_database(database, collection)
         self.database.create_index([("account_cookie", pymongo.ASCENDING),
                                     ("trading_day", pymongo.ASCENDING)], unique=True)
@@ -155,7 +169,7 @@ class QA_QIFISMANAGER():
             self.database = pymongo.MongoClient(mongo_ip).QAREALTIME.account
         else:
 
-            self.database = pymongo.MongoClient(mongo_ip).quantaxis.history
+            self.database = pymongo.MongoClient(mongo_ip).quanda.history
             self.database.create_index([("account_cookie", pymongo.ASCENDING),
                                         ("trading_day", pymongo.ASCENDING)], unique=True)
 

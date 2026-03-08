@@ -190,12 +190,13 @@ QAWebServer/  RESTful API
 ##  技术栈
 
 **核心语言**
-- Python 3.9-3.12
+- Python 3.9-3.13
 - Rust (QARS2)
 
 **关键依赖**
 ```
-pandas      ≥2.0.0    # 数据处理
+pandas      ≥2.0.0    # 数据处理，兼容3.x
+numpy       ≥1.26.0   # 支持Python 3.13
 pymongo     ≥4.10.0   # MongoDB
 pyarrow     ≥15.0.0   # 零拷贝数据
 tornado     ≥6.4.0    # Web服务
@@ -219,7 +220,7 @@ QuanDA/
 │   ├── QAStrategy/      # 策略回测
 │   ├── QAWebServer/     # Web服务
 │   └── ...
-├── quantaxis-frontend/  # 前端界面
+├── quanda-frontend/  # 前端界面
 ├── scripts/             # 工具脚本
 └── README.md
 ```
@@ -230,7 +231,7 @@ QuanDA/
 
 - [x] QARS2 Rust 核心集成
 - [x] 零拷贝数据传输
-- [x] Python 3.9-3.12 支持
+- [x] Python 3.9-3.13 支持
 - [ ] 完整期权支持
 - [ ] 实时行情推送
 - [ ] 分布式回测

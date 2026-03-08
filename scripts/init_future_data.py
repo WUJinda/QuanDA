@@ -122,7 +122,7 @@ def main():
     print("初始化完成！")
     print("=" * 60)
     print("\n现在可以启动前端查看数据了：")
-    print("cd quantaxis-frontend")
+    print("cd quanda-frontend")
     print("npm run dev")
 
 

@@ -8,7 +8,7 @@ from motor import MotorClient
 import asyncio
 
 
-def QA_util_sql_mongo_setting(uri='mongodb://localhost:27017/quantaxis'):
+def QA_util_sql_mongo_setting(uri='mongodb://localhost:27017/quanda'):
     """
     explanation:
         根据给定的uri返回一个MongoClient实例，采用@几何建议以使用加密
@@ -38,7 +38,7 @@ def QA_util_sql_mongo_setting(uri='mongodb://localhost:27017/quantaxis'):
 # async
 
 
-def QA_util_sql_async_mongo_setting(uri='mongodb://localhost:27017/quantaxis'):
+def QA_util_sql_async_mongo_setting(uri='mongodb://localhost:27017/quanda'):
     """
     explanation:
         根据给定的uri返回一个异步AsyncIOMotorClient实例
@@ -78,5 +78,5 @@ QA_util_sql_mongo_sort_DESCENDING = pymongo.DESCENDING
 
 if __name__ == '__main__':
     # test async_mongo
-    client = QA_util_sql_async_mongo_setting().quantaxis.stock_day
+    client = QA_util_sql_async_mongo_setting().quanda.stock_day
     print(client)

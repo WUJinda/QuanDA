@@ -60,8 +60,8 @@ def example_01_check_support():
         print("   性能提升: 数据传输速度提升5-10倍")
     else:
         print("⚠️  QADataSwap未安装，使用Python fallback")
-        print("   建议安装: pip install quantaxis[rust]")
-        print("   或者: cd /home/quantaxis/qadataswap && pip install -e .")
+        print("   建议安装: pip install quanda[rust]")
+        print("   或者: cd /home/quanda/qadataswap && pip install -e .")
 
 
 # ============================================================================
@@ -260,11 +260,11 @@ def example_05_shared_memory_writer():
     # 创建共享内存写入器
     print("\n✅ 创建共享内存写入器...")
     writer = SharedMemoryWriter(
-        name="quantaxis_market_data",
+        name="quanda_market_data",
         size_mb=50  # 50MB共享内存
     )
 
-    print(f"   名称: quantaxis_market_data")
+    print(f"   名称: quanda_market_data")
     print(f"   大小: 50MB")
 
     # 写入数据
@@ -317,8 +317,8 @@ def example_06_shared_memory_reader():
 
     # 创建读取器
     print("\n✅ 创建共享内存读取器...")
-    reader = SharedMemoryReader(name="quantaxis_market_data")
-    print(f"   名称: quantaxis_market_data")
+    reader = SharedMemoryReader(name="quanda_market_data")
+    print(f"   名称: quanda_market_data")
 
     # 读取数据（Polars格式）
     print("\n📥 从共享内存读取数据 (Polars格式)...")
@@ -440,7 +440,7 @@ def main():
     print("=" * 60)
 
     print("\n📚 更多信息:")
-    print("   - QADataSwap文档: /home/quantaxis/qadataswap/README.md")
+    print("   - QADataSwap文档: /home/quanda/qadataswap/README.md")
     print("   - quanda文档: https://github.com/quanda/quanda")
     print("   - 性能测试: python scripts/benchmark_databridge.py")
 

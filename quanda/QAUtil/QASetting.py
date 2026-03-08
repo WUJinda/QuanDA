@@ -12,9 +12,8 @@ from quanda.QAUtil.QASql import (
     QA_util_sql_mongo_setting
 )
 
-# quantaxis有一个配置目录存放在 ~/.quantaxis
+# quanda有一个配置目录存放在 ~/.quanda
 # 如果配置目录不存在就创建，主要配置都保存在config.json里面
-# 貌似yutian已经进行了，文件的创建步骤，他还会创建一个setting的dir
 # 需要与yutian讨论具体配置文件的放置位置 author:Will 2018.5.19
 
 DEFAULT_MONGO = os.getenv('MONGODB', 'localhost')
@@ -78,7 +77,7 @@ class QA_Setting():
             config.read(CONFIGFILE_PATH)
             return config.get(section, option)
         except:
-            res = self.client.quantaxis.usersetting.find_one(
+            res = self.client.quanda.usersetting.find_one(
                 {'section': section})
             if res:
                 return res.get(option, default_value)
@@ -103,7 +102,7 @@ class QA_Setting():
             [type] -- [description]
         """
         t = {'section': section, option: default_value}
-        self.client.quantaxis.usersetting.update_one(
+        self.client.quanda.usersetting.update_one(
             {'section': section}, {'$set': t}, upsert=True)
 
         # if os.path.exists(CONFIGFILE_PATH):
@@ -188,8 +187,8 @@ class QA_Setting():
 
 
 QASETTING = QA_Setting()
-DATABASE = QASETTING.client.quantaxis
-DATABASE_ASYNC = QASETTING.client_async.quantaxis
+DATABASE = QASETTING.client.quanda
+DATABASE_ASYNC = QASETTING.client_async.quanda
 
 
 def exclude_from_stock_ip_list(exclude_ip_list):

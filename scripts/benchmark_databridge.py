@@ -454,7 +454,7 @@ def print_summary_report(results: list):
         print("\n✨ QADataSwap零拷贝通信提供了显著的性能提升")
     else:
         print("\n💡 建议安装QADataSwap以获得更好的性能")
-        print("   安装: pip install quantaxis[rust]")
+        print("   安装: pip install quanda[rust]")
 
 
 # ============================================================================

@@ -21,7 +21,7 @@ from quanda.QAUtil.QAResourceManager import QAMongoResourceManager
 
 # 使用上下文管理器(推荐)
 with QAMongoResourceManager() as mongo:
-    db = mongo.get_database('quantaxis')
+    db = mongo.get_database('quanda')
     result = db.stock_day.find_one({'code': '000001'})
     print(result)
 # 自动关闭连接
@@ -29,7 +29,7 @@ with QAMongoResourceManager() as mongo:
 # 手动管理
 mongo = QAMongoResourceManager()
 try:
-    db = mongo.get_database('quantaxis')
+    db = mongo.get_database('quanda')
     # ... 操作 ...
 finally:
     mongo.close()  # 确保关闭
@@ -221,7 +221,7 @@ class QAMongoResourceManager(QABaseResourceManager):
 
     示例:
         >>> with QAMongoResourceManager() as mongo:
-        ...     db = mongo.get_database('quantaxis')
+        ...     db = mongo.get_database('quanda')
         ...     result = db.stock_day.find_one({'code': '000001'})
     """
 
@@ -324,12 +324,12 @@ class QAMongoResourceManager(QABaseResourceManager):
             self._is_connected = False
             return False
 
-    def get_database(self, name: str = 'quantaxis'):
+    def get_database(self, name: str = 'quanda'):
         """
         获取数据库对象
 
         参数:
-            name (str): 数据库名称, 默认'quantaxis'
+            name (str): 数据库名称, 默认'quanda'
 
         返回:
             pymongo.database.Database or motor.motor_asyncio.AsyncIOMotorDatabase
@@ -517,7 +517,7 @@ class QAClickHouseResourceManager(QABaseResourceManager):
     参数:
         host (str): ClickHouse主机地址
         port (int): 端口, 默认9000 (native protocol)
-        database (str): 数据库名, 默认'quantaxis'
+        database (str): 数据库名, 默认'quanda'
         user (str): 用户名, 默认'default'
         password (str): 密码, 默认''
         compression (bool): 是否启用压缩, 默认True
@@ -533,7 +533,7 @@ class QAClickHouseResourceManager(QABaseResourceManager):
         self,
         host: Optional[str] = None,
         port: int = 9000,
-        database: str = 'quantaxis',
+        database: str = 'quanda',
         user: str = 'default',
         password: str = '',
         compression: bool = True,
@@ -997,7 +997,7 @@ def get_mongo_resource(**kwargs):
 
     示例:
         >>> with get_mongo_resource() as mongo:
-        ...     db = mongo.get_database('quantaxis')
+        ...     db = mongo.get_database('quanda')
         ...     # 使用数据库...
     """
     manager = QAMongoResourceManager(**kwargs)

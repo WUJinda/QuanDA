@@ -13,7 +13,7 @@ import random
 def get_db():
     """获取数据库连接"""
     client = MongoClient(mongo_ip)
-    return client.quantaxis
+    return client.quanda
 
 def init_future_list():
     """初始化期货列表"""

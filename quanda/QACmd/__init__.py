@@ -115,12 +115,12 @@ class CLI(cmd.Cmd):
         now_path = os.getcwd()
         # project_dir = os.path.dirname(os.path.abspath(__file__))
 
-        data = requests.get("https://codeload.github.com/quantaxis/QADemo/zip/master")
+        data = requests.get("https://codeload.github.com/WUJinda/QADemo/zip/master")
         with open("{}{}QADEMO.zip".format(now_path, os.sep), "wb") as code:
             code.write(data.content)
 
         QA_util_log_info(
-            "Successfully generate QADEMO in : {}, for more examples, please visit https://github.com/quantaxis/qademo".format(
+            "Successfully generate QADEMO in : {}, for more examples, please visit https://github.com/WUJinda/qademo".format(
                 now_path
             )
         )
@@ -160,7 +160,7 @@ class CLI(cmd.Cmd):
         self.lastcmd = ""
 
     def help_drop_database(self):
-        print("drop quantaxis's databases")
+        print("drop quanda's databases")
 
     def do_quit(self, arg):  # 定义quit命令所执行的操作
         sys.exit(1)
@@ -357,12 +357,12 @@ class CLI(cmd.Cmd):
             if len(arg) == 1 and arg[0] == "all":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 # TODO: 将ts还是tdx作为命令传入
@@ -385,12 +385,12 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] == "day":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_SU_save_stock_day("tdx")
@@ -410,12 +410,12 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] == "min":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 # QA_SU_save_stock_day('tdx')
@@ -432,12 +432,12 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] == "transaction":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_SU_save_index_transaction("tdx")
@@ -457,12 +457,12 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] in ["X", "x"]:
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_SU_save_stock_day("tdx")
@@ -481,12 +481,12 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] == "ts_all":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_ts_update_inc()
@@ -497,24 +497,24 @@ class CLI(cmd.Cmd):
             elif len(arg) == 1 and arg[0] == "ts_financial":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"})
+                    .client.quanda.user_list.count_documents({"username": "admin"})
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_ts_update_inc()
             elif len(arg) == 1 and arg[0] == "ts_daily":
                 if (
                     QA_Setting()
-                    #.client.quantaxis.user_list.find({"username": "admin"})
+                    #.client.quanda.user_list.find({"username": "admin"})
                     #.count()
-                    .client.quantaxis.user_list.count_documents({"username": "admin"}   )
+                    .client.quanda.user_list.count_documents({"username": "admin"}   )
                     == 0
                 ):
-                    QA_Setting().client.quantaxis.user_list.insert_one(
+                    QA_Setting().client.quanda.user_list.insert_one(
                         {"username": "admin", "password": "admin"}
                     )
                 QA_ts_update_daily_basic()
@@ -662,14 +662,14 @@ class CLI(cmd.Cmd):
                     if i == "insert_user":
                         if (
                             QA_Setting()
-                            #.client.quantaxis.user_list.find({"username": "admin"})
+                            #.client.quanda.user_list.find({"username": "admin"})
                             #.count()
-                            .client.quantaxis.user_list.count_documents(
+                            .client.quanda.user_list.count_documents(
                                 {"username": "admin"}
                             )
                             == 0
                         ):
-                            QA_Setting().client.quantaxis.user_list.insert_one(
+                            QA_Setting().client.quanda.user_list.insert_one(
                                 {"username": "admin", "password": "admin"}
                             )
                     else:

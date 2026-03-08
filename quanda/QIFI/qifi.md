@@ -1,10 +1,10 @@
 # QIFI
-Quantaxis Differential Information Flow for Finance Intergration
+QuanDA Differential Information Flow for Finance Integration
 
 
 QIFI 协议 作为qatrader/ qapms的标准协议, 支持股票/期货市场
 
-- 名称 QIFI   为 Quantaxis Differential Information Flow for Finance Intergration
+- 名称 QIFI   为 QuanDA Differential Information Flow for Finance Integration
 
 - 核心字段
 	-  'accounts'
@@ -26,7 +26,7 @@ QIFI 协议 作为qatrader/ qapms的标准协议, 支持股票/期货市场
 ### 关联项目
 
 
-- [QuanDA](https://github.com/quantaxis/quantaxis)
+- [QuanDA](https://github.com/WUJinda/QuanDA)
 - [QATrader](https://github.com/yutiansut/qatrader)
 - [QIFIAccount](https://github.com/yutiansut/QIFIAccount)
 - [QAStrategy](https://github.com/yutiansut/QAStrategy)

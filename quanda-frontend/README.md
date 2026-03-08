@@ -33,7 +33,7 @@ npm run build
 ## 📁 项目结构
 
 ```
-quantaxis-frontend/
+quanda-frontend/
 ├── src/
 │   ├── components/        # 组件库
 │   │   ├── Layout/       # 布局组件

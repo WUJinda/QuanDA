@@ -41,7 +41,7 @@ def example1_mongodb_context_manager():
         # 使用with语句(推荐)
         with QAMongoResourceManager() as mongo:
             # 获取数据库
-            db = mongo.get_database('quantaxis')
+            db = mongo.get_database('quanda')
 
             # 示例操作: 查询股票日线数据
             result = db.stock_day.find_one({'code': '000001'})
@@ -85,7 +85,7 @@ def example2_mongodb_manual_management():
         print(f"✅ MongoDB连接状态: {mongo.is_connected()}")
 
         # 使用连接
-        db = mongo.get_database('quantaxis')
+        db = mongo.get_database('quanda')
         count = db.stock_list.count_documents({})
         print(f"✅ 股票列表数量: {count}")
 
@@ -117,7 +117,7 @@ def example3_mongodb_async():
     async def async_query():
         # 创建异步客户端
         async with QAMongoResourceManager(async_mode=True) as mongo:
-            db = mongo.get_database('quantaxis')
+            db = mongo.get_database('quanda')
 
             # 异步查询
             result = await db.stock_day.find_one({'code': '000001'})
@@ -339,7 +339,7 @@ def example7_resource_pool():
             print(f"   {status_icon} {resource}: {'正常' if status else '异常'}")
 
         # 使用资源进行业务逻辑...
-        db = mongo.get_database('quantaxis')
+        db = mongo.get_database('quanda')
         collections_count = len(db.list_collection_names())
         print(f"\n✅ MongoDB数据库集合数: {collections_count}")
 
@@ -420,7 +420,7 @@ class QuantStrategy:
 
     def get_market_data(self, code: str, start: str, end: str):
         """从MongoDB获取市场数据"""
-        db = self.mongo.get_database('quantaxis')
+        db = self.mongo.get_database('quanda')
         cursor = db.stock_day.find({
             'code': code,
             'date': {'$gte': start, '$lte': end}

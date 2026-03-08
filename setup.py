@@ -17,15 +17,15 @@ except ImportError:
 """
 """
 
-# 检查Python版本 - 与QARS2对齐到3.9+
+# 检查Python版本 - 支持3.9-3.13
 if sys.version_info < (3, 9) or sys.version_info >= (4, 0):
     print('=' * 60)
-    print('错误: QuanDA 2.1+ 需要 Python 3.9-3.12')
+    print('错误: QuanDA 2.1+ 需要 Python 3.9-3.13')
     print(f'当前版本: Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}')
     print('=' * 60)
     print('\n推荐使用:')
     print('  - Python 3.9+ (与QARS2 Rust核心兼容)')
-    print('  - Python 3.11+ (最佳性能)')
+    print('  - Python 3.11-3.13 (最佳性能)')
     print('\n升级方法:')
     print('  Ubuntu/Debian: sudo apt install python3.11')
     print('  macOS: brew install python@3.11')
@@ -127,14 +127,15 @@ setup(
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Intended Audience :: Developers',
         'Intended Audience :: Financial and Insurance Industry',
         'Operating System :: OS Independent',
         'Topic :: Office/Business :: Financial :: Investment',
     ],
     install_requires=INSTALL_REQUIRES,
-    # Python版本要求 - 与QARS2对齐
-    python_requires='>=3.9,<4.0',
+    # Python版本要求 - 支持3.9-3.13
+    python_requires='>=3.9,<3.14',
     # 可选依赖: Rust高性能组件
     extras_require={
         'rust': [
@@ -142,14 +143,14 @@ setup(
             'qadataswap>=0.1.0',  # 跨语言零拷贝通信
         ],
         'performance': [
-            'polars>=0.20.0,<0.22.0',  # 高性能数据处理
+            'polars>=0.20.0',  # 高性能数据处理，支持Python 3.13
             'orjson>=3.10.0',  # 快速JSON序列化
             'msgpack>=1.1.0',  # MessagePack序列化
         ],
         'full': [
             'qars3>=0.0.45',
             'qadataswap>=0.1.0',
-            'polars>=0.20.0,<0.22.0',
+            'polars>=0.20.0',
             'orjson>=3.10.0',
             'msgpack>=1.1.0',
             'jupyter>=1.0.0',

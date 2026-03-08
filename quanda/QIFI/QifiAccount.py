@@ -126,7 +126,7 @@ class QIFI_Account():
 
                 if self.model == "BACKTEST":
                     self.db = pymongo.MongoClient(
-                        self.trade_host).quantaxis
+                        self.trade_host).quanda
                 else:
                     self.db = pymongo.MongoClient(
                         self.trade_host).QAREALTIME
@@ -407,8 +407,8 @@ class QIFI_Account():
                     if self.model == "BACKTEST":
 
                         self.db = pymongo.MongoClient(
-                            self.trade_host).quantaxis
-                        ## 数据库: quantaxis.history
+                            self.trade_host).quanda
+                        ## 数据库: quanda.history
                         self.db.history.update_one({'account_cookie': self.user_id, 'trading_day': self.trading_day}, {
                             '$set': self.message}, upsert=True)
                     else:

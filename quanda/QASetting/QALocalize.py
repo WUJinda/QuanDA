@@ -14,7 +14,7 @@ import os
 
 
 path = os.path.expanduser('~')
-qa_path = '{}{}{}'.format(path, os.sep, '.quantaxis')
+qa_path = '{}{}{}'.format(path, os.sep, '.quanda')
 
 
 def generate_path(name):

@@ -36,7 +36,7 @@ def example_check_qars_support():
         print("  性能提升: 账户操作100x, 回测10x")
     else:
         print("⚠ QARS2未安装，使用Python fallback")
-        print("  建议安装: pip install quantaxis[rust]")
+        print("  建议安装: pip install quanda[rust]")
 
     print(f"\nHAS_QARS: {HAS_QARS}")
     print()
@@ -226,7 +226,7 @@ def example_backtest():
 
     if not HAS_QARS:
         print("⚠ 回测引擎需要QARS2支持")
-        print("  请安装: pip install quantaxis[rust]")
+        print("  请安装: pip install quanda[rust]")
         print()
         return
 

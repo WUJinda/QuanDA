@@ -71,7 +71,7 @@ curl http://localhost:8010/future/list
 ### 3. 启动前端
 
 ```bash
-cd quantaxis-frontend
+cd quanda-frontend
 npm run dev
 ```
 

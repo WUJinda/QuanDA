@@ -5,7 +5,7 @@ import random
 
 
 class subscriber(base_ps):
-    """new version (pika 1.0+) client for sub/quantaxis IO BUS
+    """new version (pika 1.0+) client for sub/quanda IO BUS
 
     Arguments:
         base_ps {[type]} -- [description]
@@ -51,7 +51,7 @@ class subscriber(base_ps):
 
 
 class subscriber_routing(base_ps):
-    """new version (pika 1.0+) client for sub/quantaxis IO BUS
+    """new version (pika 1.0+) client for sub/quanda IO BUS
 
     Arguments:
         base_ps {[type]} -- [description]
@@ -103,7 +103,7 @@ class subscriber_routing(base_ps):
 
 
 class subscriber_topic(base_ps):
-    """new version (pika 1.0+) client for sub/quantaxis IO BUS
+    """new version (pika 1.0+) client for sub/quanda IO BUS
 
     Arguments:
         base_ps {[type]} -- [description]

@@ -27,14 +27,14 @@ from quanda.QAUtil.QASetting import QA_Setting
 """
 
 try:
-    _name = '{}{}quantaxis_{}-{}-.log'.format(
+    _name = '{}{}quanda_{}-{}-.log'.format(
         log_path,
         os.sep,
         os.path.basename(sys.argv[0]).split('.py')[0],
         str(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
     )
 except:
-    _name = '{}{}quantaxis-{}-.log'.format(
+    _name = '{}{}quanda-{}-.log'.format(
         log_path,
         os.sep,
         str(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))

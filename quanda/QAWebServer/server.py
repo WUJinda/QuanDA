@@ -34,7 +34,7 @@ class INDEX(QABaseHandler):
         self.write(
             {
                 'status': 200,
-                'message': 'This is a welcome page for quantaxis backend',
+                'message': 'This is a welcome page for quanda backend',
                 'url': [item[0] for item in handlers]
             }
         )
