@@ -175,10 +175,10 @@ const updateChart = () => {
         barWidth: '60%',
         barMaxWidth: 8,
         itemStyle: {
-          color: '#ef232a',
-          color0: '#14b143',
-          borderColor: '#ef232a',
-          borderColor0: '#14b143'
+          color: '#FF7A7E',
+          color0: '#73D13D',
+          borderColor: '#FF7A7E',
+          borderColor0: '#73D13D'
         }
       },
       ...(props.showBoll ? [
@@ -190,7 +190,7 @@ const updateChart = () => {
           lineStyle: {
             opacity: 0.8,
             width: 1.5,
-            color: '#f5222d'
+            color: '#FF7A7E'
           },
           showSymbol: false,
           connectNulls: false
@@ -203,7 +203,7 @@ const updateChart = () => {
           lineStyle: {
             opacity: 0.8,
             width: 1.5,
-            color: '#1890ff'
+            color: '#5B8FF9'
           },
           showSymbol: false,
           connectNulls: false
@@ -216,7 +216,7 @@ const updateChart = () => {
           lineStyle: {
             opacity: 0.8,
             width: 1.5,
-            color: '#52c41a'
+            color: '#73D13D'
           },
           showSymbol: false,
           connectNulls: false
@@ -233,13 +233,13 @@ const updateChart = () => {
         itemStyle: {
           color: (params: any) => {
             const dataIndex = params.dataIndex
-            return values[dataIndex][1] > values[dataIndex][0] ? '#ef232a' : '#14b143'
+            return values[dataIndex][1] > values[dataIndex][0] ? '#FF7A7E' : '#73D13D'
           }
         }
       }
     ]
   }
-  
+
   chartInstance.setOption(option)
 }
 

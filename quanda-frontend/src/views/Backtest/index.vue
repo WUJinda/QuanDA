@@ -200,30 +200,32 @@ const createBacktest = () => {
     margin-bottom: 20px;
     font-size: 16px;
     font-weight: 600;
+    color: #262626;
   }
-  
+
   .console-output {
     background: #1e1e1e;
     color: #d4d4d4;
     padding: 16px;
-    border-radius: 4px;
+    border-radius: 8px;
     height: 400px;
     overflow-y: auto;
     font-family: 'Courier New', monospace;
     font-size: 13px;
-    
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+
     .log-line {
       margin-bottom: 4px;
       line-height: 1.5;
     }
   }
-  
+
   .up {
-    color: #f5222d;
+    color: #FF7A7E;
   }
-  
+
   .down {
-    color: #52c41a;
+    color: #73D13D;
   }
 }
 </style>

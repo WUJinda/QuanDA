@@ -88,6 +88,82 @@ onMounted(async () => {
     margin-bottom: 20px;
     font-size: 16px;
     font-weight: 600;
+    color: #262626;
+  }
+
+  // 统计卡片样式
+  .stat-card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E8E8E8;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+      transform: translateY(-2px);
+    }
+
+    .stat-title {
+      font-size: 14px;
+      color: #595959;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #262626;
+
+      &.up {
+        background: linear-gradient(135deg, #FF7A7E 0%, #FF9D9F 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      &.down {
+        background: linear-gradient(135deg, #73D13D 0%, #95DE64 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+    }
+
+    .stat-change {
+      font-size: 12px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      &.up {
+        color: #FF7A7E;
+      }
+
+      &.down {
+        color: #73D13D;
+      }
+    }
+  }
+
+  // 卡片样式
+  .card {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E8E8E8;
+    height: 100%;
+
+    h3 {
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #262626;
+    }
   }
 }
 </style>

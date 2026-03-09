@@ -53,40 +53,98 @@ const toggleSidebar = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(232, 232, 232, 0.6);
+  transition: all 0.3s ease;
+
   .left {
     display: flex;
     align-items: center;
     gap: 20px;
-    
+
     .collapse-icon {
       font-size: 20px;
       cursor: pointer;
-      transition: color 0.3s;
-      
+      color: #595959;
+      transition: all 0.3s ease;
+      padding: 8px;
+      border-radius: 8px;
+
       &:hover {
-        color: #1890ff;
+        color: #5B8FF9;
+        background: rgba(91, 143, 249, 0.08);
+      }
+    }
+
+    :deep(.el-breadcrumb) {
+      .el-breadcrumb__item {
+        .el-breadcrumb__inner {
+          color: #595959;
+          font-weight: 500;
+
+          &:hover {
+            color: #5B8FF9;
+          }
+        }
+
+        &:last-child .el-breadcrumb__inner {
+          color: #262626;
+          font-weight: 600;
+        }
+      }
+
+      .el-breadcrumb__separator {
+        color: #8C8C8C;
       }
     }
   }
-  
+
   .right {
     display: flex;
     align-items: center;
     gap: 20px;
-    
+
     .notification {
       cursor: pointer;
+      color: #595959;
+      transition: all 0.3s ease;
+      padding: 8px;
+      border-radius: 8px;
+
+      &:hover {
+        color: #5B8FF9;
+        background: rgba(91, 143, 249, 0.08);
+      }
+
+      :deep(.el-badge__content) {
+        background-color: #FF7A7E;
+        border-color: #FFFFFF;
+      }
     }
-    
+
     .user-info {
       display: flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
-      
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: rgba(91, 143, 249, 0.06);
+      }
+
       .username {
         font-size: 14px;
+        font-weight: 500;
+        color: #262626;
+      }
+
+      :deep(.el-avatar) {
+        border: 2px solid rgba(91, 143, 249, 0.1);
       }
     }
   }

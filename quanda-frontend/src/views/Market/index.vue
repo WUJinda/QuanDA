@@ -145,11 +145,11 @@ const addToWatch = (row: any) => {
 <style lang="scss" scoped>
 .market-page {
   .up {
-    color: #f5222d;
+    color: #FF7A7E;
   }
-  
+
   .down {
-    color: #52c41a;
+    color: #73D13D;
   }
 }
 </style>

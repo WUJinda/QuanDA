@@ -31,22 +31,24 @@ const isCollapse = computed(() => appStore.isCollapse)
 <style lang="scss" scoped>
 .main-layout {
   height: 100vh;
-  
+
   .sidebar {
-    background: #001529;
-    transition: width 0.3s;
+    background: linear-gradient(180deg, #1a2942 0%, #0f1c2e 100%);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .header {
-    background: #fff;
-    border-bottom: 1px solid #e8e8e8;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(232, 232, 232, 0.6);
     padding: 0 20px;
     display: flex;
     align-items: center;
   }
-  
+
   .main-content {
-    background: #f0f2f5;
+    background: #F5F7FA;
     padding: 20px;
     overflow-y: auto;
   }
@@ -54,7 +56,7 @@ const isCollapse = computed(() => appStore.isCollapse)
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fade-enter-from,

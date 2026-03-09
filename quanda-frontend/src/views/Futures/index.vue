@@ -327,7 +327,7 @@ onMounted(async () => {
     align-items: center;
     justify-content: center;
     height: 500px;
-    color: #1890ff;
+    color: #5B8FF9;
     font-size: 16px;
 
     .el-icon {
@@ -335,37 +335,37 @@ onMounted(async () => {
       margin-bottom: 12px;
     }
   }
-  
+
   .custom-period {
     padding: 10px 0;
   }
-  
+
   .realtime-info {
     .info-item {
       display: flex;
       justify-content: space-between;
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
-      
+
       &:last-child {
         border-bottom: none;
       }
-      
+
       .label {
-        color: #666;
+        color: #595959;
         font-size: 14px;
       }
-      
+
       .value {
         font-size: 16px;
         font-weight: 600;
-        
+
         &.up {
-          color: #f5222d;
+          color: #FF7A7E;
         }
-        
+
         &.down {
-          color: #52c41a;
+          color: #73D13D;
         }
       }
     }
