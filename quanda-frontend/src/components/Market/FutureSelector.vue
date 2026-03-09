@@ -7,7 +7,7 @@
     class="future-selector"
   >
     <el-option
-      v-for="future in futureList"
+      v-for="future in marketStore.futureList"
       :key="future"
       :label="future"
       :value="future"
