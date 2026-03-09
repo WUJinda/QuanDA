@@ -21,17 +21,34 @@ export const useMarketStore = defineStore('market', () => {
     }
   }
 
-  const fetchFutureData = async (code: string, start: string, end: string, frequence: string = 'day') => {
+  // 数据缓存
+  const dataCache = ref<Map<string, { data: FutureData[], timestamp: number }>>(new Map())
+  const CACHE_DURATION = 5 * 60 * 1000 // 5分钟缓存
+
+  const fetchFutureData = async (code: string, start: string, end: string, frequence: string = 'day', limit?: number) => {
     try {
+      // 生成缓存key
+      const cacheKey = `${code}_${start}_${end}_${frequence}_${limit || ''}`
+      
+      // 检查缓存
+      const cached = dataCache.value.get(cacheKey)
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        futureData.value = cached.data
+        return cached.data
+      }
+      
       let data: FutureData[]
       
       // 根据周期类型调用不同的 API
       if (frequence === 'day' || frequence === 'week' || frequence === 'month') {
-        data = await marketApi.getFutureDay(code, start, end, frequence)
+        data = await marketApi.getFutureDay(code, start, end, frequence, limit)
       } else {
-        // 分钟数据
-        data = await marketApi.getFutureMin(code, start, end, frequence)
+        // 分钟数据，默认限制2000条
+        data = await marketApi.getFutureMin(code, start, end, frequence, limit || 2000)
       }
+      
+      // 更新缓存
+      dataCache.value.set(cacheKey, { data, timestamp: Date.now() })
       
       futureData.value = data
       return data

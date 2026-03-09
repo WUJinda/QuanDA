@@ -25,16 +25,15 @@
     </div>
 
     <div class="reference-grid">
-      <div 
-        v-for="item in referenceList" 
-        :key="item.id" 
+      <div
+        v-for="item in referenceList"
+        :key="item.id"
         class="reference-card"
-        @click="viewDetail(item)"
       >
-        <div class="card-image">
+        <div class="card-image" @click="viewDetail(item)">
           <img :src="item.image || '/placeholder.png'" :alt="item.name" />
         </div>
-        <div class="card-content">
+        <div class="card-content" @click="viewDetail(item)">
           <h4>{{ item.name }}</h4>
           <p class="description">{{ item.description }}</p>
           <div class="meta">
@@ -45,15 +44,25 @@
             <span class="time">{{ formatTime(item.createTime) }}</span>
           </div>
           <div class="tags">
-            <el-tag 
-              v-for="tag in item.tags" 
-              :key="tag" 
-              size="small" 
+            <el-tag
+              v-for="tag in item.tags"
+              :key="tag"
+              size="small"
               type="info"
             >
               {{ tag }}
             </el-tag>
           </div>
+        </div>
+        <div class="card-actions">
+          <button class="action-btn detail-btn" @click.stop="viewDetail(item)">
+            <el-icon><View /></el-icon>
+            详情
+          </button>
+          <button class="action-btn edit-btn" @click.stop="editReference(item)">
+            <el-icon><Edit /></el-icon>
+            编辑
+          </button>
         </div>
       </div>
     </div>
@@ -161,6 +170,112 @@
       </template>
     </el-dialog>
 
+    <!-- 编辑对话框 -->
+    <el-dialog
+      v-model="showEditDialog"
+      title="编辑策略参考"
+      width="900px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="editForm" label-width="100px">
+        <el-form-item label="名称">
+          <el-input v-model="editForm.name" placeholder="请输入名称" />
+        </el-form-item>
+        <el-form-item label="描述">
+          <el-input
+            v-model="editForm.description"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入描述"
+          />
+        </el-form-item>
+        <el-form-item label="上传截图">
+          <el-upload
+            class="upload-demo"
+            :action="uploadUrl"
+            :on-success="handleEditUploadSuccess"
+            :before-upload="beforeUpload"
+            :show-file-list="false"
+          >
+            <el-button type="primary">更换图片</el-button>
+          </el-upload>
+          <div v-if="editForm.image" class="preview-image">
+            <img :src="editForm.image" alt="预览" />
+          </div>
+        </el-form-item>
+        <el-form-item label="合约代码">
+          <el-input v-model="editForm.code" placeholder="如: IF2512" />
+        </el-form-item>
+        <el-form-item label="K线周期">
+          <el-select v-model="editForm.frequence" style="width: 100%;">
+            <el-option label="日线" value="day" />
+            <el-option label="60分钟" value="60min" />
+            <el-option label="30分钟" value="30min" />
+            <el-option label="15分钟" value="15min" />
+            <el-option label="5分钟" value="5min" />
+            <el-option label="1分钟" value="1min" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="时间区间">
+          <el-date-picker
+            v-model="editForm.dateRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            :default-time="defaultTimeRange"
+          />
+        </el-form-item>
+        <el-form-item label="标签">
+          <el-select
+            v-model="editForm.tags"
+            multiple
+            filterable
+            allow-create
+            placeholder="请选择或输入标签"
+            style="width: 100%;"
+          >
+            <el-option label="突破" value="突破" />
+            <el-option label="回调" value="回调" />
+            <el-option label="震荡" value="震荡" />
+            <el-option label="趋势" value="趋势" />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="reanalyzeSegment" :loading="analyzing">
+            重新分析区间数据
+          </el-button>
+        </el-form-item>
+        <el-form-item v-if="analyzedData" label="分析结果">
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="趋势">
+              {{ getTrendLabel(analyzedData.pattern.trend) }}
+            </el-descriptions-item>
+            <el-descriptions-item label="BOLL位置">
+              {{ getBollPositionLabel(analyzedData.pattern.bollPosition) }}
+            </el-descriptions-item>
+            <el-descriptions-item label="涨跌幅">
+              {{ analyzedData.indicators.priceChange.toFixed(2) }}%
+            </el-descriptions-item>
+            <el-descriptions-item label="波动率">
+              {{ analyzedData.indicators.volatility.toFixed(2) }}%
+            </el-descriptions-item>
+          </el-descriptions>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showEditDialog = false">取消</el-button>
+        <el-button type="danger" @click="deleteReference" :loading="deleting">
+          删除
+        </el-button>
+        <el-button type="primary" @click="updateReference" :loading="updating">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
+
     <!-- 详情对话框 -->
     <el-dialog
       v-model="showDetailDialog"
@@ -210,7 +325,6 @@
           <KLineChart
             v-if="detailKlineData.length > 0"
             :data="detailKlineData"
-            :showBoll="true"
             height="400px"
           />
         </div>
@@ -221,17 +335,22 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus, View, Edit } from '@element-plus/icons-vue'
 import { strategyReferenceApi } from '@/api/strategy-reference'
 import KLineChart from '@/components/Charts/KLineChart.vue'
 import type { StrategyReference } from '@/types/strategy-reference'
 
 const showCreateDialog = ref(false)
+const showEditDialog = ref(false)
 const showDetailDialog = ref(false)
 const creating = ref(false)
+const updating = ref(false)
+const deleting = ref(false)
 const analyzing = ref(false)
 const referenceList = ref<StrategyReference[]>([])
 const currentDetail = ref<StrategyReference | null>(null)
+const editingId = ref<string | null>(null)
 const analyzedData = ref<any>(null)
 const uploadUrl = ref('/api/strategy-reference/upload')
 
@@ -241,6 +360,16 @@ const filter = ref({
 })
 
 const form = ref({
+  name: '',
+  description: '',
+  image: '',
+  code: '',
+  frequence: 'day',
+  dateRange: [],
+  tags: []
+})
+
+const editForm = ref({
   name: '',
   description: '',
   image: '',
@@ -275,6 +404,18 @@ const handleUploadSuccess = (response: any) => {
   } else if (response && response.url) {
     // 如果拦截器已经处理过，直接取 url
     form.value.image = response.url
+    ElMessage.success('上传成功')
+  } else {
+    ElMessage.error('上传失败')
+  }
+}
+
+const handleEditUploadSuccess = (response: any) => {
+  if (response && response.res && response.res.url) {
+    editForm.value.image = response.res.url
+    ElMessage.success('上传成功')
+  } else if (response && response.url) {
+    editForm.value.image = response.url
     ElMessage.success('上传成功')
   } else {
     ElMessage.error('上传失败')
@@ -334,7 +475,7 @@ const createReference = async () => {
       indicators: analyzedData.value.indicators,
       klineData: analyzedData.value.klineData
     }
-    
+
     await strategyReferenceApi.create(data)
     ElMessage.success('创建成功')
     showCreateDialog.value = false
@@ -343,6 +484,99 @@ const createReference = async () => {
     ElMessage.error('创建失败')
   } finally {
     creating.value = false
+  }
+}
+
+const editReference = (item: StrategyReference) => {
+  editingId.value = item.id
+  editForm.value = {
+    name: item.name,
+    description: item.description,
+    image: item.image,
+    code: item.code,
+    frequence: item.frequence,
+    dateRange: [item.startTime, item.endTime],
+    tags: item.tags || []
+  }
+  analyzedData.value = {
+    pattern: item.pattern,
+    indicators: item.indicators
+  }
+  showEditDialog.value = true
+}
+
+const reanalyzeSegment = async () => {
+  if (!editForm.value.code || !editForm.value.dateRange || editForm.value.dateRange.length !== 2) {
+    ElMessage.warning('请填写合约代码和时间区间')
+    return
+  }
+
+  analyzing.value = true
+  try {
+    analyzedData.value = await strategyReferenceApi.analyzeSegment(
+      editForm.value.code,
+      editForm.value.dateRange[0],
+      editForm.value.dateRange[1],
+      editForm.value.frequence
+    )
+    ElMessage.success('分析完成')
+  } catch (error) {
+    ElMessage.error('分析失败')
+  } finally {
+    analyzing.value = false
+  }
+}
+
+const updateReference = async () => {
+  if (!editForm.value.name || !analyzedData.value) {
+    ElMessage.warning('请填写完整信息并分析区间数据')
+    return
+  }
+
+  updating.value = true
+  try {
+    const data = {
+      ...editForm.value,
+      startTime: editForm.value.dateRange[0],
+      endTime: editForm.value.dateRange[1],
+      pattern: analyzedData.value.pattern,
+      indicators: analyzedData.value.indicators
+    }
+
+    await strategyReferenceApi.update(editingId.value!, data)
+    ElMessage.success('更新成功')
+    showEditDialog.value = false
+    fetchList()
+  } catch (error) {
+    ElMessage.error('更新失败')
+  } finally {
+    updating.value = false
+  }
+}
+
+const deleteReference = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这个策略参考吗？删除后无法恢复。',
+      '确认删除',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+      }
+    )
+
+    deleting.value = true
+    await strategyReferenceApi.delete(editingId.value!)
+    ElMessage.success('删除成功')
+    showEditDialog.value = false
+    fetchList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  } finally {
+    deleting.value = false
   }
 }
 
@@ -592,6 +826,64 @@ onMounted(() => {
           background: var(--color-bg-light);
           color: var(--color-text-secondary);
           border: 1px solid var(--color-border);
+        }
+      }
+    }
+
+    /* 卡片操作按钮区域 */
+    .card-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-top: 1px solid var(--color-border);
+      background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-light) 100%);
+
+      .action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+        .el-icon {
+          font-size: 16px;
+        }
+
+        &.detail-btn {
+          background: linear-gradient(135deg, rgba(91, 143, 249, 0.1) 0%, rgba(91, 143, 249, 0.05) 100%);
+          color: var(--color-primary);
+
+          &:hover {
+            background: linear-gradient(135deg, rgba(91, 143, 249, 0.2) 0%, rgba(91, 143, 249, 0.1) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(91, 143, 249, 0.2);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        &.edit-btn {
+          background: linear-gradient(135deg, rgba(146, 84, 222, 0.1) 0%, rgba(146, 84, 222, 0.05) 100%);
+          color: var(--color-secondary);
+
+          &:hover {
+            background: linear-gradient(135deg, rgba(146, 84, 222, 0.2) 0%, rgba(146, 84, 222, 0.1) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(146, 84, 222, 0.2);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
         }
       }
     }

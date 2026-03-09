@@ -8,16 +8,16 @@ export const marketApi = {
   },
 
   // 获取期货日线数据
-  getFutureDay: (code: string, start: string, end: string, frequence = 'day') => {
+  getFutureDay: (code: string, start: string, end: string, frequence = 'day', limit?: number) => {
     return request.get<any, FutureData[]>('/future/day', {
-      params: { code, start, end, frequence }
+      params: { code, start, end, frequence, limit }
     })
   },
 
   // 获取期货分钟数据
-  getFutureMin: (code: string, start: string, end: string, frequence = '1min') => {
+  getFutureMin: (code: string, start: string, end: string, frequence = '1min', limit?: number) => {
     return request.get<any, FutureData[]>('/future/min', {
-      params: { code, start, end, frequence }
+      params: { code, start, end, frequence, limit: limit || 2000 }
     })
   },
 

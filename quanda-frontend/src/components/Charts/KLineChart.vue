@@ -15,13 +15,13 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   height: '400px',
-  showBoll: true
+  showBoll: false  // 默认不显示BOLL，提升加载速度
 })
 
 const chartRef = ref<HTMLElement>()
 let chartInstance: echarts.ECharts | null = null
 
-// 计算布林带指标
+// 优化的布林带计算（使用滑动窗口，避免重复计算）
 const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
   const result = {
     upper: [] as (number | null)[],
@@ -29,25 +29,49 @@ const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
     lower: [] as (number | null)[]
   }
   
+  if (data.length < period) {
+    // 数据不足，全部返回null
+    return {
+      upper: new Array(data.length).fill(null),
+      middle: new Array(data.length).fill(null),
+      lower: new Array(data.length).fill(null)
+    }
+  }
+  
+  // 使用滑动窗口优化计算
+  let sum = 0
+  let sumSq = 0
+  
+  // 初始化第一个窗口
+  for (let i = 0; i < period; i++) {
+    sum += data[i]
+    sumSq += data[i] * data[i]
+  }
+  
   for (let i = 0; i < data.length; i++) {
     if (i < period - 1) {
-      // 前面不足20个数据点时，用null填充（不显示）
       result.upper.push(null)
       result.middle.push(null)
       result.lower.push(null)
       continue
     }
     
-    const slice = data.slice(i - period + 1, i + 1)
-    const sum = slice.reduce((a, b) => a + b, 0)
+    // 计算均值和标准差
     const mean = sum / period
-    
-    const variance = slice.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / period
-    const std = Math.sqrt(variance)
+    const variance = (sumSq / period) - (mean * mean)
+    const std = Math.sqrt(Math.max(0, variance))
     
     result.middle.push(mean)
     result.upper.push(mean + multiplier * std)
     result.lower.push(mean - multiplier * std)
+    
+    // 滑动窗口：移除最旧的值，添加新值
+    if (i < data.length - 1) {
+      const oldVal = data[i - period + 1]
+      const newVal = data[i + 1]
+      sum = sum - oldVal + newVal
+      sumSq = sumSq - oldVal * oldVal + newVal * newVal
+    }
   }
   
   return result
@@ -71,13 +95,23 @@ const cleanup = () => {
 const updateChart = () => {
   if (!chartInstance || !props.data.length) return
   
-  const dates = props.data.map((item: KLineData) => item.time)
-  const values = props.data.map((item: KLineData) => [item.open, item.close, item.low, item.high])
-  const volumes = props.data.map((item: KLineData) => item.volume)
-  const closePrices = props.data.map((item: KLineData) => item.close)
+  // 数据抽样优化：当数据量过大时，进行抽样显示
+  let displayData = props.data
+  const MAX_DISPLAY_POINTS = 5000
   
-  // 计算 BOLL 指标
-  const boll = calculateBOLL(closePrices)
+  if (props.data.length > MAX_DISPLAY_POINTS) {
+    // 使用等间隔抽样
+    const step = Math.ceil(props.data.length / MAX_DISPLAY_POINTS)
+    displayData = props.data.filter((_, index) => index % step === 0)
+  }
+  
+  const dates = displayData.map((item: KLineData) => item.time)
+  const values = displayData.map((item: KLineData) => [item.open, item.close, item.low, item.high])
+  const volumes = displayData.map((item: KLineData) => item.volume)
+  const closePrices = displayData.map((item: KLineData) => item.close)
+  
+  // 只在用户勾选时才计算 BOLL 指标，避免不必要的计算
+  const boll = props.showBoll ? calculateBOLL(closePrices) : null
   
   // 构建图例数据
   const legendData = ['K线', '成交量']
@@ -86,6 +120,7 @@ const updateChart = () => {
   }
   
   const option: any = {
+    animation: false, // 关闭动画，提升性能
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -154,7 +189,7 @@ const updateChart = () => {
       {
         type: 'inside',
         xAxisIndex: [0, 1],
-        start: 0,
+        start: 70,
         end: 100
       },
       {
@@ -162,7 +197,7 @@ const updateChart = () => {
         xAxisIndex: [0, 1],
         type: 'slider',
         top: '96%',
-        start: 0,
+        start: 70,
         end: 100,
         height: 15
       }
@@ -179,9 +214,11 @@ const updateChart = () => {
           color0: '#73D13D',
           borderColor: '#FF7A7E',
           borderColor0: '#73D13D'
-        }
+        },
+        large: true, // 开启大数据量优化
+        largeThreshold: 1000 // 数据量大于1000时启用优化
       },
-      ...(props.showBoll ? [
+      ...(props.showBoll && boll ? [
         {
           name: 'BOLL上轨',
           type: 'line' as const,
@@ -193,7 +230,8 @@ const updateChart = () => {
             color: '#FF7A7E'
           },
           showSymbol: false,
-          connectNulls: false
+          connectNulls: false,
+          sampling: 'lttb' // 使用LTTB算法进行数据抽样
         },
         {
           name: 'BOLL中轨',
@@ -206,7 +244,8 @@ const updateChart = () => {
             color: '#5B8FF9'
           },
           showSymbol: false,
-          connectNulls: false
+          connectNulls: false,
+          sampling: 'lttb'
         },
         {
           name: 'BOLL下轨',
@@ -219,7 +258,8 @@ const updateChart = () => {
             color: '#73D13D'
           },
           showSymbol: false,
-          connectNulls: false
+          connectNulls: false,
+          sampling: 'lttb'
         }
       ] : []),
       {
@@ -235,20 +275,28 @@ const updateChart = () => {
             const dataIndex = params.dataIndex
             return values[dataIndex][1] > values[dataIndex][0] ? '#FF7A7E' : '#73D13D'
           }
-        }
+        },
+        large: true,
+        largeThreshold: 1000
       }
     ]
   }
 
-  chartInstance.setOption(option)
+  chartInstance.setOption(option, true) // 使用notMerge模式，提升性能
 }
 
+// 监听数据变化
 watch(() => props.data, async (newData) => {
   if (newData && newData.length > 0) {
     await nextTick()
     updateChart()
   }
 }, { deep: true, immediate: true })
+
+// 监听showBoll变化，实时更新图表
+watch(() => props.showBoll, () => {
+  updateChart()
+})
 
 onMounted(() => {
   initChart()

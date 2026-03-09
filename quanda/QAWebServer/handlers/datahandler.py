@@ -46,8 +46,8 @@ def get_future_list_safe():
     ]
 
 
-def get_future_data_safe(code, start, end, frequence='day'):
-    """安全获取期货数据"""
+def get_future_data_safe(code, start, end, frequence='day', limit=None):
+    """安全获取期货数据（优化版）"""
     try:
         # 优先从MongoDB获取
         from qaenv import mongo_ip
@@ -60,10 +60,20 @@ def get_future_data_safe(code, start, end, frequence='day'):
             'date': {'$gte': start, '$lte': end}
         }
         
-        data = list(db.future_day.find(query, {'_id': 0}).sort('date', 1))
+        # 添加数据量限制，避免一次性加载过多数据
+        cursor = db.future_day.find(query, {'_id': 0}).sort('date', -1)
+        if limit:
+            cursor = cursor.limit(limit)
+        
+        data = list(cursor)
         
         if data:
-            return pd.DataFrame(data)
+            # 反转数据顺序（因为使用了倒序查询）
+            data.reverse()
+            df = pd.DataFrame(data)
+            # 只返回必要的列，减少数据传输量
+            required_cols = ['date', 'code', 'open', 'high', 'low', 'close', 'volume']
+            return df[required_cols] if all(col in df.columns for col in required_cols) else df
     except Exception as e:
         print(f"MongoDB查询失败: {e}")
         pass
@@ -77,6 +87,9 @@ def get_future_data_safe(code, start, end, frequence='day'):
             data = QA_fetch_get_future_min(code, start, end, frequence)
         
         if data is not None and not data.empty:
+            # 限制返回数据量
+            if limit and len(data) > limit:
+                data = data.tail(limit)
             return data
     except:
         pass
@@ -105,7 +118,7 @@ class QAFutureListHandler(QABaseHandler):
 
 
 class QAFutureDayHandler(QABaseHandler):
-    """获取期货日线数据"""
+    """获取期货日线数据（优化版）"""
     
     def get(self):
         try:
@@ -113,20 +126,30 @@ class QAFutureDayHandler(QABaseHandler):
             start = self.get_argument('start')
             end = self.get_argument('end')
             frequence = self.get_argument('frequence', 'day')
+            limit = self.get_argument('limit', None)
+            
+            # 转换limit参数
+            if limit:
+                limit = int(limit)
             
             # 获取期货数据
-            data = get_future_data_safe(code, start, end, frequence)
+            data = get_future_data_safe(code, start, end, frequence, limit)
             
             if data is not None and not data.empty:
                 # 确保数据格式正确
                 if 'date' not in data.columns and data.index.name == 'date':
                     data = data.reset_index()
                 
-                # 转换为 JSON 格式
+                # 转换为 JSON 格式（优化：减少精度，降低数据量）
                 result = QA_util_to_json_from_pandas(data)
+                
+                # 设置缓存头，允许浏览器缓存5分钟
+                self.set_header('Cache-Control', 'public, max-age=300')
+                
                 self.write({
                     'status': 200,
-                    'res': result
+                    'res': result,
+                    'count': len(result)
                 })
             else:
                 # 返回模拟数据用于测试
@@ -175,7 +198,7 @@ class QAFutureDayHandler(QABaseHandler):
 
 
 class QAFutureMinHandler(QABaseHandler):
-    """获取期货分钟数据"""
+    """获取期货分钟数据（优化版）"""
     
     def get(self):
         try:
@@ -183,9 +206,13 @@ class QAFutureMinHandler(QABaseHandler):
             start = self.get_argument('start')
             end = self.get_argument('end')
             frequence = self.get_argument('frequence', '1min')
+            limit = self.get_argument('limit', '2000')  # 默认限制2000条
+            
+            # 转换limit参数
+            limit = int(limit) if limit else 2000
             
             # 获取期货分钟数据
-            data = get_future_data_safe(code, start, end, frequence)
+            data = get_future_data_safe(code, start, end, frequence, limit)
             
             if data is not None and not data.empty:
                 # 确保数据格式正确
@@ -194,9 +221,14 @@ class QAFutureMinHandler(QABaseHandler):
                 
                 # 转换为 JSON 格式
                 result = QA_util_to_json_from_pandas(data)
+                
+                # 设置缓存头
+                self.set_header('Cache-Control', 'public, max-age=60')
+                
                 self.write({
                     'status': 200,
-                    'res': result
+                    'res': result,
+                    'count': len(result)
                 })
             else:
                 # 返回模拟分钟数据
