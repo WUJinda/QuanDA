@@ -137,22 +137,34 @@
                 <p class="card-subtitle">{{ currentPeriodLabel }} · 共 {{ klineData.length }} 条数据</p>
               </div>
             </div>
-            <div class="chart-legend" v-if="!loading && klineData.length > 0">
-              <div class="legend-item">
-                <span class="legend-dot open"></span>
-                <span class="legend-label">开盘</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-dot high"></span>
-                <span class="legend-label">最高</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-dot low"></span>
-                <span class="legend-label">最低</span>
-              </div>
-              <div class="legend-item">
-                <span class="legend-dot close"></span>
-                <span class="legend-label">收盘</span>
+            <div class="header-right">
+              <!-- 截取按钮 -->
+              <el-button
+                v-if="!loading && klineData.length > 0"
+                :type="isBrushMode ? 'primary' : 'default'"
+                :icon="Scissor"
+                @click="toggleBrushMode"
+                class="capture-btn"
+              >
+                {{ isBrushMode ? '取消截取' : '截取区域' }}
+              </el-button>
+              <div class="chart-legend" v-if="!loading && klineData.length > 0 && !isBrushMode">
+                <div class="legend-item">
+                  <span class="legend-dot open"></span>
+                  <span class="legend-label">开盘</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot high"></span>
+                  <span class="legend-label">最高</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot low"></span>
+                  <span class="legend-label">最低</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-dot close"></span>
+                  <span class="legend-label">收盘</span>
+                </div>
               </div>
             </div>
           </div>
@@ -168,7 +180,14 @@
 
           <!-- K线图 -->
           <div v-else-if="klineData.length > 0" class="chart-container">
-            <KLineChart :data="klineData" :showBoll="showBoll" height="540px" />
+            <KLineChart
+              ref="klineChartRef"
+              :data="klineData"
+              :showBoll="showBoll"
+              :enableBrush="isBrushMode"
+              height="540px"
+              @brush-selected="handleBrushSelected"
+            />
           </div>
 
           <!-- 空状态 -->
@@ -251,6 +270,68 @@
         </div>
       </el-col>
     </el-row>
+
+    <!-- 截取区域确认对话框 -->
+    <el-dialog
+      v-model="showCaptureDialog"
+      title="保存到策略参照库"
+      width="600px"
+      :close-on-click-modal="false"
+    >
+      <div v-if="selectedBrushData" class="capture-dialog-content">
+        <div v-if="selectedBrushData.imageData" class="preview-section">
+          <h4>截取预览</h4>
+          <img :src="selectedBrushData.imageData" alt="截取预览" class="preview-image" />
+        </div>
+        <el-form :model="captureForm" label-width="80px" style="margin-top: 20px;">
+          <el-form-item label="名称" required>
+            <el-input v-model="captureForm.name" placeholder="请输入名称" />
+          </el-form-item>
+          <el-form-item label="描述">
+            <el-input
+              v-model="captureForm.description"
+              type="textarea"
+              :rows="3"
+              placeholder="请输入描述"
+            />
+          </el-form-item>
+          <el-form-item label="标签">
+            <el-select
+              v-model="captureForm.tags"
+              multiple
+              filterable
+              allow-create
+              placeholder="请选择或输入标签"
+              style="width: 100%;"
+            >
+              <el-option label="突破" value="突破" />
+              <el-option label="回调" value="回调" />
+              <el-option label="震荡" value="震荡" />
+              <el-option label="趋势" value="趋势" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="合约代码">
+            <span class="info-text">{{ selectedBrushData.code }}</span>
+          </el-form-item>
+          <el-form-item label="K线周期">
+            <span class="info-text">{{ selectedBrushData.frequence }}</span>
+          </el-form-item>
+          <el-form-item label="时间区间">
+            <span class="info-text">{{ selectedBrushData.startTime }} ~ {{ selectedBrushData.endTime }}</span>
+          </el-form-item>
+          <el-form-item label="K线数量">
+            <span class="info-text">{{ selectedBrushData.klineData.length }} 根</span>
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <el-button @click="showCaptureDialog = false">取消</el-button>
+        <el-button @click="toggleBrushMode(true)">重新截取</el-button>
+        <el-button type="primary" @click="confirmCapture" :loading="creatingFromBrush">
+          确认保存
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -258,9 +339,9 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useMarketStore } from '@/stores/market'
 import { ElMessage } from 'element-plus'
-import { 
-  Refresh, 
-  Setting, 
+import {
+  Refresh,
+  Setting,
   Loading,
   TrendCharts,
   Filter,
@@ -269,12 +350,15 @@ import {
   Star,
   DataLine,
   Odometer,
-  DataAnalysis
+  DataAnalysis,
+  Scissor
 } from '@element-plus/icons-vue'
 import FutureSelector from '@/components/Market/FutureSelector.vue'
 import DateRangePicker from '@/components/Common/DateRangePicker.vue'
 import KLineChart from '@/components/Charts/KLineChart.vue'
+import { strategyReferenceApi } from '@/api/strategy-reference'
 import type { KLineData, FutureData } from '@/types/market'
+import type { BrushSelectedData } from '@/types/strategy-reference'
 
 const marketStore = useMarketStore()
 
@@ -294,6 +378,18 @@ const indicators = ref({
   ma20: '-',
   macd: '-',
   kdj: '-'
+})
+
+// 截取相关状态
+const isBrushMode = ref(false)
+const klineChartRef = ref()
+const showCaptureDialog = ref(false)
+const selectedBrushData = ref<BrushSelectedData | null>(null)
+const creatingFromBrush = ref(false)
+const captureForm = ref({
+  name: '',
+  description: '',
+  tags: [] as string[]
 })
 
 // 快捷周期选项
@@ -437,6 +533,104 @@ const handleAddWatch = () => {
     ElMessage.success(`已添加 ${currentFuture.value} 到自选`)
   } else {
     ElMessage.warning('请先选择合约')
+  }
+}
+
+// 切换截取模式
+const toggleBrushMode = (forceOff = false) => {
+  console.log('[Futures] toggleBrushMode called, forceOff:', forceOff, 'current isBrushMode:', isBrushMode.value)
+  if (forceOff) {
+    isBrushMode.value = false
+    klineChartRef.value?.clearBrush()
+  } else {
+    isBrushMode.value = !isBrushMode.value
+  }
+  console.log('[Futures] isBrushMode after toggle:', isBrushMode.value)
+}
+
+// 处理区域选择事件
+const handleBrushSelected = (data: any) => {
+  selectedBrushData.value = {
+    ...data,
+    code: currentFuture.value,
+    frequence: frequence.value
+  }
+
+  // 自动填充表单名称
+  const trendText = data.klineData.length > 0
+    ? (data.klineData[data.klineData.length - 1].close > data.klineData[0].close ? '上涨' : '下跌')
+    : '走势'
+  captureForm.value.name = `${currentFuture.value}-${trendText}-${data.startTime}至${data.endTime}`
+
+  showCaptureDialog.value = true
+  isBrushMode.value = false
+}
+
+// 确认截取并保存到策略参照库
+const confirmCapture = async () => {
+  if (!selectedBrushData.value) return
+
+  if (!captureForm.value.name) {
+    ElMessage.warning('请输入名称')
+    return
+  }
+
+  creatingFromBrush.value = true
+
+  try {
+    // 先上传截图
+    let imageUrl = ''
+    if (selectedBrushData.value.imageData) {
+      const base64Data = selectedBrushData.value.imageData.split(',')[1]
+      const byteCharacters = atob(base64Data)
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: 'image/png' })
+      const file = new File([blob], 'capture.png', { type: 'image/png' })
+
+      const uploadRes = await strategyReferenceApi.uploadImage(file)
+      imageUrl = uploadRes.url
+    }
+
+    // 调用分析接口
+    const analyzeRes = await strategyReferenceApi.analyzeSegment(
+      selectedBrushData.value.code,
+      selectedBrushData.value.startTime,
+      selectedBrushData.value.endTime,
+      selectedBrushData.value.frequence
+    )
+
+    // 创建策略参照
+    await strategyReferenceApi.create({
+      name: captureForm.value.name,
+      description: captureForm.value.description,
+      image: imageUrl,
+      code: selectedBrushData.value.code,
+      frequence: selectedBrushData.value.frequence,
+      startTime: selectedBrushData.value.startTime,
+      endTime: selectedBrushData.value.endTime,
+      pattern: analyzeRes.pattern,
+      indicators: analyzeRes.indicators,
+      klineData: selectedBrushData.value.klineData,
+      tags: captureForm.value.tags
+    })
+
+    ElMessage.success('已添加到策略参照库')
+    showCaptureDialog.value = false
+    selectedBrushData.value = null
+    captureForm.value = {
+      name: '',
+      description: '',
+      tags: []
+    }
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error('保存失败，请重试')
+  } finally {
+    creatingFromBrush.value = false
   }
 }
 
@@ -781,40 +975,73 @@ onMounted(async () => {
         }
       }
 
-      .chart-legend {
+      .header-right {
         display: flex;
+        align-items: center;
         gap: spacing(lg);
 
-        .legend-item {
+        .capture-btn {
+          padding: spacing(sm) spacing(lg);
+          border-radius: radius(md);
+          font-weight: font-weight(semibold);
           display: flex;
           align-items: center;
           gap: spacing(xs);
+          transition: all transition(base) easing(smooth);
+          white-space: nowrap;
 
-          .legend-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-
-            &.open {
-              background: color(primary);
-            }
-
-            &.high {
-              background: color(danger);
-            }
-
-            &.low {
-              background: color(success);
-            }
-
-            &.close {
-              background: color(warning);
-            }
+          &.el-button--primary {
+            background: linear-gradient(135deg, #FF8C42 0%, #FFA666 100%);
+            border: none;
+            box-shadow: shadow(sm);
           }
 
-          .legend-label {
-            font-size: font-size(sm);
-            color: color(text-secondary);
+          &.el-button--default {
+            border: 2px solid #FF8C42;
+            color: #FF8C42;
+            background: white;
+
+            &:hover {
+              background: rgba(255, 140, 66, 0.1);
+            }
+          }
+        }
+
+        .chart-legend {
+          display: flex;
+          gap: spacing(lg);
+
+          .legend-item {
+            display: flex;
+            align-items: center;
+            gap: spacing(xs);
+
+            .legend-dot {
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+
+              &.open {
+                background: color(primary);
+              }
+
+              &.high {
+                background: color(danger);
+              }
+
+              &.low {
+                background: color(success);
+              }
+
+              &.close {
+                background: color(warning);
+              }
+            }
+
+            .legend-label {
+              font-size: font-size(sm);
+              color: color(text-secondary);
+            }
           }
         }
       }
@@ -1108,6 +1335,31 @@ onMounted(async () => {
           color: color(text-primary);
         }
       }
+    }
+  }
+
+  // ==================== 截取对话框样式 ====================
+  .capture-dialog-content {
+    .preview-section {
+      h4 {
+        font-size: font-size(base);
+        font-weight: font-weight(semibold);
+        color: color(text-primary);
+        margin: 0 0 spacing(md) 0;
+      }
+
+      .preview-image {
+        width: 100%;
+        border-radius: radius(lg);
+        border: 2px solid color(border-light);
+        box-shadow: shadow(sm);
+      }
+    }
+
+    .info-text {
+      font-size: font-size(base);
+      color: color(text-secondary);
+      font-weight: font-weight(medium);
     }
   }
 

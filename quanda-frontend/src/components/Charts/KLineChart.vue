@@ -219,17 +219,22 @@ const updateChart = () => {
       }
     ],
     brush: props.enableBrush ? {
-      enabled: true,
-      brushType: 'rect',
+      id: 'kline-brush',
+      geoIndex: [],
       xAxisIndex: [0],
       yAxisIndex: [0],
+      brushType: 'rect',
+      brushMode: 'single',
+      transformable: true,
+      removeOnClick: true,
+      z: 100,
       brushStyle: {
         borderWidth: 2,
         color: 'rgba(91, 143, 249, 0.2)',
         borderColor: '#5B8FF9'
       },
-      transformable: false,
-      removeOnClick: true
+      throttleType: 'debounce',
+      throttleDelay: 100
     } : undefined,
     series: [
       {
@@ -311,7 +316,20 @@ const updateChart = () => {
     ]
   }
 
-  chartInstance.setOption(option, true) // 使用notMerge模式，提升性能
+  // 根据是否有 brush 配置来决定是否使用 notMerge
+  if (props.enableBrush) {
+    chartInstance.setOption(option, true)
+  } else {
+    chartInstance.setOption(option, true)
+  }
+
+  // 确保 brush 事件监听器正确设置
+  if (props.enableBrush) {
+    chartInstance.off('brushSelected')
+    chartInstance.on('brushSelected', (params: any) => {
+      handleBrushSelected(params)
+    })
+  }
 }
 
 // 监听数据变化
@@ -329,20 +347,26 @@ watch(() => props.showBoll, () => {
 
 // 监听enableBrush变化，实时更新图表
 watch(() => props.enableBrush, (enabled) => {
+  console.log('[KLineChart] enableBrush changed:', enabled)
   if (chartInstance) {
+    updateChart()
+    // 在图表更新后设置事件监听
     if (enabled) {
+      chartInstance.off('brushSelected') // 先移除旧的监听器
       chartInstance.on('brushSelected', (params: any) => {
+        console.log('[KLineChart] brushSelected event:', params)
         handleBrushSelected(params)
       })
+      console.log('[KLineChart] Brush event listener attached')
     } else {
       chartInstance.off('brushSelected')
+      console.log('[KLineChart] Brush event listener removed')
     }
-    updateChart()
   }
 })
 
 // 处理区域选择事件
-const handleBrushSelected = (params: any) => {
+const handleBrushSelected = async (params: any) => {
   if (!params || !params.batch || params.batch.length === 0) return
 
   const batch = params.batch[0]
@@ -375,8 +399,8 @@ const handleBrushSelected = (params: any) => {
   const startTime = selectedKlineData[0].time
   const endTime = selectedKlineData[selectedKlineData.length - 1].time
 
-  // 生成截图
-  const imageData = captureSelectedArea(params, startIndex, endIndex)
+  // 生成截图（异步）
+  const imageData = await captureSelectedArea(params, startIndex, endIndex)
 
   emit('brushSelected', {
     startTime,
@@ -392,7 +416,7 @@ const handleBrushSelected = (params: any) => {
 }
 
 // 裁剪选中区域的截图
-const captureSelectedArea = (params: any, startIndex: number, endIndex: number): string | undefined => {
+const captureSelectedArea = async (params: any, startIndex: number, endIndex: number): Promise<string | undefined> => {
   if (!chartInstance || !chartRef.value) return undefined
 
   try {
@@ -403,14 +427,24 @@ const captureSelectedArea = (params: any, startIndex: number, endIndex: number):
       backgroundColor: '#fff'
     })
 
-    // 如果有选中区域的坐标信息，进行精确裁剪
+    // 获取选中区域的坐标信息
     if (params.batch && params.batch[0] && params.batch[0].areas && params.batch[0].areas.length > 0) {
       const area = params.batch[0].areas[0]
-      const rect = area.coordRange
+      const coordRange = area.coordRange
 
-      if (rect && rect.length >= 2) {
-        // 使用 canvas 进行精确裁剪
-        return cropImageData(fullDataURL, rect, startIndex, endIndex)
+      if (coordRange && coordRange.length >= 2) {
+        // 获取图表的grid信息
+        const gridModel = chartInstance.getModel().getComponent('grid', 0)
+        const gridRect = gridModel.coordinateSystem.getRect()
+
+        // 将数据索引转换为像素坐标
+        const xStart = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[0])
+        const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[coordRange.length - 1])
+
+        if (typeof xStart === 'number' && typeof xEnd === 'number') {
+          // 使用 canvas 进行精确裁剪
+          return await cropImageData(fullDataURL, xStart, xEnd, gridRect)
+        }
       }
     }
 
@@ -422,31 +456,51 @@ const captureSelectedArea = (params: any, startIndex: number, endIndex: number):
 }
 
 // 使用 canvas 裁剪图片
-const cropImageData = (dataURL: string, coordRange: any, startIndex: number, endIndex: number): string => {
-  const img = new Image()
-  img.src = dataURL
+const cropImageData = (dataURL: string, xStart: number, xEnd: number, gridRect: any): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
 
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          resolve(dataURL)
+          return
+        }
 
-  if (!ctx) return dataURL
+        // 计算裁剪区域（考虑pixelRatio=2）
+        const pixelRatio = 2
+        const left = Math.floor(xStart * pixelRatio)
+        const right = Math.ceil(xEnd * pixelRatio)
+        const width = right - left
+        const height = Math.floor(gridRect.height * pixelRatio)
+        const top = Math.floor(gridRect.y * pixelRatio)
 
-  // 等待图片加载完成
-  const loadImage = () => {
-    return new Promise<void>((resolve) => {
-      img.onload = () => resolve()
-    })
-  }
+        // 设置canvas大小为裁剪区域大小
+        canvas.width = width
+        canvas.height = height
 
-  // 同步方式处理
-  canvas.width = img.width
-  canvas.height = img.height
+        // 从原图中裁剪出选中区域
+        ctx.drawImage(
+          img,
+          left, top, width, height,  // 源区域
+          0, 0, width, height         // 目标区域
+        )
 
-  // 这里简化处理，直接返回原图
-  // 实际项目中可以计算选中区域的像素坐标进行裁剪
-  ctx.drawImage(img, 0, 0)
+        resolve(canvas.toDataURL('image/png'))
+      } catch (error) {
+        console.error('Crop error:', error)
+        resolve(dataURL)
+      }
+    }
 
-  return canvas.toDataURL('image/png')
+    img.onerror = () => {
+      resolve(dataURL)
+    }
+
+    img.src = dataURL
+  })
 }
 
 // 清除选择区域
@@ -469,13 +523,6 @@ onMounted(() => {
   window.addEventListener('resize', () => {
     chartInstance?.resize()
   })
-
-  // 监听区域选择事件
-  if (chartInstance && props.enableBrush) {
-    chartInstance.on('brushSelected', (params: any) => {
-      handleBrushSelected(params)
-    })
-  }
 })
 
 onUnmounted(() => {
