@@ -4,14 +4,14 @@ import type { StrategyReference, StrategyReferenceFilter } from '@/types/strateg
 export const strategyReferenceApi = {
   // 获取策略参考列表
   getList: (filter?: StrategyReferenceFilter) => {
-    return request.get<any, StrategyReference[]>('/strategy-reference/list', {
+    return request.get<StrategyReference[]>('/strategy-reference/list', {
       params: filter
     })
   },
 
   // 获取策略参考详情
   getDetail: (id: string) => {
-    return request.get<any, StrategyReference>(`/strategy-reference/${id}`)
+    return request.get<StrategyReference>(`/strategy-reference/${id}`)
   },
 
   // 创建策略参考
@@ -21,19 +21,19 @@ export const strategyReferenceApi = {
 
   // 更新策略参考
   update: (id: string, data: Partial<StrategyReference>) => {
-    return request.put(`/strategy-reference/${id}`, data)
+    return request.put(`/strategy-reference/update/${id}`, data)
   },
 
   // 删除策略参考
   delete: (id: string) => {
-    return request.delete(`/strategy-reference/${id}`)
+    return request.delete(`/strategy-reference/delete/${id}`)
   },
 
-  // 上传截图
+  // 上传截图（使用原生方式，不经过拦截器）
   uploadImage: (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<any, { url: string }>('/strategy-reference/upload', formData, {
+    return request.post<{ url: string }>('/strategy-reference/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -42,7 +42,7 @@ export const strategyReferenceApi = {
 
   // 分析K线区间
   analyzeSegment: (code: string, start: string, end: string, frequence: string) => {
-    return request.post('/strategy-reference/analyze', {
+    return request.post<any>('/strategy-reference/analyze', {
       code,
       start,
       end,

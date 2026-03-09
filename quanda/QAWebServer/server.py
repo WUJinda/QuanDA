@@ -17,21 +17,7 @@ from quanda.QAWebServer.schedulehandler import (QAScheduleQuery,
                                                    QASchedulerHandler,
                                                    init_scheduler)
 from quanda.QAWebServer.qifiserver import QAQIFI_Handler, QAQIFIS_Handler, QAQIFIS_REALTIME_Handler
-from quanda.QAWebServer.handlers import (
-    QAFutureListHandler,
-    QAFutureDayHandler,
-    QAFutureMinHandler,
-    QAFutureRealtimeHandler
-)
-from quanda.QAWebServer.handlers.strategyreference import (
-    StrategyReferenceListHandler,
-    StrategyReferenceDetailHandler,
-    StrategyReferenceCreateHandler,
-    StrategyReferenceUpdateHandler,
-    StrategyReferenceDeleteHandler,
-    StrategyReferenceUploadHandler,
-    StrategyReferenceAnalyzeHandler
-)
+from quanda.QAWebServer.handlers import ALL_API_ROUTES
 from tornado.options import (define, options, parse_command_line,
                              parse_config_file)
 from tornado.web import Application, RequestHandler, authenticated
@@ -55,32 +41,17 @@ class QAUserhander(QABaseHandler):
 
 #term_manager = SingleTermManager(shell_command=['bash'])
 handlers = [
-    (r"/",
-     INDEX),
-    (r"/command/run",
-     CommandHandler),
-    (r"/command/runws",
-     CommandHandlerWS),
-    (r"/command/runbacktest",
-     RunnerHandler),
+    (r"/", INDEX),
+    (r"/command/run", CommandHandler),
+    (r"/command/runws", CommandHandlerWS),
+    (r"/command/runbacktest", RunnerHandler),
     (r"/scheduler/map/?", QASchedulerHandler),
     (r"/scheduler/query", QAScheduleQuery),
     (r"/qifi", QAQIFI_Handler),
     (r"/qifis", QAQIFIS_Handler),
     (r"/qifirealtime", QAQIFIS_REALTIME_Handler),
     (r"/user", QAUserhander),
-    # 数据接口
-    (r"/future/list", QAFutureListHandler),
-    (r"/future/day", QAFutureDayHandler),
-    (r"/future/min", QAFutureMinHandler),
-    (r"/future/realtime", QAFutureRealtimeHandler),
-    # 策略参考库接口
-    (r"/strategy-reference/list", StrategyReferenceListHandler),
-    (r"/strategy-reference/([^/]+)", StrategyReferenceDetailHandler),
-    (r"/strategy-reference/create", StrategyReferenceCreateHandler),
-    (r"/strategy-reference/upload", StrategyReferenceUploadHandler),
-    (r"/strategy-reference/analyze", StrategyReferenceAnalyzeHandler),
-]
+] + ALL_API_ROUTES
 
 
 def main():

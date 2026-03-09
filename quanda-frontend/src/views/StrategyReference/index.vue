@@ -251,16 +251,21 @@ const detailKlineData = ref([])
 
 const fetchList = async () => {
   try {
-    const data = await strategyReferenceApi.getList(filter.value)
-    referenceList.value = data
+    referenceList.value = await strategyReferenceApi.getList(filter.value)
   } catch (error) {
     ElMessage.error('获取列表失败')
   }
 }
 
 const handleUploadSuccess = (response: any) => {
-  if (response.status === 200) {
+  // el-upload 组件的 on-success 接收原始响应（不经过拦截器）
+  // 响应格式: { status: 200, res: { url: '...' } }
+  if (response && response.res && response.res.url) {
     form.value.image = response.res.url
+    ElMessage.success('上传成功')
+  } else if (response && response.url) {
+    // 如果拦截器已经处理过，直接取 url
+    form.value.image = response.url
     ElMessage.success('上传成功')
   } else {
     ElMessage.error('上传失败')
@@ -290,13 +295,12 @@ const analyzeSegment = async () => {
 
   analyzing.value = true
   try {
-    const result = await strategyReferenceApi.analyzeSegment(
+    analyzedData.value = await strategyReferenceApi.analyzeSegment(
       form.value.code,
       form.value.dateRange[0],
       form.value.dateRange[1],
       form.value.frequence
     )
-    analyzedData.value = result
     ElMessage.success('分析完成')
   } catch (error) {
     ElMessage.error('分析失败')
@@ -335,19 +339,20 @@ const createReference = async () => {
 
 const viewDetail = async (item: StrategyReference) => {
   try {
-    const detail = await strategyReferenceApi.getDetail(item.id)
-    currentDetail.value = detail
-    
+    currentDetail.value = await strategyReferenceApi.getDetail(item.id)
+
     // 转换K线数据格式
-    detailKlineData.value = detail.klineData.map((k: any) => ({
-      time: k.date || k.datetime,
-      open: k.open,
-      close: k.close,
-      high: k.high,
-      low: k.low,
-      volume: k.volume
-    }))
-    
+    if (currentDetail.value?.klineData) {
+      detailKlineData.value = currentDetail.value.klineData.map((k: any) => ({
+        time: k.date || k.datetime || '',
+        open: k.open ?? 0,
+        close: k.close ?? 0,
+        high: k.high ?? 0,
+        low: k.low ?? 0,
+        volume: k.volume ?? 0
+      }))
+    }
+
     showDetailDialog.value = true
   } catch (error) {
     ElMessage.error('获取详情失败')
