@@ -1,15 +1,23 @@
 <template>
   <div class="sidebar-container">
-    <div class="logo">
-      <span v-if="!isCollapse">QuanDA</span>
-      <span v-else>QA</span>
+    <!-- Logo 区域 -->
+    <div class="logo-section">
+      <div class="logo-wrapper">
+        <div class="logo-icon">
+          <span class="logo-text" v-if="!isCollapse">QuanDA</span>
+          <span class="logo-text-collapsed" v-else>QA</span>
+        </div>
+        <div class="logo-subtitle" v-if="!isCollapse">量化交易平台</div>
+      </div>
     </div>
+
+    <!-- 菜单区域 -->
     <el-menu
       :default-active="activeMenu"
       :collapse="isCollapse"
       :unique-opened="true"
       background-color="transparent"
-      text-color="#FFFFFF"
+      text-color="rgba(255, 255, 255, 0.7)"
       active-text-color="#FFFFFF"
       router
       class="sidebar-menu"
@@ -18,11 +26,21 @@
         v-for="route in menuRoutes"
         :key="route.path"
         :index="route.path"
+        class="menu-item"
       >
-        <el-icon><component :is="route.meta?.icon" /></el-icon>
-        <template #title>{{ route.meta?.title }}</template>
+        <el-icon class="menu-icon">
+          <component :is="route.meta?.icon" />
+        </el-icon>
+        <template #title>
+          <span class="menu-title">{{ route.meta?.title }}</span>
+        </template>
       </el-menu-item>
     </el-menu>
+
+    <!-- 底部装饰 -->
+    <div class="sidebar-footer" v-if="!isCollapse">
+      <div class="footer-decoration"></div>
+    </div>
   </div>
 </template>
 
@@ -49,13 +67,17 @@ const menuRoutes = [
 </script>
 
 <style lang="scss" scoped>
+@import '@/styles/design-system.scss';
+
 .sidebar-container {
   height: 100%;
   background: linear-gradient(180deg, #1a2942 0%, #0f1c2e 100%);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
-  // 渐变装饰效果
+  /* 双色渐变装饰背景 */
   &::before {
     content: '';
     position: absolute;
@@ -63,86 +85,296 @@ const menuRoutes = [
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 30%, rgba(91, 143, 249, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(146, 84, 222, 0.06) 0%, transparent 50%);
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(91, 143, 249, 0.12) 0%, transparent 40%),
+      radial-gradient(circle at 80% 50%, rgba(255, 140, 66, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(146, 84, 222, 0.06) 0%, transparent 40%);
     pointer-events: none;
+    animation: gradientShift 15s ease-in-out infinite;
   }
 
-  .logo {
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-size: 18px;
-    font-weight: bold;
+  /* 顶部装饰条 */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #5B8FF9 0%, #FF8C42 50%, #9254DE 100%);
+    z-index: 10;
+  }
+
+  /* Logo 区域 */
+  .logo-section {
+    padding: 24px 16px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
     z-index: 1;
-    letter-spacing: 1px;
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 
-    // 渐变文字效果
-    background: linear-gradient(135deg, #FFFFFF 0%, #E8E8E8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    .logo-wrapper {
+      text-align: center;
+      animation: fadeInDown 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .logo-icon {
+      margin-bottom: 8px;
+    }
+
+    .logo-text {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #5B8FF9 0%, #FF8C42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+      text-shadow: 0 0 30px rgba(91, 143, 249, 0.3);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .logo-text-collapsed {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: linear-gradient(135deg, #5B8FF9 0%, #FF8C42 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: inline-block;
+    }
+
+    .logo-subtitle {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 2px;
+      margin-top: 4px;
+      font-weight: 500;
+    }
   }
 
-  // 菜单样式
+  /* 菜单区域 */
   .sidebar-menu {
+    flex: 1;
     border-right: none;
     position: relative;
     z-index: 1;
-    padding: 8px 0;
+    padding: 16px 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
+    /* 自定义滚动条 */
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #5B8FF9 0%, #FF8C42 100%);
+      border-radius: 2px;
+
+      &:hover {
+        background: linear-gradient(180deg, #7AA5FF 0%, #FFA666 100%);
+      }
+    }
+
+    /* 菜单项样式 */
     :deep(.el-menu-item) {
-      color: rgba(255, 255, 255, 0.65);
+      color: rgba(255, 255, 255, 0.7);
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 0;
-      margin: 0;
+      border-radius: 12px;
+      margin: 4px 0;
       position: relative;
+      height: 48px;
+      line-height: 48px;
+      overflow: hidden;
 
+      /* 背景装饰 */
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, rgba(91, 143, 249, 0.15) 0%, rgba(255, 140, 66, 0.08) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 12px;
+      }
+
+      /* 悬停效果 */
       &:hover {
         background: rgba(91, 143, 249, 0.12) !important;
         color: #FFFFFF !important;
+        transform: translateX(4px);
+
+        &::after {
+          opacity: 1;
+        }
 
         &::before {
           opacity: 1;
+          width: 4px;
+        }
+
+        .menu-icon {
+          transform: scale(1.15);
+          color: #5B8FF9;
+        }
+
+        .menu-title {
+          color: #FFFFFF;
         }
       }
 
+      /* 激活状态 */
       &.is-active {
-        background: linear-gradient(90deg, rgba(91, 143, 249, 0.2) 0%, rgba(91, 143, 249, 0.05) 100%) !important;
+        background: linear-gradient(90deg, rgba(91, 143, 249, 0.25) 0%, rgba(255, 140, 66, 0.12) 100%) !important;
         color: #FFFFFF !important;
+        box-shadow: 0 4px 12px rgba(91, 143, 249, 0.2);
+
+        &::after {
+          opacity: 1;
+        }
 
         &::before {
           opacity: 1;
-          background: linear-gradient(180deg, #7AA5FF 0%, #5B8FF9 100%);
+          width: 4px;
+          background: linear-gradient(180deg, #5B8FF9 0%, #FF8C42 100%);
+        }
+
+        .menu-icon {
+          color: #5B8FF9;
+          transform: scale(1.1);
+          animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        .menu-title {
+          font-weight: 600;
+          color: #FFFFFF;
         }
       }
 
-      // 左侧高亮条
+      /* 左侧高亮条 */
       &::before {
         content: '';
         position: absolute;
         left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: linear-gradient(180deg, #7AA5FF 0%, #5B8FF9 100%);
+        top: 50%;
+        transform: translateY(-50%);
+        height: 24px;
+        width: 0;
+        background: linear-gradient(180deg, #5B8FF9 0%, #FF8C42 100%);
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 0 4px 4px 0;
       }
 
-      .el-icon {
+      /* 图标样式 */
+      .menu-icon {
         color: inherit;
-        font-size: 18px;
+        font-size: 20px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-right: 12px;
+      }
+
+      /* 标题样式 */
+      .menu-title {
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+    }
+
+    /* 折叠状态 */
+    &.el-menu--collapse {
+      :deep(.el-menu-item) {
+        justify-content: center;
+        padding: 0 !important;
+
+        .menu-icon {
+          margin-right: 0;
+        }
       }
     }
   }
 
+  /* 底部装饰 */
+  .sidebar-footer {
+    padding: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.2);
+
+    .footer-decoration {
+      height: 3px;
+      background: linear-gradient(90deg, #5B8FF9 0%, #FF8C42 50%, #9254DE 100%);
+      border-radius: 2px;
+      animation: shimmer 3s ease-in-out infinite;
+      background-size: 200% 100%;
+    }
+  }
+
+  /* 移除默认边框 */
   .el-menu {
     border-right: none;
+  }
+}
+
+/* 动画定义 */
+@keyframes gradientShift {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    transform: scale(1.1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
