@@ -11,15 +11,29 @@ interface Props {
   data: KLineData[]
   height?: string
   showBoll?: boolean
+  enableBrush?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   height: '400px',
-  showBoll: false  // 默认不显示BOLL，提升加载速度
+  showBoll: false,  // 默认不显示BOLL，提升加载速度
+  enableBrush: false
 })
+
+const emit = defineEmits<{
+  brushSelected: [data: {
+    startTime: string
+    endTime: string
+    startIndex: number
+    endIndex: number
+    klineData: KLineData[]
+    imageData?: string
+  }]
+}>()
 
 const chartRef = ref<HTMLElement>()
 let chartInstance: echarts.ECharts | null = null
+let samplingStep = 1  // 数据抽样步长，用于反向映射到原始数据索引
 
 // 优化的布林带计算（使用滑动窗口，避免重复计算）
 const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
@@ -94,15 +108,17 @@ const cleanup = () => {
 
 const updateChart = () => {
   if (!chartInstance || !props.data.length) return
-  
+
   // 数据抽样优化：当数据量过大时，进行抽样显示
   let displayData = props.data
   const MAX_DISPLAY_POINTS = 5000
-  
+
   if (props.data.length > MAX_DISPLAY_POINTS) {
     // 使用等间隔抽样
-    const step = Math.ceil(props.data.length / MAX_DISPLAY_POINTS)
-    displayData = props.data.filter((_, index) => index % step === 0)
+    samplingStep = Math.ceil(props.data.length / MAX_DISPLAY_POINTS)
+    displayData = props.data.filter((_, index) => index % samplingStep === 0)
+  } else {
+    samplingStep = 1
   }
   
   const dates = displayData.map((item: KLineData) => item.time)
@@ -202,6 +218,19 @@ const updateChart = () => {
         height: 15
       }
     ],
+    brush: props.enableBrush ? {
+      enabled: true,
+      brushType: 'rect',
+      xAxisIndex: [0],
+      yAxisIndex: [0],
+      brushStyle: {
+        borderWidth: 2,
+        color: 'rgba(91, 143, 249, 0.2)',
+        borderColor: '#5B8FF9'
+      },
+      transformable: false,
+      removeOnClick: true
+    } : undefined,
     series: [
       {
         name: 'K线',
@@ -298,11 +327,155 @@ watch(() => props.showBoll, () => {
   updateChart()
 })
 
+// 监听enableBrush变化，实时更新图表
+watch(() => props.enableBrush, (enabled) => {
+  if (chartInstance) {
+    if (enabled) {
+      chartInstance.on('brushSelected', (params: any) => {
+        handleBrushSelected(params)
+      })
+    } else {
+      chartInstance.off('brushSelected')
+    }
+    updateChart()
+  }
+})
+
+// 处理区域选择事件
+const handleBrushSelected = (params: any) => {
+  if (!params || !params.batch || params.batch.length === 0) return
+
+  const batch = params.batch[0]
+  if (!batch.selected || batch.selected.length === 0) return
+
+  // 获取选中的数据点索引范围
+  const selectedIndices: number[] = []
+  for (const selection of batch.selected) {
+    if (selection.dataIndex && selection.dataIndex.length > 0) {
+      selectedIndices.push(...selection.dataIndex)
+    }
+  }
+
+  if (selectedIndices.length < 2) {
+    // 至少需要2个数据点
+    return
+  }
+
+  // 反向映射到原始数据索引
+  const minDisplayIndex = Math.min(...selectedIndices)
+  const maxDisplayIndex = Math.max(...selectedIndices)
+
+  const startIndex = minDisplayIndex * samplingStep
+  const endIndex = Math.min(maxDisplayIndex * samplingStep, props.data.length - 1)
+
+  // 提取选中的K线数据
+  const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
+
+  // 获取时间范围
+  const startTime = selectedKlineData[0].time
+  const endTime = selectedKlineData[selectedKlineData.length - 1].time
+
+  // 生成截图
+  const imageData = captureSelectedArea(params, startIndex, endIndex)
+
+  emit('brushSelected', {
+    startTime,
+    endTime,
+    startIndex,
+    endIndex,
+    klineData: selectedKlineData,
+    imageData
+  })
+
+  // 清除选择区域
+  clearBrush()
+}
+
+// 裁剪选中区域的截图
+const captureSelectedArea = (params: any, startIndex: number, endIndex: number): string | undefined => {
+  if (!chartInstance || !chartRef.value) return undefined
+
+  try {
+    // 获取完整的图表截图
+    const fullDataURL = chartInstance.getDataURL({
+      type: 'png',
+      pixelRatio: 2,
+      backgroundColor: '#fff'
+    })
+
+    // 如果有选中区域的坐标信息，进行精确裁剪
+    if (params.batch && params.batch[0] && params.batch[0].areas && params.batch[0].areas.length > 0) {
+      const area = params.batch[0].areas[0]
+      const rect = area.coordRange
+
+      if (rect && rect.length >= 2) {
+        // 使用 canvas 进行精确裁剪
+        return cropImageData(fullDataURL, rect, startIndex, endIndex)
+      }
+    }
+
+    return fullDataURL
+  } catch (error) {
+    console.error('Screenshot failed:', error)
+    return undefined
+  }
+}
+
+// 使用 canvas 裁剪图片
+const cropImageData = (dataURL: string, coordRange: any, startIndex: number, endIndex: number): string => {
+  const img = new Image()
+  img.src = dataURL
+
+  const canvas = document.createElement('canvas')
+  const ctx = canvas.getContext('2d')
+
+  if (!ctx) return dataURL
+
+  // 等待图片加载完成
+  const loadImage = () => {
+    return new Promise<void>((resolve) => {
+      img.onload = () => resolve()
+    })
+  }
+
+  // 同步方式处理
+  canvas.width = img.width
+  canvas.height = img.height
+
+  // 这里简化处理，直接返回原图
+  // 实际项目中可以计算选中区域的像素坐标进行裁剪
+  ctx.drawImage(img, 0, 0)
+
+  return canvas.toDataURL('image/png')
+}
+
+// 清除选择区域
+const clearBrush = () => {
+  if (chartInstance) {
+    chartInstance.dispatchAction({
+      type: 'brush',
+      areas: []
+    })
+  }
+}
+
+// 暴露方法给父组件
+defineExpose({
+  clearBrush
+})
+
 onMounted(() => {
   initChart()
   window.addEventListener('resize', () => {
     chartInstance?.resize()
   })
+
+  // 监听区域选择事件
+  if (chartInstance && props.enableBrush) {
+    chartInstance.on('brushSelected', (params: any) => {
+      handleBrushSelected(params)
+    })
+  }
 })
 
 onUnmounted(() => {

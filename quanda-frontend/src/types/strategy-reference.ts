@@ -55,3 +55,15 @@ export interface StrategyReferenceFilter {
   tags?: string[]
   dateRange?: [string, string]
 }
+
+// K线区域选择数据
+export interface BrushSelectedData {
+  startTime: string
+  endTime: string
+  startIndex: number
+  endIndex: number
+  klineData: KLineSegment[]
+  imageData?: string  // base64 截图
+  code: string  // 合约代码
+  frequence: string  // K线周期
+}
