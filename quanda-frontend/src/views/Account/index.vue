@@ -83,8 +83,8 @@ const accountStore = useAccountStore()
 
 const loading = ref(false)
 const currentAccount = ref('')
-const accountHistory = ref({})
-const monthProfit = ref({})
+const accountHistory = ref([])
+const monthProfit = ref([])
 const tradeRecords = ref([])
 const accountStats = ref([
   { label: '账户余额', value: '¥0', trend: '' },

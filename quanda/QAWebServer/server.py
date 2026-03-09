@@ -23,6 +23,15 @@ from quanda.QAWebServer.handlers import (
     QAFutureMinHandler,
     QAFutureRealtimeHandler
 )
+from quanda.QAWebServer.handlers.strategyreference import (
+    StrategyReferenceListHandler,
+    StrategyReferenceDetailHandler,
+    StrategyReferenceCreateHandler,
+    StrategyReferenceUpdateHandler,
+    StrategyReferenceDeleteHandler,
+    StrategyReferenceUploadHandler,
+    StrategyReferenceAnalyzeHandler
+)
 from tornado.options import (define, options, parse_command_line,
                              parse_config_file)
 from tornado.web import Application, RequestHandler, authenticated
@@ -64,7 +73,13 @@ handlers = [
     (r"/future/list", QAFutureListHandler),
     (r"/future/day", QAFutureDayHandler),
     (r"/future/min", QAFutureMinHandler),
-    (r"/future/realtime", QAFutureRealtimeHandler)
+    (r"/future/realtime", QAFutureRealtimeHandler),
+    # 策略参考库接口
+    (r"/strategy-reference/list", StrategyReferenceListHandler),
+    (r"/strategy-reference/([^/]+)", StrategyReferenceDetailHandler),
+    (r"/strategy-reference/create", StrategyReferenceCreateHandler),
+    (r"/strategy-reference/upload", StrategyReferenceUploadHandler),
+    (r"/strategy-reference/analyze", StrategyReferenceAnalyzeHandler),
 ]
 
 

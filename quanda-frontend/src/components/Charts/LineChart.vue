@@ -6,17 +6,30 @@
 import { ref, onMounted, watch, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 
+interface DataPoint {
+  time: string
+  value: number
+}
+
 interface Props {
-  data: { [key: string]: number }
-  title?: string
+  data: DataPoint[]
   height?: string
-  color?: string
+  options?: {
+    color?: string
+    smooth?: boolean
+    areaStyle?: boolean
+    showSymbol?: boolean
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: '',
   height: '300px',
-  color: '#1890ff'
+  options: () => ({
+    color: '#0066ff',
+    smooth: true,
+    areaStyle: true,
+    showSymbol: false
+  })
 })
 
 const chartRef = ref<HTMLElement>()
@@ -30,16 +43,12 @@ const initChart = () => {
 }
 
 const updateChart = () => {
-  if (!chartInstance) return
+  if (!chartInstance || !props.data.length) return
   
-  const dates = Object.keys(props.data)
-  const values = Object.values(props.data)
+  const times = props.data.map(item => item.time)
+  const values = props.data.map(item => item.value)
   
-  const option: echarts.EChartsOption = {
-    title: {
-      text: props.title,
-      left: 'center'
-    },
+  const option: any = {
     tooltip: {
       trigger: 'axis',
       axisPointer: {
@@ -47,36 +56,72 @@ const updateChart = () => {
       }
     },
     grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
-      containLabel: true
+      left: '10%',
+      right: '10%',
+      top: '10%',
+      bottom: '15%'
     },
     xAxis: {
       type: 'category',
+      data: times,
       boundaryGap: false,
-      data: dates
+      axisLine: {
+        lineStyle: {
+          color: '#d9d9d9'
+        }
+      },
+      axisLabel: {
+        color: '#666'
+      }
     },
     yAxis: {
-      type: 'value'
+      type: 'value',
+      scale: true,
+      axisLine: {
+        show: false
+      },
+      axisTick: {
+        show: false
+      },
+      axisLabel: {
+        color: '#666'
+      },
+      splitLine: {
+        lineStyle: {
+          color: '#e8e8e8',
+          type: 'dashed'
+        }
+      }
     },
     series: [
       {
         type: 'line',
-        smooth: true,
         data: values,
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: props.color + '40' },
-            { offset: 1, color: props.color + '00' }
-          ])
-        },
+        smooth: props.options?.smooth !== false,
+        showSymbol: props.options?.showSymbol || false,
         lineStyle: {
-          color: props.color
+          color: props.options?.color || '#0066ff',
+          width: 2
         },
         itemStyle: {
-          color: props.color
-        }
+          color: props.options?.color || '#0066ff'
+        },
+        areaStyle: props.options?.areaStyle !== false ? {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            {
+              offset: 0,
+              color: props.options?.color 
+                ? `${props.options.color}40` 
+                : 'rgba(0, 102, 255, 0.25)'
+            },
+            {
+              offset: 1,
+              color: props.options?.color 
+                ? `${props.options.color}00` 
+                : 'rgba(0, 102, 255, 0)'
+            }
+          ])
+        } : undefined
       }
     ]
   }
@@ -85,6 +130,10 @@ const updateChart = () => {
 }
 
 watch(() => props.data, () => {
+  updateChart()
+}, { deep: true })
+
+watch(() => props.options, () => {
   updateChart()
 }, { deep: true })
 

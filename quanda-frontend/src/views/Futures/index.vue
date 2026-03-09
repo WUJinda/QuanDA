@@ -204,24 +204,16 @@ const fetchData = async () => {
   loading.value = true
   try {
     // 根据周期类型调用不同的 API
-    let data: FutureData[]
-    if (frequence.value === 'day' || frequence.value === 'week' || frequence.value === 'month') {
-      data = await marketStore.fetchFutureData(
-        currentFuture.value,
-        startDate.value,
-        endDate.value
-      )
-    } else {
-      // 分钟数据需要调用不同的 API
-      data = await marketStore.fetchFutureData(
-        currentFuture.value,
-        startDate.value,
-        endDate.value
-      )
-    }
+    const data: FutureData[] = await marketStore.fetchFutureData(
+      currentFuture.value,
+      startDate.value,
+      endDate.value,
+      frequence.value
+    )
     
+    // 转换数据格式
     klineData.value = data.map((item: FutureData) => ({
-      time: item.date,
+      time: item.date || item.datetime,
       open: item.open,
       close: item.close,
       high: item.high,

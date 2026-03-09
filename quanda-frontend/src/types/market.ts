@@ -1,5 +1,6 @@
 export interface FutureData {
-  date: string
+  date?: string
+  datetime?: string
   code: string
   open: number
   high: number

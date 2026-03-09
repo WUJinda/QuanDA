@@ -38,10 +38,28 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '回测系统', icon: 'Operation' }
       },
       {
+        path: 'backtest/:id',
+        name: 'BacktestDetail',
+        component: () => import('@/views/Backtest/Detail.vue'),
+        meta: { title: '回测详情', icon: 'Operation'}
+      },
+      {
         path: 'strategy',
         name: 'Strategy',
         component: () => import('@/views/Strategy/index.vue'),
         meta: { title: '策略管理', icon: 'Document' }
+      },
+      {
+        path: 'strategy/:id',
+        name: 'StrategyDetail',
+        component: () => import('@/views/Strategy/Detail.vue'),
+        meta: { title: '策略详情', icon: 'Document'}
+      },
+      {
+        path: 'strategy-reference',
+        name: 'StrategyReference',
+        component: () => import('@/views/StrategyReference/index.vue'),
+        meta: { title: '策略参考库', icon: 'Collection' }
       }
     ]
   }

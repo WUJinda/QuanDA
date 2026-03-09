@@ -1,0 +1,372 @@
+// QuanDA 设计系统 - 参考腾讯管家风格
+// 统一的颜色、字体、间距、阴影等设计规范
+
+// 导入 Sass 内置模块
+@use 'sass:map';
+@use 'sass:meta';
+@use 'sass:list';
+@use 'sass:string';
+@use 'sass:math';
+
+// ==================== 颜色系统 ====================
+$colors: (
+  // 主色调 - 科技蓝
+  primary: #0066ff,
+  primary-light: #3385ff,
+  primary-lighter: #66a3ff,
+  primary-dark: #0052cc,
+  primary-darker: #003d99,
+  
+  // 成功色 - 绿色
+  success: #00c853,
+  success-light: #33d375,
+  success-dark: #00a043,
+  
+  // 警告色 - 橙色
+  warning: #ff9800,
+  warning-light: #ffb333,
+  warning-dark: #cc7a00,
+  
+  // 危险色 - 红色
+  danger: #f44336,
+  danger-light: #f6685e,
+  danger-dark: #c3352b,
+  
+  // 信息色 - 蓝色
+  info: #2196f3,
+  info-light: #4dabf5,
+  info-dark: #1a78c2,
+  
+  // 涨跌色
+  up: #f5222d,
+  down: #52c41a,
+  
+  // 中性色
+  text-primary: #1a1a1a,
+  text-secondary: #666666,
+  text-tertiary: #999999,
+  text-disabled: #cccccc,
+  
+  // 背景色
+  bg-primary: #ffffff,
+  bg-secondary: #f5f7fa,
+  bg-tertiary: #e8ecf0,
+  bg-hover: #f0f2f5,
+  
+  // 边框色
+  border-light: #e8e8e8,
+  border-base: #d9d9d9,
+  border-dark: #bfbfbf,
+  
+  // 遮罩色
+  mask: rgba(0, 0, 0, 0.45),
+  mask-light: rgba(0, 0, 0, 0.25)
+);
+
+// 颜色函数
+@function color($key) {
+  @return map.get($colors, $key);
+}
+
+// ==================== 字体系统 ====================
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+  'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-code: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+$font-sizes: (
+  xs: 12px,
+  sm: 13px,
+  base: 14px,
+  md: 15px,
+  lg: 16px,
+  xl: 18px,
+  xxl: 20px,
+  xxxl: 24px,
+  huge: 32px
+);
+
+@function font-size($key) {
+  @return map.get($font-sizes, $key);
+}
+
+$font-weights: (
+  light: 300,
+  normal: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700
+);
+
+@function font-weight($key) {
+  @return map.get($font-weights, $key);
+}
+
+// ==================== 间距系统 ====================
+$spacings: (
+  xs: 4px,
+  sm: 8px,
+  base: 12px,
+  md: 16px,
+  lg: 20px,
+  xl: 24px,
+  xxl: 32px,
+  xxxl: 48px,
+  huge: 64px
+);
+
+@function spacing($key) {
+  @return map.get($spacings, $key);
+}
+
+// ==================== 圆角系统 ====================
+$radius: (
+  xs: 2px,
+  sm: 4px,
+  base: 6px,
+  md: 8px,
+  lg: 12px,
+  xl: 16px,
+  round: 50%,
+  circle: 9999px
+);
+
+@function radius($key) {
+  @return map.get($radius, $key);
+}
+
+// ==================== 阴影系统 ====================
+$shadows: (
+  xs: 0 1px 2px rgba(0, 0, 0, 0.05),
+  sm: 0 2px 4px rgba(0, 0, 0, 0.08),
+  base: 0 4px 8px rgba(0, 0, 0, 0.1),
+  md: 0 6px 12px rgba(0, 0, 0, 0.12),
+  lg: 0 8px 16px rgba(0, 0, 0, 0.15),
+  xl: 0 12px 24px rgba(0, 0, 0, 0.18),
+  xxl: 0 16px 32px rgba(0, 0, 0, 0.2)
+);
+
+@function shadow($key) {
+  @return map.get($shadows, $key);
+}
+
+// ==================== 过渡动画 ====================
+$transitions: (
+  fast: 0.15s,
+  base: 0.25s,
+  slow: 0.35s
+);
+
+@function transition($key) {
+  @return map.get($transitions, $key);
+}
+
+$easing: (
+  linear: linear,
+  ease: ease,
+  ease-in: ease-in,
+  ease-out: ease-out,
+  ease-in-out: ease-in-out,
+  smooth: cubic-bezier(0.4, 0, 0.2, 1)
+);
+
+@function easing($key) {
+  @return map.get($easing, $key);
+}
+
+// ==================== Z-index 层级 ====================
+$z-index: (
+  dropdown: 1000,
+  sticky: 1020,
+  fixed: 1030,
+  modal-backdrop: 1040,
+  modal: 1050,
+  popover: 1060,
+  tooltip: 1070,
+  notification: 1080
+);
+
+@function z-index($key) {
+  @return map.get($z-index, $key);
+}
+
+// ==================== 断点系统 ====================
+$breakpoints: (
+  xs: 480px,
+  sm: 768px,
+  md: 992px,
+  lg: 1200px,
+  xl: 1600px
+);
+
+@mixin respond-to($breakpoint) {
+  @media (min-width: map.get($breakpoints, $breakpoint)) {
+    @content;
+  }
+}
+
+// ==================== 通用 Mixins ====================
+
+// 卡片样式
+@mixin card {
+  background: color(bg-primary);
+  border-radius: radius(md);
+  box-shadow: shadow(sm);
+  padding: spacing(lg);
+  transition: all transition(base) easing(smooth);
+  
+  &:hover {
+    box-shadow: shadow(md);
+  }
+}
+
+// 按钮样式
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: spacing(sm) spacing(md);
+  font-size: font-size(base);
+  font-weight: font-weight(medium);
+  border-radius: radius(base);
+  border: none;
+  cursor: pointer;
+  transition: all transition(fast) easing(smooth);
+  user-select: none;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: shadow(sm);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+}
+
+// 输入框样式
+@mixin input-base {
+  width: 100%;
+  padding: spacing(sm) spacing(base);
+  font-size: font-size(base);
+  color: color(text-primary);
+  background: color(bg-primary);
+  border: 1px solid color(border-base);
+  border-radius: radius(base);
+  transition: all transition(fast) easing(smooth);
+  
+  &:hover {
+    border-color: color(primary-light);
+  }
+  
+  &:focus {
+    outline: none;
+    border-color: color(primary);
+    box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+  }
+  
+  &:disabled {
+    background: color(bg-secondary);
+    color: color(text-disabled);
+    cursor: not-allowed;
+  }
+}
+
+// 滚动条样式
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: color(bg-secondary);
+    border-radius: radius(sm);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: color(border-dark);
+    border-radius: radius(sm);
+    
+    &:hover {
+      background: color(text-tertiary);
+    }
+  }
+}
+
+// 文本省略
+@mixin text-ellipsis($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// Flex 居中
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// 绝对居中
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+// ==================== 导出 CSS 变量 ====================
+:root {
+  // 颜色
+  @each $name, $value in $colors {
+    --color-#{$name}: #{$value};
+  }
+  
+  // 字体大小
+  @each $name, $value in $font-sizes {
+    --font-size-#{$name}: #{$value};
+  }
+  
+  // 间距
+  @each $name, $value in $spacings {
+    --spacing-#{$name}: #{$value};
+  }
+  
+  // 圆角
+  @each $name, $value in $radius {
+    --radius-#{$name}: #{$value};
+  }
+  
+  // 阴影
+  @each $name, $value in $shadows {
+    --shadow-#{$name}: #{$value};
+  }
+  
+  // 过渡
+  @each $name, $value in $transitions {
+    --transition-#{$name}: #{$value};
+  }
+  
+  // Z-index
+  @each $name, $value in $z-index {
+    --z-index-#{$name}: #{$value};
+  }
+}

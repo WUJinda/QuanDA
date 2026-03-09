@@ -21,9 +21,18 @@ export const useMarketStore = defineStore('market', () => {
     }
   }
 
-  const fetchFutureData = async (code: string, start: string, end: string) => {
+  const fetchFutureData = async (code: string, start: string, end: string, frequence: string = 'day') => {
     try {
-      const data = await marketApi.getFutureDay(code, start, end)
+      let data: FutureData[]
+      
+      // 根据周期类型调用不同的 API
+      if (frequence === 'day' || frequence === 'week' || frequence === 'month') {
+        data = await marketApi.getFutureDay(code, start, end, frequence)
+      } else {
+        // 分钟数据
+        data = await marketApi.getFutureMin(code, start, end, frequence)
+      }
+      
       futureData.value = data
       return data
     } catch (error) {

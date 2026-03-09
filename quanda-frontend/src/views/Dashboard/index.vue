@@ -67,8 +67,8 @@ const stats = ref([
   { title: '今日收益', value: '¥12,345', change: '+5.6%', trend: 'up' }
 ])
 
-const accountHistory = ref({})
-const monthProfit = ref({})
+const accountHistory = ref([])
+const monthProfit = ref([])
 const recentTrades = ref([])
 
 onMounted(async () => {

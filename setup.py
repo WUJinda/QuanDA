@@ -39,13 +39,14 @@ with io.open('quanda/__init__.py', 'rt', encoding='utf8') as f:
     AUTHOR = re.search(r'__author__ = \'(.*?)\'', context).group(1)
 
 
-try:
-    if sys.platform in ['win32', 'darwin']:
-        print(webbrowser.open(
-            'https://github.com/WUJinda/QuanDA/releases'))
-        print('finish install')
-except:
-    pass
+# 注释掉自动打开浏览器的代码，避免安装时弹出页面
+# try:
+#     if sys.platform in ['win32', 'darwin']:
+#         print(webbrowser.open(
+#             'https://github.com/WUJinda/QuanDA/releases'))
+#         print('finish install')
+# except:
+#     pass
 
 
 def read(fname):
