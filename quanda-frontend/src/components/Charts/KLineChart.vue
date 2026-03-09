@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, onUnmounted } from 'vue'
+import { ref, onMounted, watch, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import type { KLineData } from '@/types/market'
 
@@ -55,9 +55,17 @@ const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
 
 const initChart = () => {
   if (!chartRef.value) return
-  
+
   chartInstance = echarts.init(chartRef.value)
   updateChart()
+}
+
+// 清理旧的 chartInstance，防止重新渲染时出错
+const cleanup = () => {
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
 }
 
 const updateChart = () => {
@@ -90,16 +98,16 @@ const updateChart = () => {
     },
     grid: [
       {
-        left: '10%',
-        right: '10%',
+        left: '5%',
+        right: '5%',
         top: '12%',
-        height: '58%'
+        height: '70%'
       },
       {
-        left: '10%',
-        right: '10%',
-        top: '75%',
-        height: '15%'
+        left: '5%',
+        right: '5%',
+        top: '84%',
+        height: '10%'
       }
     ],
     xAxis: [
@@ -146,16 +154,17 @@ const updateChart = () => {
       {
         type: 'inside',
         xAxisIndex: [0, 1],
-        start: 80,
+        start: 0,
         end: 100
       },
       {
         show: true,
         xAxisIndex: [0, 1],
         type: 'slider',
-        top: '90%',
-        start: 80,
-        end: 100
+        top: '96%',
+        start: 0,
+        end: 100,
+        height: 15
       }
     ],
     series: [
@@ -234,9 +243,12 @@ const updateChart = () => {
   chartInstance.setOption(option)
 }
 
-watch(() => props.data, () => {
-  updateChart()
-}, { deep: true })
+watch(() => props.data, async (newData) => {
+  if (newData && newData.length > 0) {
+    await nextTick()
+    updateChart()
+  }
+}, { deep: true, immediate: true })
 
 onMounted(() => {
   initChart()
@@ -246,7 +258,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  chartInstance?.dispose()
+  cleanup()
 })
 </script>
 

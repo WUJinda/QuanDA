@@ -113,6 +113,7 @@
             end-placeholder="结束时间"
             format="YYYY-MM-DD HH:mm:ss"
             value-format="YYYY-MM-DD HH:mm:ss"
+            :default-time="defaultTimeRange"
           />
         </el-form-item>
         <el-form-item label="标签">
@@ -161,10 +162,11 @@
     </el-dialog>
 
     <!-- 详情对话框 -->
-    <el-dialog 
-      v-model="showDetailDialog" 
-      title="策略参考详情" 
-      width="1200px"
+    <el-dialog
+      v-model="showDetailDialog"
+      title="策略参考详情"
+      width="95%"
+      top="5vh"
     >
       <div v-if="currentDetail" class="detail-content">
         <el-row :gutter="20">
@@ -205,10 +207,11 @@
         </el-row>
         <div class="kline-section" style="margin-top: 20px;">
           <h4>K线数据</h4>
-          <KLineChart 
-            :data="detailKlineData" 
-            :showBoll="true" 
-            height="400px" 
+          <KLineChart
+            v-if="detailKlineData.length > 0"
+            :data="detailKlineData"
+            :showBoll="true"
+            height="400px"
           />
         </div>
       </div>
@@ -217,7 +220,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { strategyReferenceApi } from '@/api/strategy-reference'
 import KLineChart from '@/components/Charts/KLineChart.vue'
@@ -248,6 +251,12 @@ const form = ref({
 })
 
 const detailKlineData = ref([])
+
+// 默认时间范围：最近两年
+const defaultTimeRange = [
+  new Date(2023, 0, 1, 9, 0, 0),  // 开始时间: 2023-01-01 09:00:00
+  new Date(2025, 11, 31, 15, 0, 0)  // 结束时间: 2025-12-31 15:00:00
+]
 
 const fetchList = async () => {
   try {
@@ -339,11 +348,16 @@ const createReference = async () => {
 
 const viewDetail = async (item: StrategyReference) => {
   try {
-    currentDetail.value = await strategyReferenceApi.getDetail(item.id)
+    // 先打开对话框
+    showDetailDialog.value = true
+
+    // 获取详情数据
+    const detail = await strategyReferenceApi.getDetail(item.id)
+    currentDetail.value = detail
 
     // 转换K线数据格式
-    if (currentDetail.value?.klineData) {
-      detailKlineData.value = currentDetail.value.klineData.map((k: any) => ({
+    if (detail?.klineData) {
+      const klineData = detail.klineData.map((k: any) => ({
         time: k.date || k.datetime || '',
         open: k.open ?? 0,
         close: k.close ?? 0,
@@ -351,9 +365,11 @@ const viewDetail = async (item: StrategyReference) => {
         low: k.low ?? 0,
         volume: k.volume ?? 0
       }))
-    }
 
-    showDetailDialog.value = true
+      // 使用 nextTick 确保对话框渲染完成后再设置数据
+      await nextTick()
+      detailKlineData.value = klineData
+    }
   } catch (error) {
     ElMessage.error('获取详情失败')
   }
@@ -397,24 +413,27 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// 导入设计系统
+@use '@/styles/design-system.scss' as *;
+
 .strategy-reference-page {
   .reference-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
+    gap: spacing(lg);
+    margin-top: spacing(lg);
   }
 
   .reference-card {
-    background: #fff;
-    border-radius: 8px;
+    background: color(bg-primary);
+    border-radius: radius(md);
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.3s;
-    border: 1px solid #e8e8e8;
+    transition: all transition(base) easing(smooth);
+    border: 1px solid color(border-light);
 
     &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      box-shadow: shadow(md);
       transform: translateY(-2px);
     }
 
@@ -422,7 +441,7 @@ onMounted(() => {
       width: 100%;
       height: 200px;
       overflow: hidden;
-      background: #f5f5f5;
+      background: color(bg-secondary);
 
       img {
         width: 100%;
@@ -432,18 +451,19 @@ onMounted(() => {
     }
 
     .card-content {
-      padding: 16px;
+      padding: spacing(md);
 
       h4 {
-        margin: 0 0 8px 0;
-        font-size: 16px;
-        font-weight: 600;
+        margin: 0 0 spacing(sm) 0;
+        font-size: font-size(lg);
+        font-weight: font-weight(semibold);
+        color: color(text-primary);
       }
 
       .description {
-        color: #666;
-        font-size: 14px;
-        margin: 0 0 12px 0;
+        color: color(text-secondary);
+        font-size: font-size(base);
+        margin: 0 0 spacing(base) 0;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
@@ -454,12 +474,12 @@ onMounted(() => {
       .meta {
         display: flex;
         align-items: center;
-        gap: 8px;
-        margin-bottom: 8px;
+        gap: spacing(sm);
+        margin-bottom: spacing(sm);
 
         .time {
-          color: #999;
-          font-size: 12px;
+          color: color(text-tertiary);
+          font-size: font-size(xs);
           margin-left: auto;
         }
       }
@@ -467,41 +487,43 @@ onMounted(() => {
       .tags {
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        gap: spacing(xs);
       }
     }
   }
 
   .preview-image {
-    margin-top: 10px;
-    
+    margin-top: spacing(sm);
+
     img {
       max-width: 300px;
       max-height: 200px;
-      border-radius: 4px;
+      border-radius: radius(sm);
     }
   }
 
   .detail-content {
     .detail-image {
       width: 100%;
-      
+
       img {
         width: 100%;
-        border-radius: 8px;
+        border-radius: radius(md);
       }
     }
 
     h3 {
-      margin: 0 0 12px 0;
-      font-size: 20px;
-      font-weight: 600;
+      margin: 0 0 spacing(base) 0;
+      font-size: font-size(xxl);
+      font-weight: font-weight(semibold);
+      color: color(text-primary);
     }
 
     h4 {
-      margin: 0 0 12px 0;
-      font-size: 16px;
-      font-weight: 600;
+      margin: 0 0 spacing(base) 0;
+      font-size: font-size(lg);
+      font-weight: font-weight(semibold);
+      color: color(text-primary);
     }
   }
 }

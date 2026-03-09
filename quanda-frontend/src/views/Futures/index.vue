@@ -51,12 +51,12 @@
           </div>
         </el-popover>
         
-        <el-button type="primary" @click="fetchData" :loading="loading">
+        <el-button type="primary" @click="fetchData" :loading="loading" :disabled="loading">
           <el-icon><Refresh /></el-icon>
-          刷新
+          {{ loading ? '加载中...' : '刷新' }}
         </el-button>
         
-        <el-checkbox v-model="showBoll" @change="fetchData">显示BOLL</el-checkbox>
+        <el-checkbox v-model="showBoll">显示BOLL</el-checkbox>
       </div>
     </div>
 
@@ -66,7 +66,15 @@
           <div class="chart-header">
             <h3>K线图 - {{ currentPeriodLabel }}</h3>
           </div>
-          <KLineChart :data="klineData" :showBoll="showBoll" height="500px" />
+
+          <!-- 加载提示 -->
+          <div v-if="loading" class="loading-overlay">
+            <el-icon class="is-loading"><Loading /></el-icon>
+            <span>正在加载行情，请稍等。。</span>
+          </div>
+
+          <!-- K线图 -->
+          <KLineChart v-else :data="klineData" :showBoll="showBoll" height="500px" />
         </div>
       </el-col>
       <el-col :span="6">
@@ -120,8 +128,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useMarketStore } from '@/stores/market'
+import { Refresh, Setting, Loading } from '@element-plus/icons-vue'
 import FutureSelector from '@/components/Market/FutureSelector.vue'
 import DateRangePicker from '@/components/Common/DateRangePicker.vue'
 import KLineChart from '@/components/Charts/KLineChart.vue'
@@ -129,7 +138,9 @@ import type { KLineData, FutureData } from '@/types/market'
 
 const marketStore = useMarketStore()
 
-const loading = ref(false)
+const loading = ref(true)  // 初始即为加载状态
+const isInitialLoad = ref(true)  // 标记是否是首次加载
+let fetchDataTimer: ReturnType<typeof setTimeout> | null = null  // 防抖定时器
 const currentFuture = ref('')
 const startDate = ref('')
 const endDate = ref('')
@@ -169,17 +180,26 @@ const currentPeriodLabel = computed(() => {
 
 const handleFutureChange = (code: string) => {
   currentFuture.value = code
-  fetchData()
+  // watch 会自动触发加载
 }
 
 const handleDateChange = (start: string, end: string) => {
   startDate.value = start
   endDate.value = end
+  // watch 会自动触发加载
 }
 
 const handlePeriodChange = (period: string) => {
   frequence.value = period
-  fetchData()
+  // 周期改变立即重新加载
+  if (currentFuture.value && startDate.value && endDate.value) {
+    // 取消防抖，直接加载
+    if (fetchDataTimer) {
+      clearTimeout(fetchDataTimer)
+      fetchDataTimer = null
+    }
+    fetchData()
+  }
 }
 
 const applyCustomPeriod = () => {
@@ -195,13 +215,27 @@ const applyCustomPeriod = () => {
   } else {
     frequence.value = `${value}min`
   }
-  fetchData()
+  // 周期改变立即重新加载
+  if (currentFuture.value && startDate.value && endDate.value) {
+    // 取消防抖，直接加载
+    if (fetchDataTimer) {
+      clearTimeout(fetchDataTimer)
+      fetchDataTimer = null
+    }
+    fetchData()
+  }
 }
 
 const fetchData = async () => {
   if (!currentFuture.value || !startDate.value || !endDate.value) return
-  
+
+  // 清除之前的定时器
+  if (fetchDataTimer) {
+    clearTimeout(fetchDataTimer)
+  }
+
   loading.value = true
+
   try {
     // 根据周期类型调用不同的 API
     const data: FutureData[] = await marketStore.fetchFutureData(
@@ -210,7 +244,7 @@ const fetchData = async () => {
       endDate.value,
       frequence.value
     )
-    
+
     // 转换数据格式
     klineData.value = data.map((item: FutureData) => ({
       time: item.date || item.datetime,
@@ -220,7 +254,7 @@ const fetchData = async () => {
       low: item.low,
       volume: item.volume
     }))
-    
+
     // 计算技术指标
     if (klineData.value.length > 0) {
       const closes = klineData.value.map((d: KLineData) => d.close)
@@ -234,15 +268,42 @@ const fetchData = async () => {
         indicators.value.ma20 = (closes.slice(-20).reduce((a: number, b: number) => a + b, 0) / 20).toFixed(2)
       }
     }
-    
+
     const realtime = await marketStore.fetchRealtimeData(currentFuture.value)
     realtimeData.value = realtime
   } catch (error) {
     console.error('获取数据失败:', error)
   } finally {
     loading.value = false
+    isInitialLoad.value = false
   }
 }
+
+// 防抖版本的 fetchData
+const debouncedFetchData = () => {
+  if (fetchDataTimer) {
+    clearTimeout(fetchDataTimer)
+  }
+  fetchDataTimer = setTimeout(() => {
+    fetchData()
+  }, 100)  // 100ms 防抖
+}
+
+// 监听数据变化，自动加载
+watch([currentFuture, startDate, endDate], () => {
+  // 当所有必要的数据都准备好时，自动加载
+  if (currentFuture.value && startDate.value && endDate.value) {
+    debouncedFetchData()
+  }
+}, { immediate: true })
+
+// 组件挂载时开始初始化
+onMounted(async () => {
+  // 确保期货列表开始加载（FutureSelector 已经在做了，这里只是确保）
+  if (marketStore.futureList.length === 0) {
+    marketStore.fetchFutureList()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -253,11 +314,26 @@ const fetchData = async () => {
     align-items: center;
     margin-bottom: 20px;
   }
-  
+
   h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
+  }
+
+  .loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    color: #1890ff;
+    font-size: 16px;
+
+    .el-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
   }
   
   .custom-period {

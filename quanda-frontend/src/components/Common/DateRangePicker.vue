@@ -23,7 +23,7 @@ interface Emits {
 const emit = defineEmits<Emits>()
 
 const dateRange = ref<[string, string]>([
-  dayjs().subtract(30, 'day').format('YYYY-MM-DD'),
+  dayjs().subtract(2, 'year').format('YYYY-MM-DD'),
   dayjs().format('YYYY-MM-DD')
 ])
 
