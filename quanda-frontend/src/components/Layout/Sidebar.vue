@@ -67,7 +67,7 @@ const menuRoutes = [
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .sidebar-container {
   height: 100%;

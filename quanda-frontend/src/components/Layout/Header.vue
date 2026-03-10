@@ -197,7 +197,7 @@ const handleCommand = (command: string) => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .header-container {
   width: 100%;

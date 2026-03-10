@@ -284,7 +284,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .strategy-detail-page {
   padding: spacing(lg);

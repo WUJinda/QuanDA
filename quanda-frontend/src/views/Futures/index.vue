@@ -645,7 +645,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .futures-page {
   padding: spacing(lg);

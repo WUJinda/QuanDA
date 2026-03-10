@@ -1,7 +1,7 @@
 // 全局样式 - 应用设计系统
 // 使用 @use 导入设计系统，as * 使变量和函数在全局作用域可用
 @use './design-system.scss' as *;
-@import './animations.scss';
+@use './animations.scss';
 
 // ==================== 全局重置 ====================
 * {

@@ -260,7 +260,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .dashboard {
   padding: spacing(lg);

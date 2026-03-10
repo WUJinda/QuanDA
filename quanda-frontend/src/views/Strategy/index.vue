@@ -312,7 +312,7 @@ const createStrategy = () => {
 </script>
 
 <style lang="scss" scoped>
-@import '@/styles/design-system.scss';
+@use '@/styles/design-system.scss' as *;
 
 .strategy-page {
   /* 双主色设计系统 - 科技蓝 + 活力橙 */
