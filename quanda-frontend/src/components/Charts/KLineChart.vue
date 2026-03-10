@@ -584,24 +584,36 @@ const confirmBrushSelection = async () => {
     return
   }
 
-  // 获取当前的 brush 区域
-  const brushOption = chartInstance.getOption() as any
-  if (!brushOption.brush || !brushOption.brush[0] || !brushOption.brush[0].areas || brushOption.brush[0].areas.length === 0) {
-    console.log('[KLineChart] No brush areas')
+  // 使用保存的 pendingBrushArea 而不是从 getOption 获取
+  if (!pendingBrushArea.value) {
+    console.log('[KLineChart] No pending brush area')
     return
   }
 
-  const area = brushOption.brush[0].areas[0]
-  const coordRange = area.coordRange
+  const area = pendingBrushArea.value
+  let coordRange = area.coordRange
 
   if (!coordRange || coordRange.length < 2) {
     console.log('[KLineChart] No coordRange')
     return
   }
 
+  // 处理 coordRange 可能是 [[x1, x2]] 或 [x1, x2] 格式
+  let coordStart: number, coordEnd: number
+
+  if (Array.isArray(coordRange[0])) {
+    // coordRange 是 [[x1, x2]] 格式
+    coordStart = (coordRange[0] as any[])[0]
+    coordEnd = (coordRange[0] as any[])[1]
+  } else {
+    // coordRange 是 [x1, x2] 格式
+    coordStart = (coordRange as any[])[0]
+    coordEnd = (coordRange as any[])[1]
+  }
+
   // 获取选中的数据索引范围
-  const minCoord = Math.min(coordRange[0], coordRange[1])
-  const maxCoord = Math.max(coordRange[0], coordRange[1])
+  const minCoord = Math.min(coordStart, coordEnd)
+  const maxCoord = Math.max(coordStart, coordEnd)
   
   // 将坐标转换为显示数据的索引
   const minDisplayIndex = Math.max(0, Math.floor(minCoord))
