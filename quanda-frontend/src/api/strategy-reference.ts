@@ -3,50 +3,57 @@ import type { StrategyReference, StrategyReferenceFilter } from '@/types/strateg
 
 export const strategyReferenceApi = {
   // 获取策略参考列表
-  getList: (filter?: StrategyReferenceFilter) => {
-    return request.get<StrategyReference[]>('/strategy-reference/list', {
+  getList: async (filter?: StrategyReferenceFilter) => {
+    const response = await request.get<StrategyReference[]>('/strategy-reference/list', {
       params: filter
     })
+    return response?.data || []
   },
 
   // 获取策略参考详情
-  getDetail: (id: string) => {
-    return request.get<StrategyReference>(`/strategy-reference/${id}`)
+  getDetail: async (id: string) => {
+    const response = await request.get<StrategyReference>(`/strategy-reference/${id}`)
+    return response?.data || null
   },
 
   // 创建策略参考
-  create: (data: Partial<StrategyReference>) => {
-    return request.post('/strategy-reference/create', data)
+  create: async (data: Partial<StrategyReference>) => {
+    const response = await request.post('/strategy-reference/create', data)
+    return response?.data || null
   },
 
   // 更新策略参考
-  update: (id: string, data: Partial<StrategyReference>) => {
-    return request.put(`/strategy-reference/update/${id}`, data)
+  update: async (id: string, data: Partial<StrategyReference>) => {
+    const response = await request.put(`/strategy-reference/update/${id}`, data)
+    return response?.data || null
   },
 
   // 删除策略参考
-  delete: (id: string) => {
-    return request.delete(`/strategy-reference/delete/${id}`)
+  delete: async (id: string) => {
+    const response = await request.delete(`/strategy-reference/delete/${id}`)
+    return response?.data || null
   },
 
   // 上传截图（使用原生方式，不经过拦截器）
-  uploadImage: (file: File) => {
+  uploadImage: async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
-    return request.post<{ url: string }>('/strategy-reference/upload', formData, {
+    const response = await request.post<{ url: string }>('/strategy-reference/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
     })
+    return response?.data || { url: '' }
   },
 
   // 分析K线区间
-  analyzeSegment: (code: string, start: string, end: string, frequence: string) => {
-    return request.post<any>('/strategy-reference/analyze', {
+  analyzeSegment: async (code: string, start: string, end: string, frequence: string) => {
+    const response = await request.post<any>('/strategy-reference/analyze', {
       code,
       start,
       end,
       frequence
     })
+    return response?.data || null
   }
 }

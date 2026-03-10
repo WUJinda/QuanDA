@@ -15,7 +15,7 @@ export const accountApi = {
     const response = await request.get('/qifi', {
       params: { action: 'acchistory', account_cookie: accountCookie }
     })
-    return response || {}
+    return response?.data || {}
   },
 
   // 获取月度收益
@@ -23,7 +23,7 @@ export const accountApi = {
     const response = await request.get('/qifi', {
       params: { action: 'monthprofit', account_cookie: accountCookie }
     })
-    return response || {}
+    return response?.data || {}
   },
 
   // 获取历史交易记录
@@ -31,7 +31,7 @@ export const accountApi = {
     const response = await request.get('/qifi', {
       params: { action: 'historytrade', account_cookie: accountCookie }
     })
-    return response || []
+    return response?.data || []
   },
 
   // 获取持仓面板

@@ -186,16 +186,10 @@ import { useAccountStore } from '@/stores/account'
 import { 
   TrendCharts, 
   DataAnalysis, 
-  Wallet, 
-  Money, 
-  PieChart, 
   Histogram,
   List,
   ArrowRight,
-  Clock,
-  CaretTop,
-  CaretBottom
-} from '@element-plus/icons-vue'
+  Clock} from '@element-plus/icons-vue'
 import LineChart from '@/components/Charts/LineChart.vue'
 
 const router = useRouter()

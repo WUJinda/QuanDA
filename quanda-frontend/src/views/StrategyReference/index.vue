@@ -415,7 +415,15 @@ const filter = ref({
   frequence: ''
 })
 
-const form = ref({
+const form = ref<{
+  name: string
+  description: string
+  image: string
+  code: string
+  frequence: string
+  dateRange: string[]
+  tags: string[]
+}>({
   name: '',
   description: '',
   image: '',
@@ -425,7 +433,15 @@ const form = ref({
   tags: []
 })
 
-const editForm = ref({
+const editForm = ref<{
+  name: string
+  description: string
+  image: string
+  code: string
+  frequence: string
+  dateRange: string[]
+  tags: string[]
+}>({
   name: '',
   description: '',
   image: '',
@@ -436,7 +452,6 @@ const editForm = ref({
 })
 
 const detailKlineData = ref<KLineData[]>([])
-const klineChartRef = ref<InstanceType<typeof KLineChart> | null>(null)
 
 // 区域截取相关状态
 const isBrushMode = ref(false)  // 是否在截取模式
@@ -1091,6 +1106,7 @@ onMounted(() => {
       }
 
       .description {
+      .description {
         color: var(--color-text-secondary);
         font-size: 14px;
         line-height: 1.7;
@@ -1099,6 +1115,7 @@ onMounted(() => {
         text-overflow: ellipsis;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         min-height: 48px;
         padding: var(--spacing-sm);
@@ -1106,7 +1123,6 @@ onMounted(() => {
         border-radius: var(--radius-sm);
         border-left: 3px solid var(--color-tech-blue);
       }
-
       /* 元数据区域 - 图标化设计 */
       .meta {
         display: flex;
@@ -1693,5 +1709,6 @@ onMounted(() => {
       color: white;
     }
   }
+}
 }
 </style>

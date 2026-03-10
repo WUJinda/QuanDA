@@ -108,14 +108,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { backtestApi } from '@/api/backtest'
 
 const searchKeyword = ref('')
 const showStrategyDialog = ref(false)
 const consoleLogs = ref<string[]>([])
-const consoleRef = ref<HTMLElement>()
 
 const backtestList = ref([
   {

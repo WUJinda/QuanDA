@@ -170,7 +170,7 @@ const fetchBacktestDetail = async () => {
     const id = Number(route.params.id)
     backtest.value = await backtestApi.getDetail(id)
     
-    if (backtest.value.status === 'completed') {
+    if (backtest.value && backtest.value.status === 'completed') {
       result.value = await backtestApi.getResult(id)
     }
   } catch (error) {

@@ -29,13 +29,13 @@
       <el-col :span="12">
         <div class="card">
           <h3>账户资产曲线</h3>
-          <LineChart :data="accountHistory" height="300px" />
+          <LineChart :data="accountHistoryData" height="300px" />
         </div>
       </el-col>
       <el-col :span="12">
         <div class="card">
           <h3>月度收益</h3>
-          <LineChart :data="monthProfit" height="300px" color="#52c41a" />
+          <LineChart :data="monthProfitData" height="300px" color="#52c41a" />
         </div>
       </el-col>
     </el-row>
@@ -72,20 +72,35 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAccountStore } from '@/stores/account'
 import AccountSelector from '@/components/Account/AccountSelector.vue'
 import LineChart from '@/components/Charts/LineChart.vue'
 import { accountApi } from '@/api/account'
+import type { AccountHistory, MonthProfit, TradeRecord } from '@/types/account'
 
 const accountStore = useAccountStore()
 
 const loading = ref(false)
 const currentAccount = ref('')
-const accountHistory = ref([])
-const monthProfit = ref([])
-const tradeRecords = ref([])
+const accountHistory = ref<AccountHistory>({})
+const monthProfit = ref<MonthProfit>({})
+const tradeRecords = ref<TradeRecord[]>([])
+
+const accountHistoryData = computed(() => {
+  return Object.entries(accountHistory.value).map(([time, value]) => ({
+    time,
+    value
+  }))
+})
+
+const monthProfitData = computed(() => {
+  return Object.entries(monthProfit.value).map(([time, value]) => ({
+    time,
+    value
+  }))
+})
 const accountStats = ref([
   { label: '账户余额', value: '¥0', trend: '' },
   { label: '可用资金', value: '¥0', trend: '' },

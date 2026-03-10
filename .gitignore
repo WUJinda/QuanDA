@@ -216,3 +216,6 @@ scripts/update/
 
 # 工具目录
 utils/
+
+# 本地脚本目录
+bin/

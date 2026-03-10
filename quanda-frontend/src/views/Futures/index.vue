@@ -143,7 +143,7 @@
                 v-if="!loading && klineData.length > 0"
                 :type="isBrushMode ? 'primary' : 'default'"
                 :icon="Scissor"
-                @click="toggleBrushMode"
+                @click="toggleBrushMode()"
                 class="capture-btn"
               >
                 {{ isBrushMode ? '取消截取' : '截取区域' }}
@@ -474,7 +474,7 @@ const fetchData = async () => {
     )
 
     klineData.value = data.map((item: FutureData) => ({
-      time: item.date || item.datetime,
+      time: item.date || item.datetime || '',
       open: item.open,
       close: item.close,
       high: item.high,
@@ -583,10 +583,7 @@ const confirmCapture = async () => {
     if (selectedBrushData.value.imageData) {
       const base64Data = selectedBrushData.value.imageData.split(',')[1]
       const byteCharacters = atob(base64Data)
-      const byteNumbers = new Array(byteCharacters.length)
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i)
-      }
+      const byteNumbers = Array.from({ length: byteCharacters.length }, (_, i) => byteCharacters.charCodeAt(i))
       const byteArray = new Uint8Array(byteNumbers)
       const blob = new Blob([byteArray], { type: 'image/png' })
       const file = new File([blob], 'capture.png', { type: 'image/png' })

@@ -206,7 +206,8 @@ const updateChart = () => {
         type: 'inside',
         xAxisIndex: [0, 1],
         start: 70,
-        end: 100
+        end: 100,
+        disabled: props.enableBrush  // 启用截取时禁用内部缩放，避免冲突
       },
       {
         show: true,
@@ -218,12 +219,12 @@ const updateChart = () => {
         height: 15
       }
     ],
-    brush: props.enableBrush ? {
+    brush: {
       id: 'kline-brush',
       geoIndex: [],
       xAxisIndex: [0],
       yAxisIndex: [0],
-      brushType: 'rect',
+      brushType: props.enableBrush ? 'rect' : false,
       brushMode: 'single',
       transformable: true,
       removeOnClick: true,
@@ -235,7 +236,7 @@ const updateChart = () => {
       },
       throttleType: 'debounce',
       throttleDelay: 100
-    } : undefined,
+    },
     series: [
       {
         name: 'K线',
@@ -367,21 +368,35 @@ watch(() => props.enableBrush, (enabled) => {
 
 // 处理区域选择事件
 const handleBrushSelected = async (params: any) => {
-  if (!params || !params.batch || params.batch.length === 0) return
+  console.log('[KLineChart] handleBrushSelected called, params:', params)
+
+  if (!params || !params.batch || params.batch.length === 0) {
+    console.log('[KLineChart] No batch data, returning')
+    return
+  }
 
   const batch = params.batch[0]
-  if (!batch.selected || batch.selected.length === 0) return
+  console.log('[KLineChart] batch:', batch)
+
+  if (!batch.selected || batch.selected.length === 0) {
+    console.log('[KLineChart] No selected data, returning')
+    return
+  }
 
   // 获取选中的数据点索引范围
   const selectedIndices: number[] = []
   for (const selection of batch.selected) {
+    console.log('[KLineChart] selection:', selection)
     if (selection.dataIndex && selection.dataIndex.length > 0) {
       selectedIndices.push(...selection.dataIndex)
     }
   }
 
+  console.log('[KLineChart] selectedIndices:', selectedIndices)
+
   if (selectedIndices.length < 2) {
     // 至少需要2个数据点
+    console.log('[KLineChart] Less than 2 data points, returning')
     return
   }
 
@@ -392,12 +407,20 @@ const handleBrushSelected = async (params: any) => {
   const startIndex = minDisplayIndex * samplingStep
   const endIndex = Math.min(maxDisplayIndex * samplingStep, props.data.length - 1)
 
+  console.log('[KLineChart] Data range:', { startIndex, endIndex, samplingStep })
+
   // 提取选中的K线数据
   const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
 
   // 获取时间范围
   const startTime = selectedKlineData[0].time
   const endTime = selectedKlineData[selectedKlineData.length - 1].time
+
+  console.log('[KLineChart] Emitting brushSelected with data:', {
+    startTime,
+    endTime,
+    klineDataLength: selectedKlineData.length
+  })
 
   // 生成截图（异步）
   const imageData = await captureSelectedArea(params, startIndex, endIndex)

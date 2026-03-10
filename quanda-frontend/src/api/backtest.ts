@@ -17,27 +17,32 @@ export const backtestApi = {
   },
 
   // 获取回测任务列表
-  getList: () => {
-    return request.get('/backtest/list')
+  getList: async () => {
+    const response = await request.get('/backtest/list')
+    return response?.data || []
   },
 
   // 获取回测任务详情
-  getDetail: (id: number) => {
-    return request.get(`/backtest/${id}`)
+  getDetail: async (id: number) => {
+    const response = await request.get(`/backtest/${id}`)
+    return response?.data || null
   },
 
   // 创建回测任务
-  create: (data: any) => {
-    return request.post('/backtest/create', data)
+  create: async (data: any) => {
+    const response = await request.post('/backtest/create', data)
+    return response?.data || null
   },
 
   // 删除回测任务
-  delete: (id: number) => {
-    return request.delete(`/backtest/${id}`)
+  delete: async (id: number) => {
+    const response = await request.delete(`/backtest/${id}`)
+    return response?.data || null
   },
 
   // 获取回测结果
-  getResult: (id: number) => {
-    return request.get(`/backtest/${id}/result`)
+  getResult: async (id: number) => {
+    const response = await request.get(`/backtest/${id}/result`)
+    return response?.data || null
   }
 }

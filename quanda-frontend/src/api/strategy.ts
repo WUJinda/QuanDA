@@ -3,42 +3,50 @@ import type { Strategy, StrategyConfig } from '@/types/strategy'
 
 export const strategyApi = {
   // 获取策略列表
-  getList: () => {
-    return request.get<any, Strategy[]>('/strategy/list')
+  getList: async () => {
+    const response = await request.get<any, Strategy[]>('/strategy/list')
+    return response?.data || []
   },
 
   // 获取策略详情
-  getDetail: (id: number) => {
-    return request.get<any, Strategy>(`/strategy/${id}`)
+  getDetail: async (id: number) => {
+    const response = await request.get<any, Strategy>(`/strategy/${id}`)
+    return response?.data || null
   },
 
   // 创建策略
-  create: (data: StrategyConfig) => {
-    return request.post('/strategy/create', data)
+  create: async (data: StrategyConfig) => {
+    const response = await request.post('/strategy/create', data)
+    return response?.data || null
   },
 
   // 更新策略
-  update: (id: number, data: Partial<Strategy>) => {
-    return request.put(`/strategy/${id}`, data)
+  update: async (id: number, data: Partial<Strategy>) => {
+    const response = await request.put(`/strategy/${id}`, data)
+    return response?.data || null
   },
 
   // 删除策略
-  delete: (id: number) => {
-    return request.delete(`/strategy/${id}`)
+  delete: async (id: number) => {
+    const response = await request.delete(`/strategy/${id}`)
+    return response?.data || null
   },
 
   // 获取策略的回测历史
-  getBacktestHistory: (id: number) => {
-    return request.get(`/strategy/${id}/backtest-history`)
+  getBacktestHistory: async (id: number) => {
+    const response = await request.get(`/strategy/${id}/backtest-history`)
+    return response?.data || []
   },
 
   // 启动策略
-  start: (id: number) => {
-    return request.post(`/strategy/${id}/start`)
+  start: async (id: number) => {
+    const response = await request.post(`/strategy/${id}/start`)
+    return response?.data || null
   },
 
   // 停止策略
-  stop: (id: number) => {
-    return request.post(`/strategy/${id}/stop`)
+  stop: async (id: number) => {
+    const response = await request.post(`/strategy/${id}/stop`)
+    return response?.data || null
   }
 }
