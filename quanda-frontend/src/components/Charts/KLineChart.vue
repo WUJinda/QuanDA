@@ -393,71 +393,46 @@ watch(() => props.showBoll, () => {
 
 // 监听enableBrush变化，实时更新图表
 watch(() => props.enableBrush, (enabled) => {
-  console.log('[KLineChart] enableBrush changed:', enabled)
   if (chartInstance) {
     updateChart()
     // 在图表更新后设置事件监听
     if (enabled) {
-      chartInstance.off('brushEnd') // 先移除旧的监听器
+      chartInstance.off('brushEnd')
       chartInstance.on('brushEnd', (params: any) => {
-        console.log('[KLineChart] brushEnd event:', params)
         handleBrushEnd(params)
       })
-      console.log('[KLineChart] Brush event listener attached')
     } else {
       chartInstance.off('brushEnd')
-      console.log('[KLineChart] Brush event listener removed')
     }
   }
 })
 
 // 处理区域选择结束事件（用户完成选择但未确认）
 const handleBrushEnd = async (params: any) => {
-  console.log('[KLineChart] handleBrushEnd called, params:', params)
-
   // 首先隐藏按钮
   showConfirmButtons.value = false
   pendingBrushArea.value = null
 
   if (!params || !params.areas || params.areas.length === 0) {
-    console.log('[KLineChart] No areas data, hiding buttons')
     return
   }
 
   const area = params.areas[0]
-  console.log('[KLineChart] area:', area)
 
   if (!area.coordRange || area.coordRange.length < 2) {
-    console.log('[KLineChart] No coordRange, hiding buttons')
     return
   }
 
   // 获取选中的数据索引范围
-  // 详细日志查看 coordRange 结构
-  console.log('[KLineChart] coordRange structure:', {
-    coordRange: area.coordRange,
-    coordRangeType: typeof area.coordRange,
-    coordRangeLength: area.coordRange?.length,
-    coordRange0: area.coordRange?.[0],
-    coordRange0Type: typeof area.coordRange?.[0],
-    coordRange1: area.coordRange?.[1],
-    coordRange1Type: typeof area.coordRange?.[1]
-  })
-
-  // coordRange 可能是 [[x1, x2]] 或 [x1, x2] 格式，需要处理
   let coordStart: number, coordEnd: number
 
   if (Array.isArray(area.coordRange[0])) {
-    // coordRange 是 [[x1, x2]] 格式
     coordStart = (area.coordRange[0] as any[])[0]
     coordEnd = (area.coordRange[0] as any[])[1]
   } else {
-    // coordRange 是 [x1, x2] 格式
     coordStart = (area.coordRange as any[])[0]
     coordEnd = (area.coordRange as any[])[1]
   }
-
-  console.log('[KLineChart] Extracted coords:', { coordStart, coordEnd, coordStartType: typeof coordStart, coordEndType: typeof coordEnd })
 
   const minCoord = Math.min(coordStart, coordEnd)
   const maxCoord = Math.max(coordStart, coordEnd)
@@ -466,31 +441,19 @@ const handleBrushEnd = async (params: any) => {
   const minDisplayIndex = Math.max(0, Math.floor(minCoord))
   const maxDisplayIndex = Math.min(Math.ceil(maxCoord), props.data.length / samplingStep - 1)
 
-  console.log('[KLineChart] Display indices:', { minDisplayIndex, maxDisplayIndex, samplingStep, minCoord, maxCoord })
-
   // 反向映射到原始数据索引
   const startIndex = minDisplayIndex * samplingStep
   const endIndex = Math.min((maxDisplayIndex + 1) * samplingStep - 1, props.data.length - 1)
 
-  console.log('[KLineChart] Data range:', { startIndex, endIndex, dataLength: props.data.length })
-
   // 验证索引范围
   if (endIndex <= startIndex || startIndex < 0 || endIndex >= props.data.length) {
-    console.log('[KLineChart] Invalid index range, hiding buttons')
     return
   }
 
   // 提取选中的K线数据
   const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
 
-  console.log('[KLineChart] Selected data:', {
-    length: selectedKlineData.length,
-    first: selectedKlineData[0],
-    last: selectedKlineData[selectedKlineData.length - 1]
-  })
-
   if (selectedKlineData.length === 0) {
-    console.log('[KLineChart] No data selected, hiding buttons')
     return
   }
 
@@ -505,7 +468,7 @@ const handleBrushEnd = async (params: any) => {
     const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, maxCoord)
 
     // 直接使用图表高度的70%（K线图表区域）作为Y轴位置
-    const buttonY = containerHeight * 0.7 - 40 // 图表区域上方40px
+    const buttonY = containerHeight * 0.7 - 40
 
     // 确保按钮不超出容器右边界（按钮宽度约80px）
     const maxButtonX = containerWidth - 90
@@ -514,35 +477,18 @@ const handleBrushEnd = async (params: any) => {
     // 确保Y坐标不为负数
     const finalButtonY = Math.max(10, buttonY)
 
-    console.log('[KLineChart] Button position calculation:', {
-      containerWidth,
-      containerHeight,
-      buttonY,
-      finalButtonY,
-      xEnd,
-      buttonX
-    })
-
     if (typeof buttonX === 'number' && typeof finalButtonY === 'number') {
       confirmButtonsStyle.value = {
         left: `${buttonX}px`,
         top: `${finalButtonY}px`
       }
-      // 最后设置显示按钮
       showConfirmButtons.value = true
-      console.log('[KLineChart] ✓ Confirm buttons SHOULD BE VISIBLE now at:', confirmButtonsStyle.value)
     }
   }
 
   // 获取时间范围
   const startTime = selectedKlineData[0].time
   const endTime = selectedKlineData[selectedKlineData.length - 1].time
-
-  console.log('[KLineChart] Emitting brushEnd with data:', {
-    startTime,
-    endTime,
-    klineDataLength: selectedKlineData.length
-  })
 
   // 发送 brushEnd 事件
   emit('brushEnd', {
@@ -556,11 +502,9 @@ const handleBrushEnd = async (params: any) => {
 
 // 确认截取
 const handleConfirm = async () => {
-  console.log('[KLineChart] handleConfirm called')
   showConfirmButtons.value = false
   
   if (!pendingBrushArea.value) {
-    console.log('[KLineChart] No pending brush area')
     return
   }
 
@@ -569,7 +513,6 @@ const handleConfirm = async () => {
 
 // 取消截取
 const handleCancel = () => {
-  console.log('[KLineChart] handleCancel called')
   showConfirmButtons.value = false
   pendingBrushArea.value = null
   clearBrush()
@@ -577,16 +520,12 @@ const handleCancel = () => {
 
 // 确认选择并生成截图
 const confirmBrushSelection = async () => {
-  console.log('[KLineChart] confirmBrushSelection called')
-  
   if (!chartInstance) {
-    console.log('[KLineChart] No chart instance')
     return
   }
 
   // 使用保存的 pendingBrushArea 而不是从 getOption 获取
   if (!pendingBrushArea.value) {
-    console.log('[KLineChart] No pending brush area')
     return
   }
 
@@ -594,7 +533,6 @@ const confirmBrushSelection = async () => {
   let coordRange = area.coordRange
 
   if (!coordRange || coordRange.length < 2) {
-    console.log('[KLineChart] No coordRange')
     return
   }
 
@@ -602,11 +540,9 @@ const confirmBrushSelection = async () => {
   let coordStart: number, coordEnd: number
 
   if (Array.isArray(coordRange[0])) {
-    // coordRange 是 [[x1, x2]] 格式
     coordStart = (coordRange[0] as any[])[0]
     coordEnd = (coordRange[0] as any[])[1]
   } else {
-    // coordRange 是 [x1, x2] 格式
     coordStart = (coordRange as any[])[0]
     coordEnd = (coordRange as any[])[1]
   }
@@ -622,17 +558,13 @@ const confirmBrushSelection = async () => {
   const startIndex = minDisplayIndex * samplingStep
   const endIndex = Math.min((maxDisplayIndex + 1) * samplingStep - 1, props.data.length - 1)
 
-  console.log('[KLineChart] Confirm selection range:', { startIndex, endIndex, dataLength: props.data.length })
-
   if (endIndex <= startIndex || startIndex < 0 || endIndex >= props.data.length) {
-    console.log('[KLineChart] Invalid index range')
     return
   }
 
   const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
   
   if (selectedKlineData.length === 0) {
-    console.log('[KLineChart] No data selected')
     return
   }
 
@@ -641,8 +573,6 @@ const confirmBrushSelection = async () => {
 
   // 生成截图
   const imageData = await captureSelectedArea({ areas: [area] }, startIndex, endIndex)
-
-  console.log('[KLineChart] Emitting brushSelected with imageData length:', imageData?.length)
 
   emit('brushSelected', {
     startTime,
@@ -669,8 +599,6 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
       backgroundColor: '#fff'
     })
 
-    console.log('[KLineChart] Full dataURL length:', fullDataURL.length)
-
     // 获取选中区域的坐标信息
     if (params.areas && params.areas.length > 0) {
       const area = params.areas[0]
@@ -681,11 +609,9 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
         let coordStart: number, coordEnd: number
 
         if (Array.isArray(coordRange[0])) {
-          // coordRange 是 [[x1, x2]] 格式
           coordStart = (coordRange[0] as any[])[0]
           coordEnd = (coordRange[0] as any[])[1]
         } else {
-          // coordRange 是 [x1, x2] 格式
           coordStart = (coordRange as any[])[0]
           coordEnd = (coordRange as any[])[1]
         }
@@ -693,8 +619,6 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
         // 将数据索引转换为像素坐标
         const xStart = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordStart)
         const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordEnd)
-
-        console.log('[KLineChart] Pixel coordinates:', { xStart, xEnd, coordStart, coordEnd })
 
         if (typeof xStart === 'number' && typeof xEnd === 'number') {
           // 获取图表容器的尺寸信息
@@ -707,13 +631,11 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
             Math.max(xStart, xEnd),
             containerHeight
           )
-          console.log('[KLineChart] Cropped dataURL length:', croppedData.length)
           return croppedData
         }
       }
     }
 
-    console.log('[KLineChart] Returning full dataURL')
     return fullDataURL
   } catch (error) {
     console.error('[KLineChart] Screenshot failed:', error)
@@ -731,7 +653,6 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
         const ctx = canvas.getContext('2d')
 
         if (!ctx) {
-          console.error('[KLineChart] Failed to get canvas context')
           resolve(dataURL)
           return
         }
@@ -746,23 +667,8 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
         const height = Math.floor(containerHeight * 0.7 * pixelRatio)
         const top = Math.floor(containerHeight * 0.12 * pixelRatio)
 
-        console.log('[KLineChart] Crop parameters:', {
-          pixelRatio,
-          xStart,
-          xEnd,
-          left,
-          right,
-          width,
-          height,
-          top,
-          containerHeight,
-          imgWidth: img.width,
-          imgHeight: img.height
-        })
-
         // 验证裁剪参数
         if (width <= 0 || height <= 0 || left < 0 || top < 0 || left >= img.width || top >= img.height) {
-          console.error('[KLineChart] Invalid crop parameters, returning full image')
           resolve(dataURL)
           return
         }
@@ -774,12 +680,11 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
         // 从原图中裁剪出选中区域
         ctx.drawImage(
           img,
-          left, top, width, height,  // 源区域
-          0, 0, width, height         // 目标区域
+          left, top, width, height,
+          0, 0, width, height
         )
 
         const croppedDataURL = canvas.toDataURL('image/png')
-        console.log('[KLineChart] Crop successful, new dataURL length:', croppedDataURL.length)
         resolve(croppedDataURL)
       } catch (error) {
         console.error('[KLineChart] Crop error:', error)

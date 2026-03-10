@@ -48,10 +48,10 @@ class QABaseHandler(RequestHandler):
         #headers.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         # self.Content-Type: text/html; charset=utf-8
 
-    def post(self):
+    def post(self, *args, **kwargs):
         self.write('some post')
 
-    def get(self):
+    def get(self, *args, **kwargs):
         self.write('some get')
 
     def options(self):

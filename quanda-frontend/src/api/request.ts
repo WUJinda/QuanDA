@@ -24,19 +24,19 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data
-    
-    // 处理 QuanDA 后端返回的数据格式
-    // 如果有 res 字段，说明是成功的响应
-    if (res.res !== undefined) {
-      return res.res
-    }
-    
-    // 检查状态码
+
+    // 先检查状态码
     if (res.status && res.status !== 200) {
       ElMessage.error(res.message || '请求失败')
       return Promise.reject(new Error(res.message || '请求失败'))
     }
-    
+
+    // 再处理 QuanDA 后端返回的数据格式
+    // 如果有 res 字段，说明是成功的响应
+    if (res.res !== undefined) {
+      return res.res
+    }
+
     return res
   },
   (error) => {

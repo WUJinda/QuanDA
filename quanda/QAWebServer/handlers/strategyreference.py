@@ -230,21 +230,28 @@ class StrategyReferenceUploadHandler(QABaseHandler):
             body = file_info['body']
             
             # 生成唯一文件名
-            ext = os.path.splitext(filename)[1]
+            ext = os.path.splitext(filename)[1] or '.png'
             new_filename = f"{uuid.uuid4()}{ext}"
             
             # 使用配置的上传路径
             from quanda.config.upload_config import get_strategy_reference_upload_path, get_file_url
             upload_dir = get_strategy_reference_upload_path()
+            
+            # 确保上传目录存在
             os.makedirs(upload_dir, exist_ok=True)
             
             file_path = os.path.join(upload_dir, new_filename)
+            
+            # 写入文件
             with open(file_path, 'wb') as f:
                 f.write(body)
             
             # 返回文件URL（相对路径）
             relative_path = os.path.join('uploads', 'strategy-reference', new_filename).replace('\\', '/')
             file_url = get_file_url(relative_path)
+            
+            print(f'[StrategyReference] File uploaded: {file_path}')
+            print(f'[StrategyReference] File URL: {file_url}')
             
             self.write({
                 'status': 200,
@@ -253,10 +260,13 @@ class StrategyReferenceUploadHandler(QABaseHandler):
             })
         except Exception as e:
             import traceback
+            error_msg = traceback.format_exc()
+            print(f'[StrategyReference] Upload error: {error_msg}')
+            # 不设置 HTTP 状态码为 500，而是在响应体中返回错误信息
             self.write({
                 'status': 500,
                 'message': f'上传失败: {str(e)}',
-                'error': traceback.format_exc(),
+                'error': error_msg,
                 'res': None
             })
 

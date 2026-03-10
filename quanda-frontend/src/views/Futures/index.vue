@@ -282,14 +282,15 @@
       <div v-if="selectedBrushData" class="capture-dialog-content">
         <div v-if="selectedBrushData.imageData" class="preview-section">
           <h4>截取预览</h4>
-          <img :src="selectedBrushData.imageData" alt="截取预览" class="preview-image" />
+          <div class="preview-image-wrapper">
+            <img :src="selectedBrushData.imageData" alt="截取预览" class="preview-image" />
+          </div>
         </div>
         <div v-else class="preview-section">
           <h4>截取预览</h4>
           <div class="no-preview">
             <el-icon :size="48"><Picture /></el-icon>
             <p>图片加载中或生成失败</p>
-            <p class="debug-info">imageData: {{ selectedBrushData.imageData ? '存在但为空' : '不存在' }}</p>
           </div>
         </div>
         <el-form :model="captureForm" label-width="80px" style="margin-top: 20px;">
@@ -548,43 +549,26 @@ const handleAddWatch = () => {
 
 // 切换截取模式
 const toggleBrushMode = (forceOff = false) => {
-  console.log('[Futures] toggleBrushMode called, forceOff:', forceOff, 'current isBrushMode:', isBrushMode.value)
   if (forceOff) {
     isBrushMode.value = false
     klineChartRef.value?.clearBrush()
   } else {
     isBrushMode.value = !isBrushMode.value
   }
-  console.log('[Futures] isBrushMode after toggle:', isBrushMode.value)
 }
 
 // 处理区域选择结束事件（图表内部已处理确认，这里只是记录日志）
 const handleBrushEnd = (data: any) => {
-  console.log('[Futures] handleBrushEnd called, data:', data)
   // 图表组件内部会显示确认/取消按钮，这里不需要额外处理
 }
 
 // 处理区域选择事件（用户确认后触发）
 const handleBrushSelected = (data: any) => {
-  console.log('[Futures] handleBrushSelected called, data:', {
-    hasImageData: !!data.imageData,
-    imageDataLength: data.imageData?.length,
-    imageDataPrefix: data.imageData?.substring(0, 50),
-    startTime: data.startTime,
-    endTime: data.endTime,
-    klineDataLength: data.klineData?.length
-  })
-  
   selectedBrushData.value = {
     ...data,
     code: currentFuture.value,
     frequence: frequence.value
   }
-
-  console.log('[Futures] selectedBrushData set:', {
-    hasImageData: !!selectedBrushData.value.imageData,
-    imageDataLength: selectedBrushData.value.imageData?.length
-  })
 
   // 自动填充表单名称
   const trendText = data.klineData.length > 0
@@ -611,8 +595,6 @@ const confirmSave = async () => {
     // 先上传截图
     let imageUrl = ''
     if (selectedBrushData.value.imageData) {
-      console.log('[Futures] Uploading image, dataURL length:', selectedBrushData.value.imageData.length)
-      
       const base64Data = selectedBrushData.value.imageData.split(',')[1]
       const byteCharacters = atob(base64Data)
       const byteNumbers = Array.from({ length: byteCharacters.length }, (_, i) => byteCharacters.charCodeAt(i))
@@ -622,7 +604,6 @@ const confirmSave = async () => {
 
       const uploadRes = await strategyReferenceApi.uploadImage(file)
       imageUrl = uploadRes.url
-      console.log('[Futures] Image uploaded, URL:', imageUrl)
     }
 
     // 调用分析接口
@@ -1378,11 +1359,24 @@ onMounted(async () => {
         margin: 0 0 spacing(md) 0;
       }
 
-      .preview-image {
-        width: 100%;
+      .preview-image-wrapper {
+        max-height: 300px;
+        overflow: hidden;
         border-radius: radius(lg);
         border: 2px solid color(border-light);
         box-shadow: shadow(sm);
+        background: color(bg-secondary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-image {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        object-fit: contain;
+        display: block;
       }
 
       .no-preview {
@@ -1404,12 +1398,6 @@ onMounted(async () => {
         p {
           margin: spacing(xs) 0;
           font-size: font-size(sm);
-        }
-
-        .debug-info {
-          font-size: font-size(xs);
-          color: color(text-quaternary);
-          font-family: $font-family-code;
         }
       }
     }
