@@ -186,6 +186,7 @@
               :showBoll="showBoll"
               :enableBrush="isBrushMode"
               height="540px"
+              @brush-end="handleBrushEnd"
               @brush-selected="handleBrushSelected"
             />
           </div>
@@ -326,8 +327,8 @@
       </div>
       <template #footer>
         <el-button @click="showCaptureDialog = false">取消</el-button>
-        <el-button @click="toggleBrushMode(true)">重新截取</el-button>
-        <el-button type="primary" @click="confirmCapture" :loading="creatingFromBrush">
+        <el-button @click="toggleBrushMode(true); showCaptureDialog = false">重新截取</el-button>
+        <el-button type="primary" @click="confirmSave" :loading="creatingFromBrush">
           确认保存
         </el-button>
       </template>
@@ -548,8 +549,16 @@ const toggleBrushMode = (forceOff = false) => {
   console.log('[Futures] isBrushMode after toggle:', isBrushMode.value)
 }
 
-// 处理区域选择事件
+// 处理区域选择结束事件（图表内部已处理确认，这里只是记录日志）
+const handleBrushEnd = (data: any) => {
+  console.log('[Futures] handleBrushEnd called, data:', data)
+  // 图表组件内部会显示确认/取消按钮，这里不需要额外处理
+}
+
+// 处理区域选择事件（用户确认后触发）
 const handleBrushSelected = (data: any) => {
+  console.log('[Futures] handleBrushSelected called, imageData length:', data.imageData?.length)
+  
   selectedBrushData.value = {
     ...data,
     code: currentFuture.value,
@@ -566,8 +575,8 @@ const handleBrushSelected = (data: any) => {
   isBrushMode.value = false
 }
 
-// 确认截取并保存到策略参照库
-const confirmCapture = async () => {
+// 确认保存到策略参照库
+const confirmSave = async () => {
   if (!selectedBrushData.value) return
 
   if (!captureForm.value.name) {
@@ -581,6 +590,8 @@ const confirmCapture = async () => {
     // 先上传截图
     let imageUrl = ''
     if (selectedBrushData.value.imageData) {
+      console.log('[Futures] Uploading image, dataURL length:', selectedBrushData.value.imageData.length)
+      
       const base64Data = selectedBrushData.value.imageData.split(',')[1]
       const byteCharacters = atob(base64Data)
       const byteNumbers = Array.from({ length: byteCharacters.length }, (_, i) => byteCharacters.charCodeAt(i))
@@ -590,6 +601,7 @@ const confirmCapture = async () => {
 
       const uploadRes = await strategyReferenceApi.uploadImage(file)
       imageUrl = uploadRes.url
+      console.log('[Futures] Image uploaded, URL:', imageUrl)
     }
 
     // 调用分析接口

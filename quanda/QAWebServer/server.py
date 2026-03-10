@@ -70,16 +70,30 @@ def main():
 
 
 def start_server(handlers, address='0.0.0.0', port=8010):
+    # 获取项目根目录
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    # 配置静态文件路径
+    from quanda.config.upload_config import get_upload_path
+    upload_root = get_upload_path()
+    static_path = os.path.join(project_root, upload_root)
+    
+    # 确保上传目录存在
+    os.makedirs(static_path, exist_ok=True)
+    
     apps = Application(
         handlers=handlers,
         debug=True,
         autoreload=True,
-        compress_response=True
+        compress_response=True,
+        static_path=static_path,
+        static_url_prefix='/uploads/'
     )
     
     print('========WELCOME quanda_WEBSERVER 2.0 ============')
     print('quanda VERSION: {}'.format(__version__))
     print('quanda WEBSERVER is Listening on: http://{}:{}'.format(address, port))
+    print('Static files path: {}'.format(static_path))
     print('请打开浏览器/使用JavaScript等来使用该后台, 并且不要关闭当前命令行窗口')
     apps.listen(port, address=address)
 

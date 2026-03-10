@@ -233,16 +233,18 @@ class StrategyReferenceUploadHandler(QABaseHandler):
             ext = os.path.splitext(filename)[1]
             new_filename = f"{uuid.uuid4()}{ext}"
             
-            # 保存文件到 uploads 目录
-            upload_dir = 'uploads/strategy-reference'
+            # 使用配置的上传路径
+            from quanda.config.upload_config import get_strategy_reference_upload_path, get_file_url
+            upload_dir = get_strategy_reference_upload_path()
             os.makedirs(upload_dir, exist_ok=True)
             
             file_path = os.path.join(upload_dir, new_filename)
             with open(file_path, 'wb') as f:
                 f.write(body)
             
-            # 返回文件URL
-            file_url = f'/uploads/strategy-reference/{new_filename}'
+            # 返回文件URL（相对路径）
+            relative_path = os.path.join('uploads', 'strategy-reference', new_filename).replace('\\', '/')
+            file_url = get_file_url(relative_path)
             
             self.write({
                 'status': 200,

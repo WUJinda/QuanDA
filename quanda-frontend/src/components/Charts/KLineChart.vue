@@ -1,5 +1,16 @@
 <template>
-  <div ref="chartRef" class="kline-chart"></div>
+  <div class="kline-chart-wrapper">
+    <div ref="chartRef" class="kline-chart"></div>
+    <!-- 确认/取消按钮 -->
+    <div v-if="showConfirmButtons" class="brush-confirm-buttons" :style="confirmButtonsStyle">
+      <button class="confirm-btn" @click="handleConfirm" title="确认截取">
+        ✓
+      </button>
+      <button class="cancel-btn" @click="handleCancel" title="取消截取">
+        ✕
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -29,11 +40,23 @@ const emit = defineEmits<{
     klineData: KLineData[]
     imageData?: string
   }]
+  brushEnd: [data: {
+    startTime: string
+    endTime: string
+    startIndex: number
+    endIndex: number
+    klineData: KLineData[]
+  }]
 }>()
 
 const chartRef = ref<HTMLElement>()
 let chartInstance: echarts.ECharts | null = null
 let samplingStep = 1  // 数据抽样步长，用于反向映射到原始数据索引
+
+// 确认按钮相关状态
+const showConfirmButtons = ref(false)
+const confirmButtonsStyle = ref({})
+const pendingBrushArea = ref<any>(null)
 
 // 优化的布林带计算（使用滑动窗口，避免重复计算）
 const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
@@ -219,24 +242,45 @@ const updateChart = () => {
         height: 15
       }
     ],
-    brush: {
-      id: 'kline-brush',
-      geoIndex: [],
-      xAxisIndex: [0],
-      yAxisIndex: [0],
-      brushType: props.enableBrush ? 'rect' : false,
-      brushMode: 'single',
-      transformable: true,
-      removeOnClick: true,
-      z: 100,
-      brushStyle: {
-        borderWidth: 2,
-        color: 'rgba(91, 143, 249, 0.2)',
-        borderColor: '#5B8FF9'
+    // 只在启用截取模式时才配置 toolbox
+    ...(props.enableBrush ? {
+      toolbox: {
+        show: true,
+        feature: {
+          brush: {
+            type: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+            title: {
+              rect: '矩形选择',
+              polygon: '多边形选择',
+              lineX: '横向选择',
+              lineY: '纵向选择',
+              keep: '保持选择',
+              clear: '清除选择'
+            }
+          }
+        },
+        right: '5%',
+        top: '1%'
       },
-      throttleType: 'debounce',
-      throttleDelay: 100
-    },
+      brush: {
+        id: 'kline-brush',
+        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+        xAxisIndex: [0],
+        yAxisIndex: [0],
+        brushType: 'auto',
+        brushMode: 'single',
+        transformable: true,
+        removeOnClick: true,
+        z: 100,
+        brushStyle: {
+          borderWidth: 2,
+          color: 'rgba(91, 143, 249, 0.2)',
+          borderColor: '#5B8FF9'
+        },
+        throttleType: 'debounce',
+        throttleDelay: 100
+      }
+    } : {}),
     series: [
       {
         name: 'K线',
@@ -327,8 +371,9 @@ const updateChart = () => {
   // 确保 brush 事件监听器正确设置
   if (props.enableBrush) {
     chartInstance.off('brushSelected')
-    chartInstance.on('brushSelected', (params: any) => {
-      handleBrushSelected(params)
+    chartInstance.off('brushEnd')
+    chartInstance.on('brushEnd', (params: any) => {
+      handleBrushEnd(params)
     })
   }
 }
@@ -353,77 +398,239 @@ watch(() => props.enableBrush, (enabled) => {
     updateChart()
     // 在图表更新后设置事件监听
     if (enabled) {
-      chartInstance.off('brushSelected') // 先移除旧的监听器
-      chartInstance.on('brushSelected', (params: any) => {
-        console.log('[KLineChart] brushSelected event:', params)
-        handleBrushSelected(params)
+      chartInstance.off('brushEnd') // 先移除旧的监听器
+      chartInstance.on('brushEnd', (params: any) => {
+        console.log('[KLineChart] brushEnd event:', params)
+        handleBrushEnd(params)
       })
       console.log('[KLineChart] Brush event listener attached')
     } else {
-      chartInstance.off('brushSelected')
+      chartInstance.off('brushEnd')
       console.log('[KLineChart] Brush event listener removed')
     }
   }
 })
 
-// 处理区域选择事件
-const handleBrushSelected = async (params: any) => {
-  console.log('[KLineChart] handleBrushSelected called, params:', params)
+// 处理区域选择结束事件（用户完成选择但未确认）
+const handleBrushEnd = async (params: any) => {
+  console.log('[KLineChart] handleBrushEnd called, params:', params)
 
-  if (!params || !params.batch || params.batch.length === 0) {
-    console.log('[KLineChart] No batch data, returning')
+  // 首先隐藏按钮
+  showConfirmButtons.value = false
+  pendingBrushArea.value = null
+
+  if (!params || !params.areas || params.areas.length === 0) {
+    console.log('[KLineChart] No areas data, hiding buttons')
     return
   }
 
-  const batch = params.batch[0]
-  console.log('[KLineChart] batch:', batch)
+  const area = params.areas[0]
+  console.log('[KLineChart] area:', area)
 
-  if (!batch.selected || batch.selected.length === 0) {
-    console.log('[KLineChart] No selected data, returning')
+  if (!area.coordRange || area.coordRange.length < 2) {
+    console.log('[KLineChart] No coordRange, hiding buttons')
     return
   }
 
-  // 获取选中的数据点索引范围
-  const selectedIndices: number[] = []
-  for (const selection of batch.selected) {
-    console.log('[KLineChart] selection:', selection)
-    if (selection.dataIndex && selection.dataIndex.length > 0) {
-      selectedIndices.push(...selection.dataIndex)
-    }
+  // 获取选中的数据索引范围
+  // 详细日志查看 coordRange 结构
+  console.log('[KLineChart] coordRange structure:', {
+    coordRange: area.coordRange,
+    coordRangeType: typeof area.coordRange,
+    coordRangeLength: area.coordRange?.length,
+    coordRange0: area.coordRange?.[0],
+    coordRange0Type: typeof area.coordRange?.[0],
+    coordRange1: area.coordRange?.[1],
+    coordRange1Type: typeof area.coordRange?.[1]
+  })
+
+  // coordRange 可能是 [[x1, x2]] 或 [x1, x2] 格式，需要处理
+  let coordStart: number, coordEnd: number
+
+  if (Array.isArray(area.coordRange[0])) {
+    // coordRange 是 [[x1, x2]] 格式
+    coordStart = (area.coordRange[0] as any[])[0]
+    coordEnd = (area.coordRange[0] as any[])[1]
+  } else {
+    // coordRange 是 [x1, x2] 格式
+    coordStart = (area.coordRange as any[])[0]
+    coordEnd = (area.coordRange as any[])[1]
   }
 
-  console.log('[KLineChart] selectedIndices:', selectedIndices)
+  console.log('[KLineChart] Extracted coords:', { coordStart, coordEnd, coordStartType: typeof coordStart, coordEndType: typeof coordEnd })
 
-  if (selectedIndices.length < 2) {
-    // 至少需要2个数据点
-    console.log('[KLineChart] Less than 2 data points, returning')
-    return
-  }
+  const minCoord = Math.min(coordStart, coordEnd)
+  const maxCoord = Math.max(coordStart, coordEnd)
+
+  // 将坐标转换为显示数据的索引
+  const minDisplayIndex = Math.max(0, Math.floor(minCoord))
+  const maxDisplayIndex = Math.min(Math.ceil(maxCoord), props.data.length / samplingStep - 1)
+
+  console.log('[KLineChart] Display indices:', { minDisplayIndex, maxDisplayIndex, samplingStep, minCoord, maxCoord })
 
   // 反向映射到原始数据索引
-  const minDisplayIndex = Math.min(...selectedIndices)
-  const maxDisplayIndex = Math.max(...selectedIndices)
-
   const startIndex = minDisplayIndex * samplingStep
-  const endIndex = Math.min(maxDisplayIndex * samplingStep, props.data.length - 1)
+  const endIndex = Math.min((maxDisplayIndex + 1) * samplingStep - 1, props.data.length - 1)
 
-  console.log('[KLineChart] Data range:', { startIndex, endIndex, samplingStep })
+  console.log('[KLineChart] Data range:', { startIndex, endIndex, dataLength: props.data.length })
+
+  // 验证索引范围
+  if (endIndex <= startIndex || startIndex < 0 || endIndex >= props.data.length) {
+    console.log('[KLineChart] Invalid index range, hiding buttons')
+    return
+  }
 
   // 提取选中的K线数据
   const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
+
+  console.log('[KLineChart] Selected data:', {
+    length: selectedKlineData.length,
+    first: selectedKlineData[0],
+    last: selectedKlineData[selectedKlineData.length - 1]
+  })
+
+  if (selectedKlineData.length === 0) {
+    console.log('[KLineChart] No data selected, hiding buttons')
+    return
+  }
+
+  // 所有验证通过，保存当前选择区域并显示按钮
+  pendingBrushArea.value = area
+
+  // 计算按钮位置
+  if (chartInstance && chartRef.value) {
+    const containerWidth = chartRef.value.clientWidth
+    const containerHeight = chartRef.value.clientHeight
+
+    const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, maxCoord)
+
+    // 直接使用图表高度的70%（K线图表区域）作为Y轴位置
+    const buttonY = containerHeight * 0.7 - 40 // 图表区域上方40px
+
+    // 确保按钮不超出容器右边界（按钮宽度约80px）
+    const maxButtonX = containerWidth - 90
+    const buttonX = Math.min(xEnd + 10, maxButtonX)
+
+    // 确保Y坐标不为负数
+    const finalButtonY = Math.max(10, buttonY)
+
+    console.log('[KLineChart] Button position calculation:', {
+      containerWidth,
+      containerHeight,
+      buttonY,
+      finalButtonY,
+      xEnd,
+      buttonX
+    })
+
+    if (typeof buttonX === 'number' && typeof finalButtonY === 'number') {
+      confirmButtonsStyle.value = {
+        left: `${buttonX}px`,
+        top: `${finalButtonY}px`
+      }
+      // 最后设置显示按钮
+      showConfirmButtons.value = true
+      console.log('[KLineChart] ✓ Confirm buttons SHOULD BE VISIBLE now at:', confirmButtonsStyle.value)
+    }
+  }
 
   // 获取时间范围
   const startTime = selectedKlineData[0].time
   const endTime = selectedKlineData[selectedKlineData.length - 1].time
 
-  console.log('[KLineChart] Emitting brushSelected with data:', {
+  console.log('[KLineChart] Emitting brushEnd with data:', {
     startTime,
     endTime,
     klineDataLength: selectedKlineData.length
   })
 
-  // 生成截图（异步）
-  const imageData = await captureSelectedArea(params, startIndex, endIndex)
+  // 发送 brushEnd 事件
+  emit('brushEnd', {
+    startTime,
+    endTime,
+    startIndex,
+    endIndex,
+    klineData: selectedKlineData
+  })
+}
+
+// 确认截取
+const handleConfirm = async () => {
+  console.log('[KLineChart] handleConfirm called')
+  showConfirmButtons.value = false
+  
+  if (!pendingBrushArea.value) {
+    console.log('[KLineChart] No pending brush area')
+    return
+  }
+
+  await confirmBrushSelection()
+}
+
+// 取消截取
+const handleCancel = () => {
+  console.log('[KLineChart] handleCancel called')
+  showConfirmButtons.value = false
+  pendingBrushArea.value = null
+  clearBrush()
+}
+
+// 确认选择并生成截图
+const confirmBrushSelection = async () => {
+  console.log('[KLineChart] confirmBrushSelection called')
+  
+  if (!chartInstance) {
+    console.log('[KLineChart] No chart instance')
+    return
+  }
+
+  // 获取当前的 brush 区域
+  const brushOption = chartInstance.getOption() as any
+  if (!brushOption.brush || !brushOption.brush[0] || !brushOption.brush[0].areas || brushOption.brush[0].areas.length === 0) {
+    console.log('[KLineChart] No brush areas')
+    return
+  }
+
+  const area = brushOption.brush[0].areas[0]
+  const coordRange = area.coordRange
+
+  if (!coordRange || coordRange.length < 2) {
+    console.log('[KLineChart] No coordRange')
+    return
+  }
+
+  // 获取选中的数据索引范围
+  const minCoord = Math.min(coordRange[0], coordRange[1])
+  const maxCoord = Math.max(coordRange[0], coordRange[1])
+  
+  // 将坐标转换为显示数据的索引
+  const minDisplayIndex = Math.max(0, Math.floor(minCoord))
+  const maxDisplayIndex = Math.min(Math.ceil(maxCoord), props.data.length / samplingStep - 1)
+
+  const startIndex = minDisplayIndex * samplingStep
+  const endIndex = Math.min((maxDisplayIndex + 1) * samplingStep - 1, props.data.length - 1)
+
+  console.log('[KLineChart] Confirm selection range:', { startIndex, endIndex, dataLength: props.data.length })
+
+  if (endIndex <= startIndex || startIndex < 0 || endIndex >= props.data.length) {
+    console.log('[KLineChart] Invalid index range')
+    return
+  }
+
+  const selectedKlineData = props.data.slice(startIndex, endIndex + 1)
+  
+  if (selectedKlineData.length === 0) {
+    console.log('[KLineChart] No data selected')
+    return
+  }
+
+  const startTime = selectedKlineData[0].time
+  const endTime = selectedKlineData[selectedKlineData.length - 1].time
+
+  // 生成截图
+  const imageData = await captureSelectedArea({ areas: [area] }, startIndex, endIndex)
+
+  console.log('[KLineChart] Emitting brushSelected with imageData length:', imageData?.length)
 
   emit('brushSelected', {
     startTime,
@@ -450,37 +657,49 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
       backgroundColor: '#fff'
     })
 
+    console.log('[KLineChart] Full dataURL length:', fullDataURL.length)
+
     // 获取选中区域的坐标信息
-    if (params.batch && params.batch[0] && params.batch[0].areas && params.batch[0].areas.length > 0) {
-      const area = params.batch[0].areas[0]
+    if (params.areas && params.areas.length > 0) {
+      const area = params.areas[0]
       const coordRange = area.coordRange
 
       if (coordRange && coordRange.length >= 2) {
-        // 获取图表的grid信息
-        const gridModel = chartInstance.getModel().getComponent('grid', 0)
-        const gridRect = gridModel.coordinateSystem.getRect()
-
         // 将数据索引转换为像素坐标
         const xStart = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[0])
-        const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[coordRange.length - 1])
+        const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[1])
+
+        console.log('[KLineChart] Pixel coordinates:', { xStart, xEnd })
 
         if (typeof xStart === 'number' && typeof xEnd === 'number') {
+          // 获取图表容器的尺寸信息
+          const containerWidth = chartRef.value.clientWidth
+          const containerHeight = chartRef.value.clientHeight
+
           // 使用 canvas 进行精确裁剪
-          return await cropImageData(fullDataURL, xStart, xEnd, gridRect)
+          const croppedData = await cropImageData(
+            fullDataURL,
+            Math.min(xStart, xEnd),
+            Math.max(xStart, xEnd),
+            containerHeight
+          )
+          console.log('[KLineChart] Cropped dataURL length:', croppedData.length)
+          return croppedData
         }
       }
     }
 
+    console.log('[KLineChart] Returning full dataURL')
     return fullDataURL
   } catch (error) {
-    console.error('Screenshot failed:', error)
+    console.error('[KLineChart] Screenshot failed:', error)
     return undefined
   }
 }
 
 // 使用 canvas 裁剪图片
-const cropImageData = (dataURL: string, xStart: number, xEnd: number, gridRect: any): Promise<string> => {
-  return new Promise((resolve, reject) => {
+const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerHeight: number): Promise<string> => {
+  return new Promise((resolve) => {
     const img = new Image()
     img.onload = () => {
       try {
@@ -497,8 +716,10 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, gridRect: 
         const left = Math.floor(xStart * pixelRatio)
         const right = Math.ceil(xEnd * pixelRatio)
         const width = right - left
-        const height = Math.floor(gridRect.height * pixelRatio)
-        const top = Math.floor(gridRect.y * pixelRatio)
+        
+        // 裁剪高度为图表高度的70%（K线图表区域）
+        const height = Math.floor(containerHeight * 0.7 * pixelRatio)
+        const top = Math.floor(containerHeight * 0.12 * pixelRatio)
 
         // 设置canvas大小为裁剪区域大小
         canvas.width = width
@@ -534,11 +755,14 @@ const clearBrush = () => {
       areas: []
     })
   }
+  showConfirmButtons.value = false
+  pendingBrushArea.value = null
 }
 
 // 暴露方法给父组件
 defineExpose({
-  clearBrush
+  clearBrush,
+  confirmBrushSelection
 })
 
 onMounted(() => {
@@ -554,8 +778,82 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.kline-chart {
+.kline-chart-wrapper {
+  position: relative;
   width: 100%;
   height: v-bind(height);
+}
+
+.kline-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.brush-confirm-buttons {
+  position: absolute;
+  display: flex;
+  gap: 8px;
+  z-index: 9999;
+  pointer-events: auto;
+  animation: buttonFadeIn 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  @keyframes buttonFadeIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .confirm-btn,
+  .cancel-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .confirm-btn {
+    background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, #73D13D 0%, #95DE64 100%);
+    }
+  }
+
+  .cancel-btn {
+    background: linear-gradient(135deg, #FF4D4F 0%, #FF7875 100%);
+    color: white;
+
+    &:hover {
+      background: linear-gradient(135deg, #FF7875 0%, #FFA39E 100%);
+    }
+  }
 }
 </style>
