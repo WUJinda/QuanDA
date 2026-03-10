@@ -19,12 +19,19 @@ def get_future_list_safe():
         from pymongo import MongoClient
         client = MongoClient(mongo_ip)
         db = client.quanda
+
+        # 首先尝试从 future_day 集合获取实际存在的合约
+        codes = db.future_day.distinct('code')
+        if codes:
+            return sorted(codes)
+
+        # 其次尝试从 future_list 集合获取
         data = list(db.future_list.find({}, {'code': 1, '_id': 0}))
         if data:
             return [item['code'] for item in data]
     except:
         pass
-    
+
     try:
         # 尝试从TDX获取
         from quanda.QAFetch.QATdx import QA_fetch_get_future_list
@@ -33,7 +40,7 @@ def get_future_list_safe():
             return data['code'].tolist()
     except:
         pass
-    
+
     # 返回常用期货代码作为fallback
     return [
         'IF2403', 'IF2404', 'IF2406', 'IF2409',  # 沪深300股指期货

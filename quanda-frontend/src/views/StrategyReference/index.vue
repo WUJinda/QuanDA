@@ -789,7 +789,7 @@ const confirmCapture = async () => {
       selectedBrushData.value.startTime,
       selectedBrushData.value.endTime,
       selectedBrushData.value.frequence
-    )
+    ) as any
 
     // 创建策略参考，自动添加"截取"标签
     const createData = {
@@ -800,9 +800,9 @@ const confirmCapture = async () => {
       frequence: selectedBrushData.value.frequence,
       startTime: selectedBrushData.value.startTime,
       endTime: selectedBrushData.value.endTime,
-      tags: ['截取', ...new Set(analyzedResult.pattern?.type ? [analyzedResult.pattern.type] : [])],
-      pattern: analyzedResult.pattern,
-      indicators: analyzedResult.indicators,
+      tags: ['截取', ...new Set((analyzedResult as any).pattern?.type ? [(analyzedResult as any).pattern.type] : [])],
+      pattern: (analyzedResult as any).pattern,
+      indicators: (analyzedResult as any).indicators,
       klineData: selectedBrushData.value.klineData
     }
 

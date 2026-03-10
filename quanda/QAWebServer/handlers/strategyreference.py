@@ -282,14 +282,41 @@ class StrategyReferenceAnalyzeHandler(QABaseHandler):
             end = data.get('end')
             frequence = data.get('frequence', 'day')
             
+            print(f'[StrategyReference] Analyzing segment: code={code}, start={start}, end={end}, frequence={frequence}')
+            
             # 获取K线数据
             from quanda.QAWebServer.handlers.datahandler import get_future_data_safe
             df = get_future_data_safe(code, start, end, frequence)
             
-            if df is None or df.empty:
+            if df is None:
+                print(f'[StrategyReference] No data found: df is None')
                 self.write({
                     'status': 404,
-                    'message': '未找到数据',
+                    'message': '未找到数据：数据库返回为空',
+                    'res': None
+                })
+                return
+            
+            if df.empty:
+                print(f'[StrategyReference] No data found: df is empty')
+                self.write({
+                    'status': 404,
+                    'message': '未找到数据：查询结果为空',
+                    'res': None
+                })
+                return
+            
+            print(f'[StrategyReference] Data loaded: {len(df)} rows')
+            print(f'[StrategyReference] Columns: {df.columns.tolist()}')
+            
+            # 检查必要的列
+            required_cols = ['close', 'volume']
+            missing_cols = [col for col in required_cols if col not in df.columns]
+            if missing_cols:
+                print(f'[StrategyReference] Missing columns: {missing_cols}')
+                self.write({
+                    'status': 500,
+                    'message': f'数据格式错误：缺少列 {missing_cols}',
                     'res': None
                 })
                 return
@@ -378,15 +405,19 @@ class StrategyReferenceAnalyzeHandler(QABaseHandler):
                 'klineData': QA_util_to_json_from_pandas(df)
             }
             
+            print(f'[StrategyReference] Analysis complete: pattern={result["pattern"]["type"]}, trend={result["pattern"]["trend"]}')
+            
             self.write({
                 'status': 200,
                 'res': result
             })
         except Exception as e:
             import traceback
+            error_msg = traceback.format_exc()
+            print(f'[StrategyReference] Analysis error: {error_msg}')
             self.write({
                 'status': 500,
                 'message': f'分析失败: {str(e)}',
-                'error': traceback.format_exc(),
+                'error': error_msg,
                 'res': None
             })

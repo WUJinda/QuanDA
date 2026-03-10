@@ -48,21 +48,27 @@ export const strategyReferenceApi = {
 
   // 分析K线区间
   analyzeSegment: async (code: string, start: string, end: string, frequence: string) => {
-    const response = await request.post('/strategy-reference/analyze', {
-      code,
-      start,
-      end,
-      frequence
-    })
-    
-    if (!response) {
-      throw new Error('分析接口返回数据为空，请检查后端服务')
+    try {
+      const response = await request.post<any>('/strategy-reference/analyze', {
+        code,
+        start,
+        end,
+        frequence
+      })
+      
+      if (!response) {
+        throw new Error('分析接口返回数据为空，请检查后端服务')
+      }
+      
+      if (!(response as any).pattern) {
+        throw new Error('分析结果缺少 pattern 数据，可能是数据格式错误')
+      }
+      
+      return response
+    } catch (error: any) {
+      // 重新抛出错误，保留原始错误信息
+      const errorMsg = error.message || '分析失败'
+      throw new Error(errorMsg)
     }
-    
-    if (!response.pattern) {
-      throw new Error('分析结果缺少 pattern 数据')
-    }
-    
-    return response
   }
 }
