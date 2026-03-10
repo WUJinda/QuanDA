@@ -558,7 +558,7 @@ const toggleBrushMode = (forceOff = false) => {
 }
 
 // 处理区域选择结束事件（图表内部已处理确认，这里只是记录日志）
-const handleBrushEnd = (data: any) => {
+const handleBrushEnd = () => {
   // 图表组件内部会显示确认/取消按钮，这里不需要额外处理
 }
 
@@ -612,7 +612,12 @@ const confirmSave = async () => {
       selectedBrushData.value.startTime,
       selectedBrushData.value.endTime,
       selectedBrushData.value.frequence
-    )
+    ) as any
+
+    // 检查分析结果
+    if (!analyzeRes) {
+      throw new Error('分析接口返回数据为空')
+    }
 
     // 创建策略参照
     await strategyReferenceApi.create({
@@ -623,8 +628,8 @@ const confirmSave = async () => {
       frequence: selectedBrushData.value.frequence,
       startTime: selectedBrushData.value.startTime,
       endTime: selectedBrushData.value.endTime,
-      pattern: analyzeRes.pattern,
-      indicators: analyzeRes.indicators,
+      pattern: analyzeRes.pattern || {},
+      indicators: analyzeRes.indicators || {},
       klineData: selectedBrushData.value.klineData,
       tags: captureForm.value.tags
     })
@@ -639,7 +644,8 @@ const confirmSave = async () => {
     }
   } catch (error) {
     console.error('保存失败:', error)
-    ElMessage.error('保存失败，请重试')
+    const errorMsg = error instanceof Error ? error.message : '保存失败，请重试'
+    ElMessage.error(errorMsg)
   } finally {
     creatingFromBrush.value = false
   }
