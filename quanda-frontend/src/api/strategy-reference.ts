@@ -55,19 +55,35 @@ export const strategyReferenceApi = {
         end,
         frequence
       })
-      
+
+      console.log('[analyzeSegment] 原始响应:', response)
+
       if (!response) {
         throw new Error('分析接口返回数据为空，请检查后端服务')
       }
-      
-      if (!(response as any).pattern) {
+
+      // 检查响应数据结构
+      if (typeof response !== 'object') {
+        console.error('[analyzeSegment] 响应不是对象:', typeof response)
+        throw new Error('分析结果格式错误：响应不是对象类型')
+      }
+
+      if (!('pattern' in response)) {
+        console.error('[analyzeSegment] 响应中缺少 pattern 字段，响应内容:', response)
         throw new Error('分析结果缺少 pattern 数据，可能是数据格式错误')
       }
-      
+
+      if (!response.pattern) {
+        console.error('[analyzeSegment] pattern 字段为空:', response.pattern)
+        throw new Error('pattern 数据为空')
+      }
+
+      console.log('[analyzeSegment] 分析成功:', response.pattern)
       return response
     } catch (error: any) {
       // 重新抛出错误，保留原始错误信息
       const errorMsg = error.message || '分析失败'
+      console.error('[analyzeSegment] 分析失败:', errorMsg)
       throw new Error(errorMsg)
     }
   }

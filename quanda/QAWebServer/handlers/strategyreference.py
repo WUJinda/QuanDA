@@ -120,13 +120,32 @@ class StrategyReferenceCreateHandler(QABaseHandler):
             client = MongoClient(mongo_ip)
             db = client.quanda
             collection = db.strategy_reference
-            
+
             collection.insert_one(reference)
-            
+
+            # 返回数据时移除可能包含的 ObjectId
+            # 只返回前端需要的数据，排除 _id 等内部字段
+            safe_reference = {
+                'id': reference['id'],
+                'name': reference.get('name', ''),
+                'description': reference.get('description', ''),
+                'image': reference.get('image', ''),
+                'code': reference.get('code', ''),
+                'frequence': reference.get('frequence', 'day'),
+                'startTime': reference.get('startTime', ''),
+                'endTime': reference.get('endTime', ''),
+                'pattern': reference.get('pattern', {}),
+                'indicators': reference.get('indicators', {}),
+                'klineData': reference.get('klineData', []),
+                'tags': reference.get('tags', []),
+                'createTime': reference.get('createTime', ''),
+                'updateTime': reference.get('updateTime', '')
+            }
+
             self.write({
                 'status': 200,
                 'message': '创建成功',
-                'res': reference
+                'res': safe_reference
             })
         except Exception as e:
             import traceback
@@ -156,11 +175,37 @@ class StrategyReferenceUpdateHandler(QABaseHandler):
             )
             
             if result.modified_count > 0:
-                self.write({
-                    'status': 200,
-                    'message': '更新成功',
-                    'res': data
-                })
+                # 获取更新后的数据
+                updated = collection.find_one({'id': ref_id})
+                if updated:
+                    # 移除 ObjectId 等内部字段
+                    safe_reference = {
+                        'id': updated.get('id', ''),
+                        'name': updated.get('name', ''),
+                        'description': updated.get('description', ''),
+                        'image': updated.get('image', ''),
+                        'code': updated.get('code', ''),
+                        'frequence': updated.get('frequence', 'day'),
+                        'startTime': updated.get('startTime', ''),
+                        'endTime': updated.get('endTime', ''),
+                        'pattern': updated.get('pattern', {}),
+                        'indicators': updated.get('indicators', {}),
+                        'klineData': updated.get('klineData', []),
+                        'tags': updated.get('tags', []),
+                        'createTime': updated.get('createTime', ''),
+                        'updateTime': updated.get('updateTime', '')
+                    }
+                    self.write({
+                        'status': 200,
+                        'message': '更新成功',
+                        'res': safe_reference
+                    })
+                else:
+                    self.write({
+                        'status': 500,
+                        'message': '更新后无法查询数据',
+                        'res': None
+                    })
             else:
                 self.write({
                     'status': 404,

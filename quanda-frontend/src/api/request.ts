@@ -31,12 +31,15 @@ service.interceptors.response.use(
       return Promise.reject(new Error(res.message || '请求失败'))
     }
 
-    // 再处理 QuanDA 后端返回的数据格式
-    // 如果有 res 字段，说明是成功的响应
-    if (res.res !== undefined) {
+    // 处理 QuanDA 后端返回的数据格式
+    // 后端返回格式：{ status: 200, res: {...} } 或 { status: 200, message: '...', res: null }
+    // 我们需要返回 res 字段的内容，但要处理 null 的情况
+    if (typeof res === 'object' && res !== null && 'res' in res) {
+      // 如果 res �在，返回它（即使是 null）
       return res.res
     }
 
+    // 如果没有 res 字段，直接返回整个响应
     return res
   },
   (error) => {

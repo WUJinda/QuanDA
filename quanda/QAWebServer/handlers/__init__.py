@@ -34,12 +34,12 @@ DATA_HANDLERS = [
 # 所有策略参考库 Handler
 STRATEGY_REFERENCE_HANDLERS = [
     (r"/strategy-reference/list", StrategyReferenceListHandler),
-    (r"/strategy-reference/([^/]+)", StrategyReferenceDetailHandler),
+    (r"/strategy-reference/analyze", StrategyReferenceAnalyzeHandler),
     (r"/strategy-reference/create", StrategyReferenceCreateHandler),
+    (r"/strategy-reference/upload", StrategyReferenceUploadHandler),
     (r"/strategy-reference/update/([^/]+)", StrategyReferenceUpdateHandler),
     (r"/strategy-reference/delete/([^/]+)", StrategyReferenceDeleteHandler),
-    (r"/strategy-reference/upload", StrategyReferenceUploadHandler),
-    (r"/strategy-reference/analyze", StrategyReferenceAnalyzeHandler),
+    (r"/strategy-reference/([^/]+)", StrategyReferenceDetailHandler),
 ]
 
 # 所有 API 路由
