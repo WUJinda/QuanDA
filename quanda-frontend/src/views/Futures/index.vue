@@ -284,6 +284,14 @@
           <h4>截取预览</h4>
           <img :src="selectedBrushData.imageData" alt="截取预览" class="preview-image" />
         </div>
+        <div v-else class="preview-section">
+          <h4>截取预览</h4>
+          <div class="no-preview">
+            <el-icon :size="48"><Picture /></el-icon>
+            <p>图片加载中或生成失败</p>
+            <p class="debug-info">imageData: {{ selectedBrushData.imageData ? '存在但为空' : '不存在' }}</p>
+          </div>
+        </div>
         <el-form :model="captureForm" label-width="80px" style="margin-top: 20px;">
           <el-form-item label="名称" required>
             <el-input v-model="captureForm.name" placeholder="请输入名称" />
@@ -352,7 +360,8 @@ import {
   DataLine,
   Odometer,
   DataAnalysis,
-  Scissor
+  Scissor,
+  Picture
 } from '@element-plus/icons-vue'
 import FutureSelector from '@/components/Market/FutureSelector.vue'
 import DateRangePicker from '@/components/Common/DateRangePicker.vue'
@@ -557,13 +566,25 @@ const handleBrushEnd = (data: any) => {
 
 // 处理区域选择事件（用户确认后触发）
 const handleBrushSelected = (data: any) => {
-  console.log('[Futures] handleBrushSelected called, imageData length:', data.imageData?.length)
+  console.log('[Futures] handleBrushSelected called, data:', {
+    hasImageData: !!data.imageData,
+    imageDataLength: data.imageData?.length,
+    imageDataPrefix: data.imageData?.substring(0, 50),
+    startTime: data.startTime,
+    endTime: data.endTime,
+    klineDataLength: data.klineData?.length
+  })
   
   selectedBrushData.value = {
     ...data,
     code: currentFuture.value,
     frequence: frequence.value
   }
+
+  console.log('[Futures] selectedBrushData set:', {
+    hasImageData: !!selectedBrushData.value.imageData,
+    imageDataLength: selectedBrushData.value.imageData?.length
+  })
 
   // 自动填充表单名称
   const trendText = data.klineData.length > 0
@@ -1362,6 +1383,34 @@ onMounted(async () => {
         border-radius: radius(lg);
         border: 2px solid color(border-light);
         box-shadow: shadow(sm);
+      }
+
+      .no-preview {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: spacing(xxl);
+        background: color(bg-secondary);
+        border-radius: radius(lg);
+        border: 2px dashed color(border-dark);
+        color: color(text-tertiary);
+
+        .el-icon {
+          margin-bottom: spacing(md);
+          opacity: 0.5;
+        }
+
+        p {
+          margin: spacing(xs) 0;
+          font-size: font-size(sm);
+        }
+
+        .debug-info {
+          font-size: font-size(xs);
+          color: color(text-quaternary);
+          font-family: $font-family-code;
+        }
       }
     }
 

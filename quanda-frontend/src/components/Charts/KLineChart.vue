@@ -674,18 +674,30 @@ const captureSelectedArea = async (params: any, startIndex: number, endIndex: nu
     // 获取选中区域的坐标信息
     if (params.areas && params.areas.length > 0) {
       const area = params.areas[0]
-      const coordRange = area.coordRange
+      let coordRange = area.coordRange
 
       if (coordRange && coordRange.length >= 2) {
-        // 将数据索引转换为像素坐标
-        const xStart = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[0])
-        const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordRange[1])
+        // 处理 coordRange 可能是 [[x1, x2]] 或 [x1, x2] 格式
+        let coordStart: number, coordEnd: number
 
-        console.log('[KLineChart] Pixel coordinates:', { xStart, xEnd })
+        if (Array.isArray(coordRange[0])) {
+          // coordRange 是 [[x1, x2]] 格式
+          coordStart = (coordRange[0] as any[])[0]
+          coordEnd = (coordRange[0] as any[])[1]
+        } else {
+          // coordRange 是 [x1, x2] 格式
+          coordStart = (coordRange as any[])[0]
+          coordEnd = (coordRange as any[])[1]
+        }
+
+        // 将数据索引转换为像素坐标
+        const xStart = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordStart)
+        const xEnd = chartInstance.convertToPixel({ xAxisIndex: 0 }, coordEnd)
+
+        console.log('[KLineChart] Pixel coordinates:', { xStart, xEnd, coordStart, coordEnd })
 
         if (typeof xStart === 'number' && typeof xEnd === 'number') {
           // 获取图表容器的尺寸信息
-          const containerWidth = chartRef.value.clientWidth
           const containerHeight = chartRef.value.clientHeight
 
           // 使用 canvas 进行精确裁剪
@@ -719,6 +731,7 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
         const ctx = canvas.getContext('2d')
 
         if (!ctx) {
+          console.error('[KLineChart] Failed to get canvas context')
           resolve(dataURL)
           return
         }
@@ -733,6 +746,27 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
         const height = Math.floor(containerHeight * 0.7 * pixelRatio)
         const top = Math.floor(containerHeight * 0.12 * pixelRatio)
 
+        console.log('[KLineChart] Crop parameters:', {
+          pixelRatio,
+          xStart,
+          xEnd,
+          left,
+          right,
+          width,
+          height,
+          top,
+          containerHeight,
+          imgWidth: img.width,
+          imgHeight: img.height
+        })
+
+        // 验证裁剪参数
+        if (width <= 0 || height <= 0 || left < 0 || top < 0 || left >= img.width || top >= img.height) {
+          console.error('[KLineChart] Invalid crop parameters, returning full image')
+          resolve(dataURL)
+          return
+        }
+
         // 设置canvas大小为裁剪区域大小
         canvas.width = width
         canvas.height = height
@@ -744,14 +778,17 @@ const cropImageData = (dataURL: string, xStart: number, xEnd: number, containerH
           0, 0, width, height         // 目标区域
         )
 
-        resolve(canvas.toDataURL('image/png'))
+        const croppedDataURL = canvas.toDataURL('image/png')
+        console.log('[KLineChart] Crop successful, new dataURL length:', croppedDataURL.length)
+        resolve(croppedDataURL)
       } catch (error) {
-        console.error('Crop error:', error)
+        console.error('[KLineChart] Crop error:', error)
         resolve(dataURL)
       }
     }
 
-    img.onerror = () => {
+    img.onerror = (error) => {
+      console.error('[KLineChart] Image load error:', error)
       resolve(dataURL)
     }
 
