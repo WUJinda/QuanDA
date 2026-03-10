@@ -603,7 +603,7 @@ const confirmSave = async () => {
       const file = new File([blob], 'capture.png', { type: 'image/png' })
 
       const uploadRes = await strategyReferenceApi.uploadImage(file)
-      imageUrl = uploadRes.url
+      imageUrl = uploadRes.data.url
     }
 
     // 调用分析接口

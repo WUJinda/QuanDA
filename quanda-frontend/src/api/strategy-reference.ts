@@ -7,31 +7,31 @@ export const strategyReferenceApi = {
     const response = await request.get<StrategyReference[]>('/strategy-reference/list', {
       params: filter
     })
-    return response?.data || []
+    return response || []
   },
 
   // 获取策略参考详情
   getDetail: async (id: string) => {
     const response = await request.get<StrategyReference>(`/strategy-reference/${id}`)
-    return response?.data || null
+    return response || null
   },
 
   // 创建策略参考
   create: async (data: Partial<StrategyReference>) => {
     const response = await request.post('/strategy-reference/create', data)
-    return response?.data || null
+    return response || null
   },
 
   // 更新策略参考
   update: async (id: string, data: Partial<StrategyReference>) => {
     const response = await request.put(`/strategy-reference/update/${id}`, data)
-    return response?.data || null
+    return response || null
   },
 
   // 删除策略参考
   delete: async (id: string) => {
     const response = await request.delete(`/strategy-reference/delete/${id}`)
-    return response?.data || null
+    return response || null
   },
 
   // 上传截图（使用原生方式，不经过拦截器）
@@ -43,7 +43,7 @@ export const strategyReferenceApi = {
         'Content-Type': 'multipart/form-data'
       }
     })
-    return response?.data || { url: '' }
+    return response || { url: '' }
   },
 
   // 分析K线区间

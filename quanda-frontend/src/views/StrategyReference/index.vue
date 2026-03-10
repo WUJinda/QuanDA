@@ -24,34 +24,52 @@
       </div>
     </div>
 
-    <div class="reference-grid">
+    <div class="reference-list">
       <div
         v-for="item in referenceList"
         :key="item.id"
         class="reference-card"
+        @click="viewDetail(item)"
       >
-        <div class="card-image" @click="viewDetail(item)">
+        <div class="card-image">
           <img :src="item.image || '/placeholder.png'" :alt="item.name" />
         </div>
-        <div class="card-content" @click="viewDetail(item)">
-          <h4>{{ item.name }}</h4>
-          <p class="description">{{ item.description }}</p>
-          <div class="meta">
-            <el-tag size="small" :type="getTrendType(item.pattern.trend)">
-              {{ getTrendLabel(item.pattern.trend) }}
-            </el-tag>
-            <el-tag size="small">{{ item.frequence }}</el-tag>
-            <span class="time">{{ formatTime(item.createTime) }}</span>
+        <div class="card-content">
+          <div class="content-header">
+            <h4>{{ item.name }}</h4>
+            <div class="meta-inline">
+              <el-tag size="small" :type="getTrendType(item.pattern.trend)">
+                {{ getTrendLabel(item.pattern.trend) }}
+              </el-tag>
+              <el-tag size="small">{{ item.frequence }}</el-tag>
+              <span class="code">{{ item.code }}</span>
+            </div>
           </div>
-          <div class="tags">
-            <el-tag
-              v-for="tag in item.tags"
-              :key="tag"
-              size="small"
-              type="info"
-            >
-              {{ tag }}
-            </el-tag>
+          <p class="description">{{ item.description }}</p>
+          <div class="content-footer">
+            <div class="tags">
+              <el-tag
+                v-for="tag in item.tags"
+                :key="tag"
+                size="small"
+                type="info"
+              >
+                {{ tag }}
+              </el-tag>
+            </div>
+            <div class="indicators">
+              <span class="indicator">
+                <span class="label">涨跌幅:</span>
+                <span class="value" :class="item.indicators.priceChange >= 0 ? 'up' : 'down'">
+                  {{ item.indicators.priceChange.toFixed(2) }}%
+                </span>
+              </span>
+              <span class="indicator">
+                <span class="label">波动率:</span>
+                <span class="value">{{ item.indicators.volatility.toFixed(2) }}%</span>
+              </span>
+              <span class="time">{{ formatTime(item.createTime) }}</span>
+            </div>
           </div>
         </div>
         <div class="card-actions">
@@ -467,7 +485,8 @@ const defaultTimeRange = [
 
 const fetchList = async () => {
   try {
-    referenceList.value = await strategyReferenceApi.getList(filter.value)
+    const data = await strategyReferenceApi.getList(filter.value)
+    referenceList.value = data as unknown as StrategyReference[]
   } catch (error) {
     ElMessage.error('获取列表失败')
   }
@@ -664,7 +683,7 @@ const viewDetail = async (item: StrategyReference) => {
     showDetailDialog.value = true
 
     // 获取详情数据
-    const detail = await strategyReferenceApi.getDetail(item.id)
+    const detail = await strategyReferenceApi.getDetail(item.id) as unknown as StrategyReference
     currentDetail.value = detail
 
     // 转换K线数据格式
@@ -779,7 +798,7 @@ const confirmCapture = async () => {
       const file = new File([blob], 'brush-capture.png', { type: 'image/png' })
 
       // 上传图片
-      const uploadResult = await strategyReferenceApi.uploadImage(file)
+      const uploadResult = await strategyReferenceApi.uploadImage(file) as unknown as { url: string }
       imageUrl = uploadResult.url || ''
     }
 
@@ -970,11 +989,11 @@ onMounted(() => {
     }
   }
 
-  /* 卡片网格布局 - 响应式 */
-  .reference-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: var(--spacing-xl);
+  /* 卡片列表布局 - 长条形 */
+  .reference-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
     animation: fadeIn 0.6s ease;
   }
 
@@ -989,17 +1008,20 @@ onMounted(() => {
     }
   }
 
-  /* 卡片样式 - 现代科技感设计 */
+  /* 卡片样式 - 长条形现代设计 */
   .reference-card {
+    display: flex;
+    align-items: stretch;
     background: white;
-    border-radius: var(--radius-xl);
+    border-radius: var(--radius-lg);
     overflow: hidden;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px solid var(--color-border-light);
+    border: 1.5px solid var(--color-border-light);
     box-shadow: var(--shadow-sm);
     position: relative;
     animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    height: 140px;
 
     /* 顶部装饰条 - 双色渐变 */
     &::before {
@@ -1008,7 +1030,7 @@ onMounted(() => {
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
+      height: 3px;
       background: linear-gradient(90deg, var(--color-tech-blue) 0%, var(--color-vibrant-orange) 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -1017,8 +1039,8 @@ onMounted(() => {
 
     /* 悬停效果 - 卡片上浮 + 阴影加深 + 边框高亮 */
     &:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: var(--shadow-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
       border-color: var(--color-tech-blue-lighter);
 
       &::before {
@@ -1027,11 +1049,11 @@ onMounted(() => {
 
       .card-image {
         &::after {
-          opacity: 0.6;
+          opacity: 0.4;
         }
 
         img {
-          transform: scale(1.08);
+          transform: scale(1.05);
         }
       }
 
@@ -1050,13 +1072,14 @@ onMounted(() => {
       }
     }
 
-    /* 图片容器 - 渐变背景 + 遮罩效果 */
+    /* 图片容器 - 紧凑设计 */
     .card-image {
-      width: 100%;
-      height: 220px;
+      width: 160px;
+      height: 100%;
       overflow: hidden;
       background: linear-gradient(135deg, rgba(91, 143, 249, 0.08) 0%, rgba(255, 140, 66, 0.05) 100%);
       position: relative;
+      flex-shrink: 0;
 
       /* 渐变遮罩 */
       &::after {
@@ -1066,21 +1089,9 @@ onMounted(() => {
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.05) 100%);
+        background: linear-gradient(90deg, transparent 50%, rgba(0, 0, 0, 0.03) 100%);
         pointer-events: none;
         transition: opacity 0.3s ease;
-      }
-
-      /* 图标装饰 */
-      &::before {
-        content: '📊';
-        position: absolute;
-        top: var(--spacing-sm);
-        right: var(--spacing-sm);
-        font-size: 24px;
-        z-index: 2;
-        opacity: 0.7;
-        transition: all 0.3s ease;
       }
 
       img {
@@ -1091,137 +1102,194 @@ onMounted(() => {
       }
     }
 
-    /* 卡片内容 - 层次分明 */
+    /* 卡片内容 - 层次分明的长条形布局 */
     .card-content {
-      padding: var(--spacing-lg) var(--spacing-xl);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-md) var(--spacing-lg);
+      min-width: 0;
+      justify-content: space-between;
 
-      h4 {
-        margin: 0 0 var(--spacing-sm) 0;
-        font-size: 19px;
-        font-weight: 700;
-        color: var(--color-text);
-        line-height: 1.4;
-        letter-spacing: -0.3px;
-        transition: all 0.3s ease;
+      .content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-xs);
+
+        h4 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--color-text);
+          line-height: 1.3;
+          letter-spacing: -0.2px;
+          transition: all 0.3s ease;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          flex-shrink: 1;
+        }
+
+        .meta-inline {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-xs);
+          flex-shrink: 0;
+
+          .code {
+            padding: 3px 9px;
+            background: linear-gradient(135deg, rgba(91, 143, 249, 0.1) 0%, rgba(255, 140, 66, 0.08) 100%);
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-family: var(--font-family-code, monospace);
+            border: 1px solid rgba(91, 143, 249, 0.1);
+          }
+
+          :deep(.el-tag) {
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            padding: 2px 9px;
+            height: 22px;
+            line-height: 18px;
+            font-size: 11px;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+            &.el-tag--danger {
+              background: linear-gradient(135deg, #FF4D4F 0%, #FF7875 100%);
+              color: white;
+            }
+
+            &.el-tag--success {
+              background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
+              color: white;
+            }
+
+            &.el-tag--warning {
+              background: linear-gradient(135deg, #FAAD14 0%, #FFC53D 100%);
+              color: white;
+            }
+          }
+        }
       }
 
       .description {
-      .description {
         color: var(--color-text-secondary);
-        font-size: 14px;
-        line-height: 1.7;
-        margin: 0 0 var(--spacing-md) 0;
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
+        -webkit-line-clamp: 1;
+        line-clamp: 1;
         -webkit-box-orient: vertical;
-        min-height: 48px;
-        padding: var(--spacing-sm);
-        background: var(--color-bg-light);
-        border-radius: var(--radius-sm);
-        border-left: 3px solid var(--color-tech-blue);
       }
-      /* 元数据区域 - 图标化设计 */
-      .meta {
+
+      .content-footer {
         display: flex;
         align-items: center;
-        gap: var(--spacing-sm);
-        margin-bottom: var(--spacing-md);
-        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xs);
 
-        /* 趋势标签样式 - 渐变背景 */
-        :deep(.el-tag) {
-          border-radius: var(--radius-sm);
-          font-weight: 600;
-          padding: 4px 12px;
-          height: 26px;
-          line-height: 18px;
-          font-size: 12px;
-          border: none;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-          transition: all 0.3s ease;
+        .tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--spacing-xs);
+          flex: 1;
+          min-width: 0;
 
-          &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-          }
-
-          &.el-tag--danger {
-            background: linear-gradient(135deg, #FF4D4F 0%, #FF7875 100%);
-            color: white;
-          }
-
-          &.el-tag--success {
-            background: linear-gradient(135deg, #52C41A 0%, #73D13D 100%);
-            color: white;
-          }
-
-          &.el-tag--warning {
-            background: linear-gradient(135deg, #FAAD14 0%, #FFC53D 100%);
-            color: white;
+          :deep(.el-tag--small) {
+            border-radius: var(--radius-sm);
+            font-size: 10px;
+            padding: 2px 7px;
+            background: linear-gradient(135deg, rgba(91, 143, 249, 0.08) 0%, rgba(255, 140, 66, 0.05) 100%);
+            color: var(--color-text-secondary);
+            border: 1px solid var(--color-border);
+            height: 20px;
+            line-height: 16px;
           }
         }
 
-        .time {
-          color: var(--color-text-tertiary);
-          font-size: 12px;
-          margin-left: auto;
+        .indicators {
           display: flex;
           align-items: center;
-          gap: 4px;
+          gap: var(--spacing-md);
+          flex-shrink: 0;
 
-          &::before {
-            content: '🕐';
-            font-size: 14px;
+          .indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+
+            .label {
+              color: var(--color-text-tertiary);
+              font-weight: 500;
+            }
+
+            .value {
+              font-weight: 700;
+              color: var(--color-text-secondary);
+
+              &.up {
+                color: var(--color-danger);
+              }
+
+              &.down {
+                color: var(--color-success);
+              }
+            }
           }
-        }
-      }
 
-      /* 标签区域 - 圆角设计 */
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--spacing-xs);
+          .time {
+            color: var(--color-text-tertiary);
+            font-size: 11px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 3px;
 
-        :deep(.el-tag--small) {
-          border-radius: var(--radius-md);
-          font-size: 12px;
-          padding: 3px 10px;
-          background: linear-gradient(135deg, rgba(91, 143, 249, 0.08) 0%, rgba(255, 140, 66, 0.05) 100%);
-          color: var(--color-text-secondary);
-          border: 1px solid var(--color-border);
+            &::before {
+              content: '🕐';
+              font-size: 12px;
+            }
+          }
         }
       }
     }
-
-    /* 卡片操作按钮区域 - 双色按钮 */
+    /* 卡片操作按钮区域 - 优化的双色按钮 */
     .card-actions {
       display: flex;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-md) var(--spacing-xl);
-      border-top: 2px solid var(--color-border-light);
-      background: linear-gradient(180deg, white 0%, var(--color-bg-light) 100%);
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: 0 var(--spacing-lg);
+      flex-shrink: 0;
 
       .action-btn {
-        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
-        padding: 10px 16px;
+        gap: 5px;
+        padding: 7px 16px;
         border: none;
         border-radius: var(--radius-md);
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        white-space: nowrap;
+        min-width: 75px;
 
         .el-icon {
-          font-size: 16px;
+          font-size: 14px;
           transition: transform 0.3s ease;
         }
 
@@ -1233,8 +1301,9 @@ onMounted(() => {
           left: -100%;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
           transition: left 0.5s ease;
+          pointer-events: none;
         }
 
         &:hover::before {
@@ -1244,13 +1313,15 @@ onMounted(() => {
         &.detail-btn {
           background: linear-gradient(135deg, rgba(91, 143, 249, 0.12) 0%, rgba(91, 143, 249, 0.06) 100%);
           color: var(--color-tech-blue);
-          border: 2px solid rgba(91, 143, 249, 0.2);
+          border: 1px solid rgba(91, 143, 249, 0.2);
+          box-shadow: 0 2px 6px rgba(91, 143, 249, 0.1);
 
           &:hover {
             background: linear-gradient(135deg, var(--color-tech-blue) 0%, var(--color-tech-blue-light) 100%);
             color: white;
+            border-color: var(--color-tech-blue);
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(91, 143, 249, 0.35);
+            box-shadow: 0 6px 16px rgba(91, 143, 249, 0.25);
 
             .el-icon {
               transform: scale(1.1);
@@ -1259,19 +1330,22 @@ onMounted(() => {
 
           &:active {
             transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(91, 143, 249, 0.15);
           }
         }
 
         &.edit-btn {
           background: linear-gradient(135deg, rgba(255, 140, 66, 0.12) 0%, rgba(255, 140, 66, 0.06) 100%);
           color: var(--color-vibrant-orange);
-          border: 2px solid rgba(255, 140, 66, 0.2);
+          border: 1px solid rgba(255, 140, 66, 0.2);
+          box-shadow: 0 2px 6px rgba(255, 140, 66, 0.1);
 
           &:hover {
             background: linear-gradient(135deg, var(--color-vibrant-orange) 0%, var(--color-vibrant-orange-light) 100%);
             color: white;
+            border-color: var(--color-vibrant-orange);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-orange);
+            box-shadow: 0 6px 16px rgba(255, 140, 66, 0.25);
 
             .el-icon {
               transform: scale(1.1);
@@ -1280,6 +1354,7 @@ onMounted(() => {
 
           &:active {
             transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(255, 140, 66, 0.15);
           }
         }
       }
@@ -1709,6 +1784,5 @@ onMounted(() => {
       color: white;
     }
   }
-}
 }
 </style>
