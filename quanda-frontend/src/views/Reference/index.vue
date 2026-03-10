@@ -1,5 +1,5 @@
 <template>
-  <div class="strategy-reference-page">
+  <div class="reference-page">
     <div class="toolbar">
       <div class="toolbar-left">
         <el-button type="primary" @click="showCreateDialog = true">
@@ -843,8 +843,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-/* 现代科技感 + 活力橙双主色设计系统 */
-.strategy-reference-page {
+/* 策略参考库页面 */
+.reference-page {
   /* 双主色设计系统 - 科技蓝 + 活力橙 */
   --color-tech-blue: #5B8FF9;
   --color-tech-blue-light: #7AA5FF;

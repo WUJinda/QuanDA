@@ -57,8 +57,8 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'strategy-reference',
-        name: 'StrategyReference',
-        component: () => import('@/views/StrategyReference/index.vue'),
+        name: 'Reference',
+        component: () => import('@/views/Reference/index.vue'),
         meta: { title: '策略参考库', icon: 'Collection' }
       }
     ]
