@@ -297,19 +297,12 @@
     <!-- 详情对话框 -->
     <el-dialog
       v-model="showDetailDialog"
-      width="95%"
-      top="5vh"
+      width="75%"
+      top="8vh"
     >
       <template #header>
         <div class="detail-header">
           <span class="detail-title">策略参考详情</span>
-          <el-button
-            :type="isBrushMode ? 'primary' : 'default'"
-            :icon="Scissor"
-            @click="toggleBrushMode"
-          >
-            {{ isBrushMode ? '取消截取' : '截取区域' }}
-          </el-button>
         </div>
       </template>
       <div v-if="currentDetail" class="detail-content">
@@ -352,67 +345,27 @@
         <div class="kline-section" style="margin-top: 20px;">
           <div class="kline-header">
             <h4>K线数据</h4>
-            <el-tag v-if="isBrushMode" type="primary" size="small">
-              请在K线图上拖拽选择区域
-            </el-tag>
           </div>
           <KLineChart
             v-if="detailKlineData.length > 0"
             ref="klineChartRef"
             :data="detailKlineData"
-            :enable-brush="isBrushMode"
             height="400px"
-            @brush-selected="handleBrushSelected"
           />
         </div>
       </div>
     </el-dialog>
 
-    <!-- 截取区域确认对话框 -->
-    <el-dialog
-      v-model="showConfirmDialog"
-      title="确认截取区域"
-      width="600px"
-      :close-on-click-modal="false"
-    >
-      <div v-if="selectedBrushData" class="brush-confirm-content">
-        <div v-if="selectedBrushData.imageData" class="preview-section">
-          <h4>预览图</h4>
-          <img :src="selectedBrushData.imageData" alt="截取预览" class="preview-image" />
-        </div>
-        <el-descriptions :column="1" border class="info-section">
-          <el-descriptions-item label="合约代码">
-            {{ selectedBrushData.code }}
-          </el-descriptions-item>
-          <el-descriptions-item label="K线周期">
-            {{ selectedBrushData.frequence }}
-          </el-descriptions-item>
-          <el-descriptions-item label="时间区间">
-            {{ selectedBrushData.startTime }} ~ {{ selectedBrushData.endTime }}
-          </el-descriptions-item>
-          <el-descriptions-item label="K线数量">
-            {{ selectedBrushData.klineData.length }} 根
-          </el-descriptions-item>
-        </el-descriptions>
-      </div>
-      <template #footer>
-        <el-button @click="showConfirmDialog = false">取消</el-button>
-        <el-button @click="toggleBrushMode(true)">重新选择</el-button>
-        <el-button type="primary" @click="confirmCapture" :loading="creatingFromBrush">
-          确认截取
-        </el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, View, Edit, Scissor } from '@element-plus/icons-vue'
+import { Plus, View, Edit } from '@element-plus/icons-vue'
 import { strategyReferenceApi } from '@/api/strategy-reference'
 import KLineChart from '@/components/Charts/KLineChart.vue'
-import type { StrategyReference, BrushSelectedData } from '@/types/strategy-reference'
+import type { StrategyReference } from '@/types/strategy-reference'
 import type { KLineData } from '@/types/market'
 
 const showCreateDialog = ref(false)
@@ -470,12 +423,6 @@ const editForm = ref<{
 })
 
 const detailKlineData = ref<KLineData[]>([])
-
-// 区域截取相关状态
-const isBrushMode = ref(false)  // 是否在截取模式
-const selectedBrushData = ref<BrushSelectedData | null>(null)  // 选中的数据
-const showConfirmDialog = ref(false)  // 确认对话框显示
-const creatingFromBrush = ref(false)  // 从截取创建中
 
 // 默认时间范围：最近两年
 const defaultTimeRange = [
@@ -736,105 +683,6 @@ const getBollPositionLabel = (position: string) => {
 
 const formatTime = (time: string) => {
   return new Date(time).toLocaleDateString()
-}
-
-// 切换截取模式
-const toggleBrushMode = (keepConfirm = false) => {
-  isBrushMode.value = !isBrushMode.value
-  if (!isBrushMode.value && !keepConfirm) {
-    // 取消截取模式时，清除选择并关闭确认对话框
-    showConfirmDialog.value = false
-    selectedBrushData.value = null
-  }
-}
-
-// 处理K线图区域选择
-const handleBrushSelected = (data: {
-  startTime: string
-  endTime: string
-  startIndex: number
-  endIndex: number
-  klineData: KLineData[]
-  imageData?: string
-}) => {
-  if (data.klineData.length < 2) {
-    ElMessage.warning('请选择至少包含2根K线的区域')
-    return
-  }
-
-  // 使用当前详情的合约代码和周期
-  selectedBrushData.value = {
-    ...data,
-    code: currentDetail.value?.code || '',
-    frequence: currentDetail.value?.frequence || 'day',
-    klineData: data.klineData.map(k => ({
-      time: k.time,
-      open: k.open,
-      close: k.close,
-      high: k.high,
-      low: k.low,
-      volume: k.volume
-    }))
-  }
-
-  // 退出截取模式，显示确认对话框
-  isBrushMode.value = false
-  showConfirmDialog.value = true
-}
-
-// 确认截取并创建策略参考
-const confirmCapture = async () => {
-  if (!selectedBrushData.value) return
-
-  creatingFromBrush.value = true
-  try {
-    let imageUrl = ''
-
-    // 如果有截图，先上传
-    if (selectedBrushData.value.imageData) {
-      // 将 base64 转换为 Blob
-      const response = await fetch(selectedBrushData.value.imageData)
-      const blob = await response.blob()
-      const file = new File([blob], 'brush-capture.png', { type: 'image/png' })
-
-      // 上传图片
-      const uploadResult = await strategyReferenceApi.uploadImage(file) as unknown as { url: string }
-      imageUrl = uploadResult.url || ''
-    }
-
-    // 分析区间数据
-    const analyzedResult = await strategyReferenceApi.analyzeSegment(
-      selectedBrushData.value.code,
-      selectedBrushData.value.startTime,
-      selectedBrushData.value.endTime,
-      selectedBrushData.value.frequence
-    ) as any
-
-    // 创建策略参考，自动添加"截取"标签
-    const createData = {
-      name: `${selectedBrushData.value.code} ${selectedBrushData.value.startTime} 截取`,
-      description: `从K线图截取的区间：${selectedBrushData.value.startTime} 至 ${selectedBrushData.value.endTime}`,
-      image: imageUrl,
-      code: selectedBrushData.value.code,
-      frequence: selectedBrushData.value.frequence,
-      startTime: selectedBrushData.value.startTime,
-      endTime: selectedBrushData.value.endTime,
-      tags: ['截取', ...new Set((analyzedResult as any).pattern?.type ? [(analyzedResult as any).pattern.type] : [])],
-      pattern: (analyzedResult as any).pattern,
-      indicators: (analyzedResult as any).indicators,
-      klineData: selectedBrushData.value.klineData
-    }
-
-    await strategyReferenceApi.create(createData)
-    ElMessage.success('截取成功，已创建新的策略参考')
-    showConfirmDialog.value = false
-    showDetailDialog.value = false
-    fetchList()
-  } catch (error) {
-    ElMessage.error('创建失败：' + (error as Error).message)
-  } finally {
-    creatingFromBrush.value = false
-  }
 }
 
 onMounted(() => {
