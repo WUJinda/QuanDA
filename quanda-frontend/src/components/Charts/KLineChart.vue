@@ -170,6 +170,10 @@ const updateChart = () => {
       data: legendData,
       top: 0
     },
+    // 完全禁用 toolbox
+    toolbox: {
+      show: false
+    },
     grid: [
       {
         left: '5%',
@@ -242,13 +246,13 @@ const updateChart = () => {
         height: 15
       }
     ],
-    // 只在启用截取模式时才配置 brush（仅横向选择）
+    // 只在启用截取模式时才配置 brush（仅横向选择，无工具栏）
     ...(props.enableBrush ? {
       brush: {
         id: 'kline-brush',
-        toolbox: ['lineX'],
+        toolbox: [],  // 不显示工具栏
         xAxisIndex: [0],
-        brushType: 'lineX',
+        brushType: 'lineX',  // 固定为横向选择
         brushMode: 'single',
         transformable: false,
         removeOnClick: false,
@@ -259,7 +263,13 @@ const updateChart = () => {
           borderColor: '#5B8FF9'
         },
         throttleType: 'debounce',
-        throttleDelay: 100
+        throttleDelay: 100,
+        inBrush: {
+          opacity: 1
+        },
+        outOfBrush: {
+          opacity: 0.3
+        }
       }
     } : {}),
     series: [
@@ -343,11 +353,7 @@ const updateChart = () => {
   }
 
   // 根据是否有 brush 配置来决定是否使用 notMerge
-  if (props.enableBrush) {
-    chartInstance.setOption(option, true)
-  } else {
-    chartInstance.setOption(option, true)
-  }
+  chartInstance.setOption(option, true)
 
   // 确保 brush 事件监听器正确设置
   if (props.enableBrush) {
@@ -355,6 +361,20 @@ const updateChart = () => {
     chartInstance.off('brushEnd')
     chartInstance.on('brushEnd', (params: any) => {
       handleBrushEnd(params)
+    })
+    
+    // 自动激活横向选择模式
+    nextTick(() => {
+      if (chartInstance) {
+        chartInstance.dispatchAction({
+          type: 'takeGlobalCursor',
+          key: 'brush',
+          brushOption: {
+            brushType: 'lineX',
+            brushMode: 'single'
+          }
+        })
+      }
     })
   }
 }
@@ -373,7 +393,7 @@ watch(() => props.showBoll, () => {
 })
 
 // 监听enableBrush变化，实时更新图表
-watch(() => props.enableBrush, (enabled) => {
+watch(() => props.enableBrush, async (enabled) => {
   if (chartInstance) {
     updateChart()
     // 在图表更新后设置事件监听
@@ -382,8 +402,24 @@ watch(() => props.enableBrush, (enabled) => {
       chartInstance.on('brushEnd', (params: any) => {
         handleBrushEnd(params)
       })
+      
+      // 自动激活横向选择模式
+      await nextTick()
+      chartInstance.dispatchAction({
+        type: 'takeGlobalCursor',
+        key: 'brush',
+        brushOption: {
+          brushType: 'lineX',
+          brushMode: 'single'
+        }
+      })
     } else {
       chartInstance.off('brushEnd')
+      // 退出截取模式时，清除brush状态
+      chartInstance.dispatchAction({
+        type: 'brush',
+        areas: []
+      })
     }
   }
 })
@@ -711,6 +747,20 @@ onUnmounted(() => {
   cleanup()
 })
 </script>
+
+<style lang="scss">
+// 全局隐藏 ECharts brush 工具栏（不使用 scoped）
+.kline-chart-wrapper {
+  .echarts-brush-btn,
+  div[class*="echarts"][class*="brush"],
+  div[_echarts_instance_] > div > div[style*="position: absolute"][style*="cursor"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+</style>
 
 <style lang="scss" scoped>
 .kline-chart-wrapper {
