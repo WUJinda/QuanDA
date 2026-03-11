@@ -242,35 +242,16 @@ const updateChart = () => {
         height: 15
       }
     ],
-    // 只在启用截取模式时才配置 toolbox
+    // 只在启用截取模式时才配置 brush（仅横向选择）
     ...(props.enableBrush ? {
-      toolbox: {
-        show: true,
-        feature: {
-          brush: {
-            type: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-            title: {
-              rect: '矩形选择',
-              polygon: '多边形选择',
-              lineX: '横向选择',
-              lineY: '纵向选择',
-              keep: '保持选择',
-              clear: '清除选择'
-            }
-          }
-        },
-        right: '5%',
-        top: '1%'
-      },
       brush: {
         id: 'kline-brush',
-        toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
+        toolbox: ['lineX'],
         xAxisIndex: [0],
-        yAxisIndex: [0],
-        brushType: 'auto',
+        brushType: 'lineX',
         brushMode: 'single',
-        transformable: true,
-        removeOnClick: true,
+        transformable: false,
+        removeOnClick: false,
         z: 100,
         brushStyle: {
           borderWidth: 2,
