@@ -23,12 +23,17 @@ interface Props {
   height?: string
   showBoll?: boolean
   enableBrush?: boolean
+  highlightRange?: {
+    startTime: string
+    endTime: string
+  }
 }
 
 const props = withDefaults(defineProps<Props>(), {
   height: '400px',
   showBoll: false,  // 默认不显示BOLL，提升加载速度
-  enableBrush: false
+  enableBrush: false,
+  highlightRange: undefined
 })
 
 const emit = defineEmits<{
@@ -69,9 +74,9 @@ const calculateBOLL = (data: number[], period = 20, multiplier = 2) => {
   if (data.length < period) {
     // 数据不足，全部返回null
     return {
-      upper: new Array(data.length).fill(null),
-      middle: new Array(data.length).fill(null),
-      lower: new Array(data.length).fill(null)
+      upper: Array.from({ length: data.length }, () => null),
+      middle: Array.from({ length: data.length }, () => null),
+      lower: Array.from({ length: data.length }, () => null)
     }
   }
   
@@ -158,6 +163,23 @@ const updateChart = () => {
     legendData.push('BOLL上轨', 'BOLL中轨', 'BOLL下轨')
   }
   
+  // 计算高亮区间的索引范围
+  let highlightStartIndex = -1
+  let highlightEndIndex = -1
+  if (props.highlightRange) {
+    highlightStartIndex = dates.findIndex(time => time >= props.highlightRange!.startTime)
+    highlightEndIndex = dates.findIndex(time => time >= props.highlightRange!.endTime)
+    
+    // 如果找不到结束时间，使用最后一个索引
+    if (highlightEndIndex === -1) {
+      highlightEndIndex = dates.length - 1
+    }
+    // 如果开始时间在结束时间之后，交换它们
+    if (highlightStartIndex > highlightEndIndex) {
+      [highlightStartIndex, highlightEndIndex] = [highlightEndIndex, highlightStartIndex]
+    }
+  }
+  
   const option: any = {
     animation: false, // 关闭动画，提升性能
     tooltip: {
@@ -174,6 +196,31 @@ const updateChart = () => {
     toolbox: {
       show: false
     },
+    // 添加视觉映射，用于高亮显示截取区间
+    visualMap: props.highlightRange && highlightStartIndex >= 0 && highlightEndIndex >= 0 ? [
+      {
+        show: false,
+        seriesIndex: 0, // 应用到K线系列
+        dimension: 0,
+        pieces: [
+          {
+            gte: 0,
+            lt: highlightStartIndex,
+            color: 'rgba(0, 0, 0, 0.3)' // 区间外的K线变暗
+          },
+          {
+            gte: highlightStartIndex,
+            lte: highlightEndIndex,
+            color: '' // 区间内的K线保持原色
+          },
+          {
+            gt: highlightEndIndex,
+            lte: dates.length,
+            color: 'rgba(0, 0, 0, 0.3)' // 区间外的K线变暗
+          }
+        ]
+      }
+    ] : undefined,
     grid: [
       {
         left: '5%',
@@ -196,7 +243,20 @@ const updateChart = () => {
         axisLine: { onZero: false },
         splitLine: { show: false },
         min: 'dataMin',
-        max: 'dataMax'
+        max: 'dataMax',
+        axisPointer: {
+          label: {
+            formatter: (params: any) => {
+              const index = params.value
+              // 在高亮区间内显示特殊标记
+              if (props.highlightRange && highlightStartIndex >= 0 && highlightEndIndex >= 0 &&
+                  index >= highlightStartIndex && index <= highlightEndIndex) {
+                return `📍 ${dates[index]}`
+              }
+              return dates[index]
+            }
+          }
+        }
       },
       {
         type: 'category',
@@ -232,7 +292,8 @@ const updateChart = () => {
       {
         type: 'inside',
         xAxisIndex: [0, 1],
-        start: 70,
+        // 如果有高亮区间，显示全部数据；否则显示最后30%
+        start: props.highlightRange ? 0 : 70,
         end: 100,
         disabled: props.enableBrush  // 启用截取时禁用内部缩放，避免冲突
       },
@@ -241,7 +302,8 @@ const updateChart = () => {
         xAxisIndex: [0, 1],
         type: 'slider',
         top: '96%',
-        start: 70,
+        // 如果有高亮区间，显示全部数据；否则显示最后30%
+        start: props.highlightRange ? 0 : 70,
         end: 100,
         height: 15
       }
@@ -285,8 +347,43 @@ const updateChart = () => {
           borderColor: '#FF7A7E',
           borderColor0: '#73D13D'
         },
-        large: true, // 开启大数据量优化
-        largeThreshold: 1000 // 数据量大于1000时启用优化
+        // 高亮区间时禁用large模式，以便visualMap生效
+        large: !props.highlightRange,
+        largeThreshold: 1000,
+        // 添加标记线显示截取区间
+        markArea: props.highlightRange && highlightStartIndex >= 0 && highlightEndIndex >= 0 ? {
+          silent: true,
+          itemStyle: {
+            color: 'rgba(91, 143, 249, 0.15)',
+            borderColor: '#5B8FF9',
+            borderWidth: 2,
+            borderType: 'solid'
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '截取区间',
+            color: '#5B8FF9',
+            fontSize: 12,
+            fontWeight: 'bold',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            padding: [4, 8],
+            borderRadius: 4
+          },
+          data: [
+            [
+              {
+                xAxis: highlightStartIndex,
+                itemStyle: {
+                  color: 'rgba(91, 143, 249, 0.15)'
+                }
+              },
+              {
+                xAxis: highlightEndIndex
+              }
+            ]
+          ]
+        } : undefined
       },
       ...(props.showBoll && boll ? [
         {
@@ -589,7 +686,7 @@ const confirmBrushSelection = async () => {
   const endTime = selectedKlineData[selectedKlineData.length - 1].time
 
   // 生成截图
-  const imageData = await captureSelectedArea({ areas: [area] }, startIndex, endIndex)
+  const imageData = await captureSelectedArea({ areas: [area] })
 
   emit('brushSelected', {
     startTime,
@@ -605,7 +702,7 @@ const confirmBrushSelection = async () => {
 }
 
 // 裁剪选中区域的截图
-const captureSelectedArea = async (params: any, startIndex: number, endIndex: number): Promise<string | undefined> => {
+const captureSelectedArea = async (params: any): Promise<string | undefined> => {
   if (!chartInstance || !chartRef.value) return undefined
 
   try {

@@ -297,8 +297,8 @@
     <!-- 详情对话框 -->
     <el-dialog
       v-model="showDetailDialog"
-      width="75%"
-      top="8vh"
+      width="85%"
+      top="5vh"
     >
       <template #header>
         <div class="detail-header">
@@ -307,22 +307,22 @@
       </template>
       <div v-if="currentDetail" class="detail-content">
         <el-row :gutter="20">
-          <el-col :span="12">
+          <el-col :span="10">
             <div class="detail-image">
               <img :src="currentDetail.image" :alt="currentDetail.name" />
             </div>
           </el-col>
-          <el-col :span="12">
+          <el-col :span="14">
             <h3>{{ currentDetail.name }}</h3>
             <p>{{ currentDetail.description }}</p>
-            <el-descriptions :column="1" border style="margin-top: 20px;">
+            <el-descriptions :column="2" border style="margin-top: 20px;">
               <el-descriptions-item label="合约代码">
                 {{ currentDetail.code }}
               </el-descriptions-item>
               <el-descriptions-item label="K线周期">
                 {{ currentDetail.frequence }}
               </el-descriptions-item>
-              <el-descriptions-item label="时间区间">
+              <el-descriptions-item label="时间区间" :span="2">
                 {{ currentDetail.startTime }} ~ {{ currentDetail.endTime }}
               </el-descriptions-item>
               <el-descriptions-item label="趋势">
@@ -334,7 +334,9 @@
                 {{ getBollPositionLabel(currentDetail.pattern.bollPosition) }}
               </el-descriptions-item>
               <el-descriptions-item label="涨跌幅">
-                {{ currentDetail.indicators.priceChange.toFixed(2) }}%
+                <span :class="currentDetail.indicators.priceChange >= 0 ? 'price-up' : 'price-down'">
+                  {{ currentDetail.indicators.priceChange.toFixed(2) }}%
+                </span>
               </el-descriptions-item>
               <el-descriptions-item label="波动率">
                 {{ currentDetail.indicators.volatility.toFixed(2) }}%
@@ -342,15 +344,26 @@
             </el-descriptions>
           </el-col>
         </el-row>
-        <div class="kline-section" style="margin-top: 20px;">
+        <div class="kline-section">
           <div class="kline-header">
             <h4>K线数据</h4>
+            <div class="kline-tips">
+              <el-tag type="info" size="small">
+                <el-icon><InfoFilled /></el-icon>
+                蓝色区域为截取区间
+              </el-tag>
+              <span class="tip-text">拖动下方滑块可调整显示范围</span>
+            </div>
           </div>
           <KLineChart
             v-if="detailKlineData.length > 0"
             ref="klineChartRef"
             :data="detailKlineData"
-            height="400px"
+            :highlight-range="{
+              startTime: currentDetail.startTime,
+              endTime: currentDetail.endTime
+            }"
+            height="500px"
           />
         </div>
       </div>
@@ -362,7 +375,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, View, Edit } from '@element-plus/icons-vue'
+import { Plus, View, Edit, InfoFilled } from '@element-plus/icons-vue'
 import { strategyReferenceApi } from '@/api/strategy-reference'
 import KLineChart from '@/components/Charts/KLineChart.vue'
 import type { StrategyReference } from '@/types/strategy-reference'
@@ -1313,7 +1326,35 @@ onMounted(() => {
         margin-bottom: var(--spacing-lg);
         padding-bottom: var(--spacing-md);
         border-bottom: 2px solid var(--color-border-light);
+
+        .kline-tips {
+          display: flex;
+          align-items: center;
+          gap: var(--spacing-md);
+
+          .tip-text {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            font-style: italic;
+          }
+
+          :deep(.el-tag) {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+        }
       }
+    }
+
+    .price-up {
+      color: var(--color-danger);
+      font-weight: 700;
+    }
+
+    .price-down {
+      color: var(--color-success);
+      font-weight: 700;
     }
 
     :deep(.el-descriptions) {

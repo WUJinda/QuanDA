@@ -69,6 +69,41 @@ class StrategyReferenceDetailHandler(QABaseHandler):
             data = collection.find_one({'id': ref_id}, {'_id': 0})
             
             if data:
+                # 扩展K线数据范围：让截取区域占整个图表的40%
+                # 需要在前后各扩展75%，这样截取区域就是 1/(1+0.75+0.75) = 40%
+                try:
+                    code = data.get('code')
+                    start_time = data.get('startTime')
+                    end_time = data.get('endTime')
+                    frequence = data.get('frequence', 'day')
+                    
+                    if code and start_time and end_time:
+                        from quanda.QAWebServer.handlers.datahandler import get_future_data_safe
+                        import pandas as pd
+                        
+                        # 计算时间范围扩展
+                        start_dt = pd.to_datetime(start_time)
+                        end_dt = pd.to_datetime(end_time)
+                        duration = end_dt - start_dt
+                        
+                        # 前后各扩展75%，让截取区域占40%
+                        extended_start = (start_dt - duration * 0.75).strftime('%Y-%m-%d %H:%M:%S')
+                        extended_end = (end_dt + duration * 0.75).strftime('%Y-%m-%d %H:%M:%S')
+                        
+                        # 获取扩展范围的K线数据
+                        df = get_future_data_safe(code, extended_start, extended_end, frequence)
+                        
+                        if df is not None and not df.empty:
+                            from quanda.QAUtil import QA_util_to_json_from_pandas
+                            data['klineData'] = QA_util_to_json_from_pandas(df)
+                            print(f'[StrategyReference] Extended kline data: {len(df)} rows (截取区域占比: 40%, 原始: {start_time} to {end_time}, 扩展: {extended_start} to {extended_end})')
+                        else:
+                            print(f'[StrategyReference] Failed to load extended kline data, using original data')
+                except Exception as e:
+                    print(f'[StrategyReference] Error extending kline data: {str(e)}')
+                    # 如果扩展失败，使用原始数据
+                    pass
+                
                 self.write({
                     'status': 200,
                     'res': data
