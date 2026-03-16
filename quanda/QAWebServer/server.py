@@ -9,48 +9,42 @@ import sys
 import tornado
 from quanda import __version__
 from quanda.QAUtil.QASetting import QASETTING
-from quanda.QAWebServer.basehandles import QABaseHandler
+from quanda.QAWebServer.basehandles import QDBaseHandler
 from quanda.QAWebServer.commandhandler import (CommandHandler,
                                                   CommandHandlerWS,
                                                   RunnerHandler)
-from quanda.QAWebServer.schedulehandler import (QAScheduleQuery,
-                                                   QASchedulerHandler,
-                                                   init_scheduler)
-from quanda.QAWebServer.qifiserver import QAQIFI_Handler, QAQIFIS_Handler, QAQIFIS_REALTIME_Handler
+from quanda.QAWebServer.qifiserver import QDQIFI_Handler, QDQIFIS_Handler, QDQIFIS_REALTIME_Handler
 from quanda.QAWebServer.handlers import ALL_API_ROUTES
 from tornado.options import (define, options, parse_command_line,
                              parse_config_file)
 from tornado.web import Application, RequestHandler, authenticated
 
 
-class INDEX(QABaseHandler):
+class QDIndex(QDBaseHandler):
 
     def get(self):
         self.write(
             {
                 'status': 200,
-                'message': 'This is a welcome page for quanda backend',
+                'message': 'This is a welcome page for QD backend',
                 'url': [item[0] for item in handlers]
             }
         )
 
 
-class QAUserhander(QABaseHandler):
+class QDUserHandler(QDBaseHandler):
     def get(self):
         self.write({'status': 200, 'result':{'user_cookie': 'xx'}})
 
-#term_manager = SingleTermManager(shell_command=['bash'])
 handlers = [
-    (r"/", INDEX),
+    (r"/", QDIndex),
     (r"/command/run", CommandHandler),
     (r"/command/runws", CommandHandlerWS),
     (r"/command/runbacktest", RunnerHandler),
-    (r"/scheduler/map/?", QASchedulerHandler),
-    (r"/scheduler/query", QAScheduleQuery),
-    (r"/qifi", QAQIFI_Handler),
-    (r"/qifis", QAQIFIS_Handler),
-    (r"/qifirealtime", QAQIFIS_REALTIME_Handler),
-    (r"/user", QAUserhander),
+    (r"/qifi", QDQIFI_Handler),
+    (r"/qifis", QDQIFIS_Handler),
+    (r"/qifirealtime", QDQIFIS_REALTIME_Handler),
+    (r"/user", QDUserHandler),
 ] + ALL_API_ROUTES
 
 
@@ -64,7 +58,6 @@ def main():
     parse_command_line()
     port = options.port
     address = options.address
-    scheduler = init_scheduler()
 
     start_server(handlers, address, port)
 
@@ -90,11 +83,10 @@ def start_server(handlers, address='0.0.0.0', port=8010):
         static_url_prefix='/uploads/'
     )
     
-    print('========WELCOME quanda_WEBSERVER 2.0 ============')
-    print('quanda VERSION: {}'.format(__version__))
-    print('quanda WEBSERVER is Listening on: http://{}:{}'.format(address, port))
+    print('========WELCOME QD WEBSERVER 2.0 ============')
+    print('QD VERSION: {}'.format(__version__))
+    print('QD WEBSERVER is Listening on: http://{}:{}'.format(address, port))
     print('Static files path: {}'.format(static_path))
-    print('请打开浏览器/使用JavaScript等来使用该后台, 并且不要关闭当前命令行窗口')
     apps.listen(port, address=address)
 
     tornado.ioloop.IOLoop.current().start()

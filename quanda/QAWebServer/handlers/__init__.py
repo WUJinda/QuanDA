@@ -6,10 +6,10 @@ quanda WebServer Handlers
 
 # 数据接口
 from quanda.QAWebServer.handlers.datahandler import (
-    QAFutureListHandler,
-    QAFutureDayHandler,
-    QAFutureMinHandler,
-    QAFutureRealtimeHandler
+    QDFutureListHandler,
+    QDFutureDayHandler,
+    QDFutureMinHandler,
+    QDFutureRealtimeHandler
 )
 
 # 策略参考库接口
@@ -25,10 +25,10 @@ from quanda.QAWebServer.handlers.strategyreference import (
 
 # 所有数据接口 Handler
 DATA_HANDLERS = [
-    (r"/future/list", QAFutureListHandler),
-    (r"/future/day", QAFutureDayHandler),
-    (r"/future/min", QAFutureMinHandler),
-    (r"/future/realtime", QAFutureRealtimeHandler),
+    (r"/future/list", QDFutureListHandler),
+    (r"/future/day", QDFutureDayHandler),
+    (r"/future/min", QDFutureMinHandler),
+    (r"/future/realtime", QDFutureRealtimeHandler),
 ]
 
 # 所有策略参考库 Handler
@@ -47,10 +47,10 @@ ALL_API_ROUTES = DATA_HANDLERS + STRATEGY_REFERENCE_HANDLERS
 
 __all__ = [
     # Data Handlers
-    'QAFutureListHandler',
-    'QAFutureDayHandler',
-    'QAFutureMinHandler',
-    'QAFutureRealtimeHandler',
+    'QDFutureListHandler',
+    'QDFutureDayHandler',
+    'QDFutureMinHandler',
+    'QDFutureRealtimeHandler',
     # Strategy Reference Handlers
     'StrategyReferenceListHandler',
     'StrategyReferenceDetailHandler',

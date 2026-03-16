@@ -17,12 +17,7 @@ from quanda.QAWebServer.util import (APPLICATION_JSON, APPLICATION_XML,
 from tornado.web import RequestHandler
 from tornado.websocket import WebSocketHandler
 
-"""
-基础类
-"""
-
-
-class QABaseHandler(RequestHandler):
+class QDBaseHandler(RequestHandler):
     @property
     def db(self):
         return self.application.db
@@ -32,21 +27,16 @@ class QABaseHandler(RequestHandler):
         return self.application.redis
 
     def set_default_headers(self):
-
-
         self.set_header("Access-Control-Allow-Headers", "x-requested-with")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
-        self.set_header("Access-Control-Allow-Origin", "*")  # 这个地方可以写域名
-        #self.set_header("Access-Control-Allow-Headers", "x-requested-with")
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.set_header('Access-Control-Allow-Methods',
                         'POST, GET, OPTIONS, DELETE, PUT, PATCH')
         self.set_header('Access-Control-Allow-Headers',
                         "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, XMLHttpRequest,HTTP2-Settings")
         self.set_header(
             'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8')
-        self.set_header('Server', 'quandaBACKEND')
-        #headers.set('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-        # self.Content-Type: text/html; charset=utf-8
+        self.set_header('Server', 'QDBACKEND')
 
     def post(self, *args, **kwargs):
         self.write('some post')
@@ -55,7 +45,6 @@ class QABaseHandler(RequestHandler):
         self.write('some get')
 
     def options(self):
-        # no body
         self.set_status(204)
         self.finish()
 
@@ -69,7 +58,7 @@ class QABaseHandler(RequestHandler):
         pass
 
 
-class QAWebSocketHandler(WebSocketHandler):
+class QDWebSocketHandler(WebSocketHandler):
 
     def check_origin(self, origin):
         return True
@@ -82,7 +71,7 @@ class QAWebSocketHandler(WebSocketHandler):
                         999999999999999999999999999999999)
         self.set_header('Access-Control-Allow-Headers',
                         "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With,HTTP2-Settings")
-        self.set_header('Server', 'quandaBACKEND')
+        self.set_header('Server', 'QDBACKEND')
 
     def open(self,  *args, **kwargs):
         self.write_message('x')

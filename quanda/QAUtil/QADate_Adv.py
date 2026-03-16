@@ -1,5 +1,4 @@
 # coding:utf-8
-# Author:阿财（11652964@qq.com）
 # Created date: 2018-06-03
 #
 # The MIT License (MIT)

@@ -6,7 +6,7 @@
 
 import json
 import pandas as pd
-from quanda.QAWebServer.basehandles import QABaseHandler
+from quanda.QAWebServer.basehandles import QDBaseHandler
 from quanda.QAUtil import QA_util_to_json_from_pandas
 import quanda as QA
 
@@ -104,7 +104,7 @@ def get_future_data_safe(code, start, end, frequence='day', limit=None):
     return None
 
 
-class QAFutureListHandler(QABaseHandler):
+class QDFutureListHandler(QDBaseHandler):
     """获取期货列表"""
     
     def get(self):
@@ -124,7 +124,7 @@ class QAFutureListHandler(QABaseHandler):
             })
 
 
-class QAFutureDayHandler(QABaseHandler):
+class QDFutureDayHandler(QDBaseHandler):
     """获取期货日线数据（优化版）"""
     
     def get(self):
@@ -204,7 +204,7 @@ class QAFutureDayHandler(QABaseHandler):
             })
 
 
-class QAFutureMinHandler(QABaseHandler):
+class QDFutureMinHandler(QDBaseHandler):
     """获取期货分钟数据（优化版）"""
     
     def get(self):
@@ -294,7 +294,7 @@ class QAFutureMinHandler(QABaseHandler):
             })
 
 
-class QAFutureRealtimeHandler(QABaseHandler):
+class QDFutureRealtimeHandler(QDBaseHandler):
     """获取期货实时数据"""
     
     def get(self):

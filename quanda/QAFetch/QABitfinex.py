@@ -1,5 +1,4 @@
 # coding: utf-8
-# Author: 阿财（Rgveda@github）（11652964@qq.com）
 # Created date: 2020-02-27
 #
 # The MIT License (MIT)

@@ -12,13 +12,13 @@ import base64
 from typing import Dict, List
 import pandas as pd
 import numpy as np
-from quanda.QAWebServer.basehandles import QABaseHandler
+from quanda.QAWebServer.basehandles import QDBaseHandler
 from quanda.QAUtil import QA_util_to_json_from_pandas
 from qaenv import mongo_ip
 from pymongo import MongoClient
 
 
-class StrategyReferenceListHandler(QABaseHandler):
+class StrategyReferenceListHandler(QDBaseHandler):
     """获取策略参考列表"""
     
     def get(self):
@@ -57,7 +57,7 @@ class StrategyReferenceListHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceDetailHandler(QABaseHandler):
+class StrategyReferenceDetailHandler(QDBaseHandler):
     """获取策略参考详情"""
     
     def get(self, ref_id):
@@ -124,7 +124,7 @@ class StrategyReferenceDetailHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceCreateHandler(QABaseHandler):
+class StrategyReferenceCreateHandler(QDBaseHandler):
     """创建策略参考"""
     
     def post(self):
@@ -192,7 +192,7 @@ class StrategyReferenceCreateHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceUpdateHandler(QABaseHandler):
+class StrategyReferenceUpdateHandler(QDBaseHandler):
     """更新策略参考"""
     
     def put(self, ref_id):
@@ -257,7 +257,7 @@ class StrategyReferenceUpdateHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceDeleteHandler(QABaseHandler):
+class StrategyReferenceDeleteHandler(QDBaseHandler):
     """删除策略参考"""
     
     def delete(self, ref_id):
@@ -290,7 +290,7 @@ class StrategyReferenceDeleteHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceUploadHandler(QABaseHandler):
+class StrategyReferenceUploadHandler(QDBaseHandler):
     """上传截图"""
     
     def post(self):
@@ -351,7 +351,7 @@ class StrategyReferenceUploadHandler(QABaseHandler):
             })
 
 
-class StrategyReferenceAnalyzeHandler(QABaseHandler):
+class StrategyReferenceAnalyzeHandler(QDBaseHandler):
     """分析K线区间"""
     
     def post(self):

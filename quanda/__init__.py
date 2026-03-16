@@ -10,7 +10,7 @@ by WUJinda
 """
 
 __version__ = '2.1.0.alpha2'
-__author__ = 'WUJinda'
+__author__ = 'DAREWIN'
 
 # Rust集成支持检测
 try:

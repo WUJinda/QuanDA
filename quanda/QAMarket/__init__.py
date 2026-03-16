@@ -133,4 +133,4 @@ __all__ = [
 ]
 
 __version__ = '2.1.0'
-__author__ = 'WUJinda'
+__author__ = 'DAREWIN'

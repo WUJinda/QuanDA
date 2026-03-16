@@ -1,6 +1,4 @@
 # coding: utf-8
-# Author: Will
-# Contributor: 阿财（Rgveda@github）（11652964@qq.com）
 # Created date: 2018-06-08
 #
 # The MIT License (MIT)

@@ -7,50 +7,39 @@ import threading
 import tornado
 from quanda.QAUtil import QA_util_log_info
 from quanda.QAUtil.QADict import QA_util_dict_remove_key
-from quanda.QAWebServer.basehandles import QABaseHandler, QAWebSocketHandler
+from quanda.QAWebServer.basehandles import QDBaseHandler, QDWebSocketHandler
 from tornado.web import Application, RequestHandler, authenticated
 from tornado.websocket import WebSocketHandler
 
 
 def background_task(command):
-    #command = self.get_argument('command')
     cmd = shlex.split(command)
     p = subprocess.Popen(
         cmd, shell=False, close_fds=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     while p.poll() is None:
         line = p.stdout.readline()
-        # QA.QA_util_log_info(line)
     raise Exception
 
 
-class CommandHandler(QABaseHandler):
+class CommandHandler(QDBaseHandler):
     x = {}
 
     def post(self):
         print('get message')
         try:
             command = self.get_argument('command')
-            # print(command)
-            #command = 'bash -c "{}"'.format(command)
             print(command)
 
             threading.Thread(target=background_task, args=(
                 command,), daemon=True).start()
-            # if command not in self.x.keys():
-            #     self.x[command] = background_task(command)
-            # else:
-            #     self.x[command].kill()
-            #     self.x[command] = background_task(command)
-            # print(res.read())
             self.write({'result': 'true'})
         except Exception as e:
             self.write({'result': 'wrong', 'reason': str(e)})
 
 
-class CommandHandlerWS(QAWebSocketHandler):
+class CommandHandlerWS(QDWebSocketHandler):
 
     def on_message(self, shell_cmd):
-        # shell_cmd = 'python "{}"'.format(shell_cmd)
         self.write_message({'quanda RUN ': shell_cmd})
         cmd = shlex.split(shell_cmd)
         p = subprocess.Popen(
@@ -71,7 +60,7 @@ class CommandHandlerWS(QAWebSocketHandler):
         pass
 
 
-class RunnerHandler(QAWebSocketHandler):
+class RunnerHandler(QDWebSocketHandler):
 
     def on_message(self, shell_cmd):
         shell_cmd = 'python "{}"'.format(shell_cmd)
