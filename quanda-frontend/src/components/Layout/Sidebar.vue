@@ -59,7 +59,6 @@ const menuRoutes = [
   { path: '/dashboard', meta: { title: '仪表盘', icon: 'DataAnalysis' } },
   { path: '/market', meta: { title: '市场行情', icon: 'TrendCharts' } },
   { path: '/futures', meta: { title: '期货分析', icon: 'Histogram' } },
-  { path: '/account', meta: { title: '账户管理', icon: 'Wallet' } },
   { path: '/backtest', meta: { title: '回测系统', icon: 'Operation' } },
   { path: '/strategy', meta: { title: '策略管理', icon: 'Document' } },
   { path: '/strategy-reference', meta: { title: '策略参考库', icon: 'Collection' } }

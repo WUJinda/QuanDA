@@ -92,6 +92,10 @@
         </div>
         <template #dropdown>
           <el-dropdown-menu class="user-dropdown">
+            <el-dropdown-item command="account">
+              <el-icon><Wallet /></el-icon>
+              <span>账户管理</span>
+            </el-dropdown-item>
             <el-dropdown-item command="profile">
               <el-icon><User /></el-icon>
               <span>个人中心</span>
@@ -134,7 +138,8 @@ import {
   ArrowDown,
   Setting,
   Sunny,
-  SwitchButton
+  SwitchButton,
+  Wallet
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -179,6 +184,9 @@ const handleHelp = () => {
 
 const handleCommand = (command: string) => {
   switch (command) {
+    case 'account':
+      router.push('/account')
+      break
     case 'profile':
       ElMessage.info('个人中心')
       break
