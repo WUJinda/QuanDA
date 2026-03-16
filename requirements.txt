@@ -1,6 +1,5 @@
 # QuanDA 2.1 依赖清单
 # Python 3.9-3.13 supported
-# @yutiansut @quantaxis
 
 # ============================================================================
 # 数据库层 - Database Layer

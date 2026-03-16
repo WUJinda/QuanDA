@@ -19,7 +19,7 @@ def stock_format(code):
 
 
 class QACKClient():
-    def __init__(self, host=clickhouse_ip, port=clickhouse_port,  database='quantaxis', user=clickhouse_user, password=clickhouse_password):
+    def __init__(self, host=clickhouse_ip, port=clickhouse_port,  database='quanda', user=clickhouse_user, password=clickhouse_password):
         self.client = clickhouse_driver.Client(host=host, port=port,  database=database, user=user, password=password,
                                                settings={
                                                    'insert_block_size': 100000000},
@@ -85,7 +85,7 @@ class QACKClient():
                 codex.append(
                     coder+'.XSHG' if coder[0] == '6' else coder+'.XSHE')
 
-        res = self.execute("SELECT * FROM quantaxis.citis_industry  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(
+        res = self.execute("SELECT * FROM quanda.citis_industry  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(
             start, end, "'{}'".format("','".join(codex)))).drop_duplicates(['date', 'order_book_id'])
         return res
 
@@ -108,7 +108,7 @@ class QACKClient():
                 codex.append(
                     coder+'.XSHE' if coder[0] == '6' else coder+'.XSHG')
 
-        res = self.execute("SELECT * FROM quantaxis.index_weight  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`index_code` IN ({}))".format(
+        res = self.execute("SELECT * FROM quanda.index_weight  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`index_code` IN ({}))".format(
             start, end, "'{}'".format("','".join(codex)))).drop_duplicates(['date', 'order_book_id'])
         return res
 
@@ -128,7 +128,7 @@ class QACKClient():
             else:
                 codex.append(
                     coder+'.XSHG' if coder[0] == '6' else coder+'.XSHE')
-        res = self.execute("SELECT * FROM quantaxis.stock_adj  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(
+        res = self.execute("SELECT * FROM quanda.stock_adj  WHERE ((`date` >= '{}')) AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(
             start, end, "'{}'".format("','".join(codex)))).drop_duplicates(['date', 'order_book_id'])
         #res = res.assign(code = res.code.apply(lambda x: x[0:6]))
         return res.set_index(['date', 'order_book_id']).sort_index()
@@ -139,7 +139,7 @@ class QACKClient():
 
         columns_raw = ['date', 'order_book_id', 'num_trades', 'limit_up',
                        'limit_down', 'open', 'high', 'low', 'close', 'volume', 'total_turnover']
-        u = self.execute("SELECT * FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}')) \
+        u = self.execute("SELECT * FROM quanda.stock_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
 
         u = u.set_index(['date', 'order_book_id'], drop=False).sort_index()
@@ -166,7 +166,7 @@ class QACKClient():
                 lambda x: x+'.XSHE' if x[0] != '6' else x+'.XSHG').tolist()
         columns_raw = ['datetime', 'order_book_id'].extend(fields)
 
-        res = self.client.query_dataframe("SELECT datetime, order_book_id, {} FROM quantaxis.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT datetime, order_book_id, {} FROM quanda.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(','.join(fields),
                          start, end, "'{}'".format("','".join(codelist)))).drop_duplicates(['datetime', 'order_book_id'])
 
@@ -206,11 +206,11 @@ class QACKClient():
         adjx = self.get_stock_adj(codelist, start, end)
 
         columns_raw = ['date', 'order_book_id'].extend(fields)
-        print("SELECT date, order_book_id, {} FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}')) \
+        print("SELECT date, order_book_id, {} FROM quanda.stock_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(','.join(fields),
                          start, end, "'{}'".format("','".join(codelist))))
 
-        u = self.execute("SELECT date, order_book_id, {} FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}')) \
+        u = self.execute("SELECT date, order_book_id, {} FROM quanda.stock_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(','.join(fields),
                          start, end, "'{}'".format("','".join(codelist)))).drop_duplicates(['date', 'order_book_id'])
 
@@ -232,8 +232,8 @@ class QACKClient():
         return data.loc[:, fields].sort_index()
 
     def get_stock_day_date(self, code, start, end):
-        print("SELECT order_book_id, date FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}'))  AND (`date` <= '{}') AND (`order_book_id` == '{}')".format(start, end, code))
-        u = self.execute("SELECT order_book_id, date FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}')) \
+        print("SELECT order_book_id, date FROM quanda.stock_cn_day  WHERE ((`date` >= '{}'))  AND (`date` <= '{}') AND (`order_book_id` == '{}')".format(start, end, code))
+        u = self.execute("SELECT order_book_id, date FROM quanda.stock_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` == '{}')".format(start, end, code)).drop_duplicates()
 
         u = u.set_index('order_book_id').sort_values('date')
@@ -241,7 +241,7 @@ class QACKClient():
 
     def get_stock_min_datetime(self, code, start, end):
 
-        u = self.execute("SELECT order_book_id, datetime FROM quantaxis.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
+        u = self.execute("SELECT order_book_id, datetime FROM quanda.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` == '{}')".format(start, end, code)).drop_duplicates().set_index('order_book_id').sort_values('datetime')
         return u
 
@@ -266,7 +266,7 @@ class QACKClient():
         columns_raw = ['stock_code', 'stock_amount', 'cash_substitute',
                        'cash_substitute_proportion', 'fixed_cash_substitute', 'order_book_id',
                        'trading_date']
-        return self.client.query_dataframe("SELECT * FROM quantaxis.etf_components  WHERE ((`trading_date` >= '{}')) \
+        return self.client.query_dataframe("SELECT * FROM quanda.etf_components  WHERE ((`trading_date` >= '{}')) \
                                 AND (`trading_date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['stock_code', 'trading_date', 'order_book_id'])
 
     def get_stock_day(self, codelist, start, end):
@@ -276,7 +276,7 @@ class QACKClient():
                 lambda x: x+'.XSHE' if x[0] != '6' else x+'.XSHG').tolist()
         columns_raw = ['date', 'order_book_id', 'num_trades', 'limit_up',
                        'limit_down', 'open', 'high', 'low', 'close', 'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.stock_cn_day  WHERE ((`date` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.stock_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
         return QA_DataStruct_Stock_day(res.assign(date=pd.to_datetime(res.date), code=res.order_book_id, amount=res.total_turnover).set_index(['date', 'code']).sort_index())
 
@@ -287,7 +287,7 @@ class QACKClient():
                 lambda x: x+'.XSHE' if x[0] != '6' else x+'.XSHG').tolist()
         columns_raw = ['datetime', 'order_book_id',  'open',
                        'high', 'low', 'close', 'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return QA_DataStruct_Stock_min(res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover, type='1min',).set_index(['datetime', 'code']).sort_index())
 
@@ -298,7 +298,7 @@ class QACKClient():
                 lambda x: x+'.XSHE' if x[0] != '6' else x+'.XSHG').tolist()
 
         columns_raw = ['datetime', 'order_book_id', 'close']
-        res = self.client.query_dataframe("SELECT datetime, order_book_id, close FROM quantaxis.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT datetime, order_book_id, close FROM quanda.stock_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return res.assign(datetime=pd.to_datetime(res.datetime)).set_index(['datetime', 'order_book_id']).sort_index()
 
@@ -308,7 +308,7 @@ class QACKClient():
                        'prev_settlement', 'settlement', 'open', 'high', 'low', 'close',
                        'volume', 'total_turnover']
 
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.future_cn_day  WHERE ((`date` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.future_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
 
         return QA_DataStruct_Future_day(res.assign(date=pd.to_datetime(res.date),
@@ -322,7 +322,7 @@ class QACKClient():
         columns_raw = ['datetime', 'order_book_id', 'open_interest', 'trading_date',
                        'open', 'high', 'low', 'close',
                                    'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.future_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.future_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return QA_DataStruct_Future_min(res.assign(datetime=pd.to_datetime(res.datetime),
                                                    position=res.open_interest,
@@ -343,7 +343,7 @@ class QACKClient():
                        'limit_down', 'a1', 'a2', 'a3', 'a4', 'a5', 'b1', 'b2', 'b3', 'b4',
                        'b5', 'a1_v', 'a2_v', 'a3_v', 'a4_v', 'a5_v', 'b1_v', 'b2_v', 'b3_v',
                        'b4_v', 'b5_v', 'change_rate']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.stock_cn_tick  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.stock_cn_tick  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw]
         return res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover).set_index(['datetime', 'code']).sort_index()
 
@@ -355,7 +355,7 @@ class QACKClient():
                        'limit_down', 'a1', 'a2', 'a3', 'a4', 'a5', 'b1', 'b2', 'b3', 'b4',
                        'b5', 'a1_v', 'a2_v', 'a3_v', 'a4_v', 'a5_v', 'b1_v', 'b2_v', 'b3_v',
                        'b4_v', 'b5_v', 'change_rate']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.index_cn_tick  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.index_cn_tick  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover).set_index(['datetime', 'code']).sort_index()
 
@@ -366,7 +366,7 @@ class QACKClient():
                        'total_turnover', 'limit_up', 'limit_down', 'a1', 'a2', 'a3', 'a4',
                        'a5', 'b1', 'b2', 'b3', 'b4', 'b5', 'a1_v', 'a2_v', 'a3_v', 'a4_v',
                        'a5_v', 'b1_v', 'b2_v', 'b3_v', 'b4_v', 'b5_v', 'change_rate']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.future_cn_tick  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.future_cn_tick  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw]
         return res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover).set_index(['datetime', 'code']).sort_index()
 
@@ -378,7 +378,7 @@ class QACKClient():
 
         columns_raw = ['date', 'order_book_id', 'num_trades', 'open', 'high', 'low', 'close',
                        'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.index_cn_day  WHERE ((`date` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.index_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
         return QA_DataStruct_Index_day(res.assign(date=pd.to_datetime(res.date), code=res.order_book_id, amount=res.total_turnover).set_index(['date', 'code']).sort_index())
 
@@ -390,7 +390,7 @@ class QACKClient():
 
         columns_raw = ['datetime', 'order_book_id',  'open',
                        'high', 'low', 'close', 'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.index_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.index_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return QA_DataStruct_Index_min(res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover, type='1min',).set_index(['datetime', 'code']).sort_index())
 
@@ -402,7 +402,7 @@ class QACKClient():
 
         columns_raw = ['date', 'order_book_id', 'num_trades', 'open', 'high', 'low', 'close',
                        'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.etf_cn_day  WHERE ((`date` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.etf_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
         return QA_DataStruct_Index_day(res.assign(date=pd.to_datetime(res.date), code=res.order_book_id, amount=res.total_turnover).set_index(['date', 'code']).sort_index())
 
@@ -414,7 +414,7 @@ class QACKClient():
 
         columns_raw = ['datetime', 'order_book_id',  'open',
                        'high', 'low', 'close', 'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.etf_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.etf_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return QA_DataStruct_Index_min(res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover, type='1min',).set_index(['datetime', 'code']).sort_index())
 
@@ -426,7 +426,7 @@ class QACKClient():
 
         columns_raw = ['date', 'order_book_id', 'num_trades', 'open', 'high', 'low', 'close',
                        'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.lof_cn_day  WHERE ((`date` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.lof_cn_day  WHERE ((`date` >= '{}')) \
                          AND (`date` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['date', 'order_book_id'])
         return QA_DataStruct_Index_day(res.assign(date=pd.to_datetime(res.date), code=res.order_book_id, amount=res.total_turnover).set_index(['date', 'code']).sort_index())
 
@@ -438,6 +438,6 @@ class QACKClient():
 
         columns_raw = ['datetime', 'order_book_id',  'open',
                        'high', 'low', 'close', 'volume', 'total_turnover']
-        res = self.client.query_dataframe("SELECT * FROM quantaxis.lof_cn_1min  WHERE ((`datetime` >= '{}')) \
+        res = self.client.query_dataframe("SELECT * FROM quanda.lof_cn_1min  WHERE ((`datetime` >= '{}')) \
                          AND (`datetime` <= '{}') AND (`order_book_id` IN ({}))".format(start, end, "'{}'".format("','".join(codelist)))).loc[:, columns_raw].drop_duplicates(['datetime', 'order_book_id'])
         return QA_DataStruct_Index_min(res.assign(datetime=pd.to_datetime(res.datetime), code=res.order_book_id, amount=res.total_turnover, type='1min',).set_index(['datetime', 'code']).sort_index())

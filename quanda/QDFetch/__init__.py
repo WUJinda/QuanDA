@@ -24,7 +24,7 @@ QAFetch - quanda 数据获取模块
     # 获取实时行情
     realtime = QA_fetch_get_stock_realtime('tdx', '000001')
 
-@author: yutiansut
+@author: QuanDA
 @version: 2.0.0
 @license: MIT
 """

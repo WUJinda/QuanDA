@@ -3,15 +3,15 @@ import re
 import uuid
 import datetime
 from quanda.QDMarket.market_preset import MARKET_PRESET
-from quanda.QDMarket.QAOrder import QA_Order
-from quanda.QDUtil.QAParameter import (
+from quanda.QDMarket.QDOrder import QA_Order
+from quanda.QDUtil.QDParameter import (
     EXCHANGE_ID,
     MARKET_TYPE,
     ORDER_DIRECTION,
     ORDER_STATUS
 )
 from quanda.QDSU.save_position import save_position
-from quanda.QDUtil.QASetting import DATABASE
+from quanda.QDUtil.QDSetting import DATABASE
 
 
 class QA_Position():
@@ -68,9 +68,9 @@ class QA_Position():
 
     def __init__(self,
                  code='000001',
-                 account_cookie='quantaxis',
+                 account_cookie='quanda',
                  portfolio_cookie='portfolio',
-                 username='quantaxis',
+                 username='quanda',
                  moneypreset=100000,  # 初始分配资金
                  frozen=None,
                  moneypresetLeft=None,

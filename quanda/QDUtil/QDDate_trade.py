@@ -7,7 +7,7 @@ from typing import List, Tuple, Union
 
 import pandas as pd
 
-from quanda.QDUtil.QAParameter import FREQUENCE, MARKET_TYPE
+from quanda.QDUtil.QDParameter import FREQUENCE, MARKET_TYPE
 
 # todo 🛠 只记录非交易日，其余的用程序迭代 生成交易日
 

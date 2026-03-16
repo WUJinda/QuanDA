@@ -6,8 +6,8 @@ import configparser
 import json
 import os
 from multiprocessing import Lock
-from quanda.QDSetting.QALocalize import qa_path, setting_path, strategy_path
-from quanda.QDUtil.QASql import (
+from quanda.QDSetting.QDLocalize import qa_path, setting_path, strategy_path
+from quanda.QDUtil.QDSql import (
     QA_util_sql_async_mongo_setting,
     QA_util_sql_mongo_setting
 )

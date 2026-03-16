@@ -32,7 +32,6 @@ def SMA(Series, N, M=1):
 
     本次修正主要是对于返回值的优化,现在的返回值会带上原先输入的索引index
     2018/5/3
-    @yutiansut
     """
     ret = []
     i = 1

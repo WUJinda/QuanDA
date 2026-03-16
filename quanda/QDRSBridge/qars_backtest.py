@@ -6,7 +6,7 @@ QARS回测引擎桥接 - Rust高性能回测引擎的Python包装器
 - 内存占用: -40%
 - 支持大规模历史数据回测
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 from typing import Dict, List, Optional, Callable

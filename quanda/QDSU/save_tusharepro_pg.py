@@ -17,11 +17,11 @@ import psycopg2
 import warnings
 warnings.filterwarnings("ignore")
 import quanda as QA
-from quanda.QDUtil.QALogs import (QA_util_log_debug, QA_util_log_expection,
+from quanda.QDUtil.QDLogs import (QA_util_log_debug, QA_util_log_expection,
                                      QA_util_log_info)
 
-from quanda.QDUtil.QADate_trade import QA_util_get_trade_range
-from quanda.QDUtil.QADate import (QA_util_date_str2int,QA_util_date_int2str)
+from quanda.QDUtil.QDDate_trade import QA_util_get_trade_range
+from quanda.QDUtil.QDDate import (QA_util_date_str2int,QA_util_date_int2str)
 
 
 token='xxxx'  #你的tusharepro token
@@ -32,7 +32,7 @@ else:
 def cilent_pg():
     Account='postgres'#pg账号
     Password='xxxxx'   #pg密码
-    database='quantaxis'  #该数据库需要提前手动建立，应该有自动建立方法，还不会。。。
+    database='quanda'  #该数据库需要提前手动建立，应该有自动建立方法，还不会。。。
     client = create_engine('postgresql+psycopg2://'+Account+':'+Password+'@127.0.0.1:5432/'+database)  
     return client 
 

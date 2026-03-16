@@ -7,7 +7,7 @@
 233333 结果变成自己访问自己了
 """
 import  pandas as pd
-from quanda.QDUtil.QACode import QA_util_code_tostr
+from quanda.QDUtil.QDCode import QA_util_code_tostr
 
 
 def QA_fetch_get_stock_day(code, start, end, ip='192.168.0.1', port='8010'):
@@ -22,7 +22,7 @@ def QA_fetch_get_stock_block():
         [type] -- [description]
     """
 
-    url = 'http://data.yutiansut.com/self_block.csv'
+    url = None  # 需要替换为有效的数据源
     try:
         bl = pd.read_csv(url)
         return bl.assign(code=bl['证券代码'].apply(QA_util_code_tostr), blockname=bl['行业'], name=bl['证券名称'], source='outside', type='outside').set_index('code', drop=False)

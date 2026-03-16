@@ -16,22 +16,22 @@ from quanda.QDUtil import (
     QA_util_log_expection,
     QA_util_to_json_from_pandas
 )
-from quanda.QDUtil.QADate_Adv import (
+from quanda.QDUtil.QDDate_Adv import (
     QA_util_timestamp_to_str,
     QA_util_datetime_to_Unix_timestamp,
     QA_util_print_timestamp
 )
-from quanda.QDFetch.QABitfinex import (
+from quanda.QDFetch.QDBitfinex import (
     QA_fetch_bitfinex_symbols,
     QA_fetch_bitfinex_kline,
     QA_fetch_bitfinex_kline_min,
     Bitfinex2QA_FREQUENCY_DICT
 )
-from quanda.QDUtil.QAcrypto import (
+from quanda.QDUtil.QDcrypto import (
     QA_util_save_raw_symbols,
     QA_util_find_missing_kline
 )
-from quanda.QDFetch.QAQuery import (QA_fetch_cryptocurrency_list)
+from quanda.QDFetch.QDQuery import (QA_fetch_cryptocurrency_list)
 
 import pymongo
 

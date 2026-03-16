@@ -7,7 +7,7 @@ from copy import deepcopy, copy
 import pandas as pd
 
 try:
-    from quanda.QDFetch.QATdx import QA_fetch_get_stock_realtime
+    from quanda.QDFetch.QDTdx import QA_fetch_get_stock_realtime
 except ImportError:
     QA_fetch_get_stock_realtime = None
 

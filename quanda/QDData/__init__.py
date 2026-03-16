@@ -29,8 +29,8 @@ from quanda.QDData.dsmethods import (
     concat,
     from_tushare
 )
-from quanda.QDData.QABlockStruct import QA_DataStruct_Stock_block
-from quanda.QDData.QADataStruct import (
+from quanda.QDData.QDBlockStruct import QA_DataStruct_Stock_block
+from quanda.QDData.QDDataStruct import (
     QA_DataStruct_Day,
     QA_DataStruct_Future_day,
     QA_DataStruct_Future_min,
@@ -45,8 +45,8 @@ from quanda.QDData.QADataStruct import (
     QA_DataStruct_Stock_realtime,
     QA_DataStruct_Stock_transaction
 )
-from quanda.QDData.QAFinancialStruct import QA_DataStruct_Financial
-from quanda.QDData.QAIndicatorStruct import QA_DataStruct_Indicators
-from quanda.QDData.QASeriesStruct import QA_DataStruct_Series
+from quanda.QDData.QDFinancialStruct import QA_DataStruct_Financial
+from quanda.QDData.QDIndicatorStruct import QA_DataStruct_Indicators
+from quanda.QDData.QDSeriesStruct import QA_DataStruct_Series
 
 from quanda.QDData.paneldatastruct import QAPanelDataStruct

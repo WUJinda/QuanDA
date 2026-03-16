@@ -48,8 +48,8 @@ from quanda.QDUtil import (
     QA_util_to_pandas_from_json,
     trade_date_sse
 )
-from quanda.QDUtil.QADate import QA_util_to_datetime
-from quanda.QDUtil.QAParameter import FREQUENCE, MARKET_TYPE
+from quanda.QDUtil.QDDate import QA_util_to_datetime
+from quanda.QDUtil.QDParameter import FREQUENCE, MARKET_TYPE
 
 
 def _QA_fetch_stock_adj(

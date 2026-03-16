@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QDFetch.QATdx import (
+from quanda.QDFetch.QDTdx import (
     QA_fetch_get_index_day,
     QA_fetch_get_stock_day,
     QA_fetch_get_stock_list
@@ -18,12 +18,12 @@ import pandas as pd
 import pymongo
 from multiprocessing import cpu_count
 from quanda.QDSU.save_tdx import now_time
-from quanda.QDFetch.QATdx import (
+from quanda.QDFetch.QDTdx import (
     get_ip_list_by_multi_process_ping,
     stock_ip_list,
     QA_fetch_get_stock_xdxr
 )
-from quanda.QDUtil.QACache import QA_util_cache
+from quanda.QDUtil.QDCache import QA_util_cache
 
 
 def run(cls_instance, code):

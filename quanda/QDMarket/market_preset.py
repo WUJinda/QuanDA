@@ -1,6 +1,6 @@
 import pandas as pd
 from functools import lru_cache
-from quanda.QDUtil.QAParameter import EXCHANGE_ID
+from quanda.QDUtil.QDParameter import EXCHANGE_ID
 
 
 class MARKET_PRESET:

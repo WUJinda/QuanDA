@@ -8,7 +8,7 @@ import threading
 import time
 import numpy as np
 
-from quanda.QDUtil.QALogs import QA_util_log_info
+from quanda.QDUtil.QDLogs import QA_util_log_info
 
 
 def QA_util_datetime_to_Unix_timestamp(ts_epoch = None):  

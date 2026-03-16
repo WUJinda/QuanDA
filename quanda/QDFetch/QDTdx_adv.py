@@ -12,11 +12,11 @@ from threading import Thread, Timer
 import pandas as pd
 from pytdx.hq import TdxHq_API
 
-from quanda.QDEngine.QAThreadEngine import QA_Thread
-from quanda.QDUtil.QADate_trade import QA_util_if_tradetime
-from quanda.QDUtil.QASetting import DATABASE, stock_ip_list
-from quanda.QDUtil.QASql import QA_util_sql_mongo_sort_ASCENDING
-from quanda.QDUtil.QATransform import QA_util_to_json_from_pandas
+from quanda.QDEngine.QDThreadEngine import QA_Thread
+from quanda.QDUtil.QDDate_trade import QA_util_if_tradetime
+from quanda.QDUtil.QDSetting import DATABASE, stock_ip_list
+from quanda.QDUtil.QDSql import QA_util_sql_mongo_sort_ASCENDING
+from quanda.QDUtil.QDTransform import QA_util_to_json_from_pandas
 
 
 """
@@ -222,7 +222,7 @@ class QA_Tdx_Executor(QA_Thread):
         database.create_index([('code', QA_util_sql_mongo_sort_ASCENDING)])
         database.create_index([('datetime', QA_util_sql_mongo_sort_ASCENDING)])
 
-        from quanda.QDFetch.QAQuery_Advance import QA_fetch_stock_block_adv
+        from quanda.QDFetch.QDQuery_Advance import QA_fetch_stock_block_adv
         code = QA_fetch_stock_block_adv().code
 
         while True:
@@ -248,7 +248,7 @@ class QA_Tdx_Executor(QA_Thread):
 def get_bar(timeout=1, sleep=1):
     sleep = int(sleep)
     _time1 = datetime.datetime.now()
-    from quanda.QDFetch.QAQuery_Advance import QA_fetch_stock_block_adv
+    from quanda.QDFetch.QDQuery_Advance import QA_fetch_stock_block_adv
     code = QA_fetch_stock_block_adv().code
     print(len(code))
     x = QA_Tdx_Executor(timeout=float(timeout))
@@ -277,7 +277,7 @@ def get_bar(timeout=1, sleep=1):
 def get_day_once():
 
     _time1 = datetime.datetime.now()
-    from quanda.QDFetch.QAQuery_Advance import QA_fetch_stock_block_adv
+    from quanda.QDFetch.QDQuery_Advance import QA_fetch_stock_block_adv
     code = QA_fetch_stock_block_adv().code
     x = QA_Tdx_Executor()
     return x.get_security_bar_concurrent(code, 'day', 1)

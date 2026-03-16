@@ -1,1 +1,1 @@
-from quanda.QDSetting.QALocalize import qa_path, setting_path, cache_path, download_path, log_path
+from quanda.QDSetting.QDLocalize import qa_path, setting_path, cache_path, download_path, log_path

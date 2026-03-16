@@ -1,7 +1,7 @@
 #coding=utf-8
 
 from time import time
-from quanda.QDUtil.QASingleton import singleton
+from quanda.QDUtil.QDSingleton import singleton
 
 @singleton
 class QA_util_cache:

@@ -10,14 +10,14 @@ import pandas as pd
 
 from quanda.QDData.data_marketvalue import QA_data_marketvalue
 from quanda.QDFetch.Fetcher import QA_quotation
-from quanda.QDFetch.QAQuery import QA_fetch_stock_info
-from quanda.QDFetch.QAQuery_Advance import (QA_fetch_stock_block_adv,
+from quanda.QDFetch.QDQuery import QA_fetch_stock_info
+from quanda.QDFetch.QDQuery_Advance import (QA_fetch_stock_block_adv,
                                                QA_fetch_stock_day_adv,
                                                QA_fetch_stock_min_adv)
-from quanda.QDFetch.QATdx import QA_fetch_get_stock_info
-from quanda.QDFetch.QATdx_adv import QA_Tdx_Executor
-from quanda.QDUtil.QADate_trade import QA_util_get_real_datelist
-from quanda.QDUtil.QAParameter import (DATASOURCE, FREQUENCE, MARKET_TYPE,
+from quanda.QDFetch.QDTdx import QA_fetch_get_stock_info
+from quanda.QDFetch.QDTdx_adv import QA_Tdx_Executor
+from quanda.QDUtil.QDDate_trade import QA_util_get_real_datelist
+from quanda.QDUtil.QDParameter import (DATASOURCE, FREQUENCE, MARKET_TYPE,
                                           OUTPUT_FORMAT)
 
 

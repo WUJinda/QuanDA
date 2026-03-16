@@ -9,7 +9,7 @@ QARS账户桥接 - Rust高性能QIFI账户的Python包装器
 
 完全兼容QIFI协议，可无缝替换QIFI_Account
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 from typing import Dict, List, Optional, Union

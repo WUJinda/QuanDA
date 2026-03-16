@@ -23,7 +23,7 @@ from quanda.QDData import (
     QA_DataStruct_Index_min,
     QA_DataStruct_Index_transaction
 )
-from quanda.QDFetch.QAQuery import (
+from quanda.QDFetch.QDQuery import (
     QA_fetch_index_day,
     QA_fetch_index_min,
     QA_fetch_index_transaction,
@@ -43,7 +43,7 @@ from quanda.QDFetch.QAQuery import (
     QA_fetch_cryptocurrency_min,
     QA_fetch_cryptocurrency_list
 )
-from quanda.QDUtil.QADate import month_data
+from quanda.QDUtil.QDDate import month_data
 from quanda.QDUtil import (
     DATABASE,
     QA_Setting,
@@ -1012,7 +1012,7 @@ def QA_fetch_cryptocurrency_list_adv(
 if __name__ == '__main__':
     #st = QA_fetch_stock_block_adv(None, ["北京", "计算机"])
     #QA_fetch_stock_realtime_adv(['000001', '000002'], num=10)
-    from quanda.QDFetch.QAhuobi import FIRST_PRIORITY
+    from quanda.QDFetch.QDhuobi import FIRST_PRIORITY
     import quanda as QA
     codelist = ['BINANCE.BCHUSDT', 'BINANCE.BSVUSDT', 'BINANCE.BTCUSDT', 'BINANCE.EOSUSDT', 'BINANCE.ETHUSDT', 'BINANCE.ETCUSDT', 'BINANCE.DASHUSDT', 'BINANCE.LTCUSDT', 'BINANCE.XMRUSDT', 'BINANCE.XRPUSDT', 'BINANCE.ZECUSDT']
     data1 = QA_fetch_cryptocurrency_day_adv(

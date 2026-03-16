@@ -2,9 +2,9 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QDUtil.QALogs import QA_util_log_info
+from quanda.QDUtil.QDLogs import QA_util_log_info
 #from quanda.QDARP.QAUser import QA_User
-from quanda.QDUtil.QASetting import DATABASE
+from quanda.QDUtil.QDSetting import DATABASE
 
 
 def QA_user_sign_in(username, password):

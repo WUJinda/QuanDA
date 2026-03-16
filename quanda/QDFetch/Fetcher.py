@@ -5,13 +5,11 @@
 """
 QA fetch module
 
-@yutiansut
-
 QAFetch is Under [QAStandard#0.0.2@10x] Protocol
 
 
 """
-from quanda.QDData.QADataStruct import (QA_DataStruct_Future_day,
+from quanda.QDData.QDDataStruct import (QA_DataStruct_Future_day,
                                            QA_DataStruct_Future_min,
                                            QA_DataStruct_Future_realtime,
                                            QA_DataStruct_Stock_day,
@@ -19,19 +17,19 @@ from quanda.QDData.QADataStruct import (QA_DataStruct_Future_day,
                                            QA_DataStruct_Stock_realtime,
                                            QA_DataStruct_Index_day,
                                            QA_DataStruct_Index_min)
-from quanda.QDFetch import QAEastMoney as QAEM
-from quanda.QDFetch import QAQuery
-from quanda.QDFetch import QAQuery_Advance as QAQueryAdv
-from quanda.QDFetch import QAQuery_Async as QAQueryAsync
-from quanda.QDFetch import QATdx as QATdx
-from quanda.QDFetch import QAThs as QAThs
-from quanda.QDFetch import QATushare as QATushare
+from quanda.QDFetch import QDEastMoney as QAEM
+from quanda.QDFetch import QDQuery
+from quanda.QDFetch import QDQuery_Advance as QAQueryAdv
+from quanda.QDFetch import QDQuery_Async as QAQueryAsync
+from quanda.QDFetch import QDTdx as QATdx
+from quanda.QDFetch import QDThs as QAThs
+from quanda.QDFetch import QDTushare as QATushare
 
-from quanda.QDUtil.QAParameter import (DATABASE_TABLE, DATASOURCE,
+from quanda.QDUtil.QDParameter import (DATABASE_TABLE, DATASOURCE,
                                           FREQUENCE, MARKET_TYPE,
                                           OUTPUT_FORMAT)
-from quanda.QDUtil.QASql import QA_util_sql_mongo_setting
-from quanda.QDUtil.QADate_trade import QA_util_get_next_period
+from quanda.QDUtil.QDSql import QA_util_sql_mongo_setting
+from quanda.QDUtil.QDDate_trade import QA_util_get_next_period
 from quanda.QDData.data_resample import QA_data_day_resample
 from quanda.QDSU import save_tdx
 import pandas as pd
@@ -39,18 +37,18 @@ import datetime
 
 
 class QA_Fetcher():
-    def __init__(self, uri='mongodb://127.0.0.1:27017/quantaxis', username='', password=''):
+    def __init__(self, uri='mongodb://127.0.0.1:27017/quanda', username='', password=''):
         """
         初始化的时候 会初始化
         """
 
-        self.database = QA_util_sql_mongo_setting(uri).quantaxis
+        self.database = QA_util_sql_mongo_setting(uri).quanda
         self.history = {}
         # self.best_ip = QATdx.select_best_ip()  # 项目不涉及股票业务，注释掉自动IP选择
         self.best_ip = None
 
     def change_ip(self, uri):
-        self.database = QA_util_sql_mongo_setting(uri).quantaxis
+        self.database = QA_util_sql_mongo_setting(uri).quanda
         return self
 
     def get_quotation(self, code=None, start=None, end=None, frequence=None, market=None, source=None, output=None):

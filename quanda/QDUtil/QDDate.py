@@ -7,7 +7,7 @@ import threading
 import time
 import pandas as pd
 
-from quanda.QDUtil.QALogs import QA_util_log_info
+from quanda.QDUtil.QDLogs import QA_util_log_info
 
 QATZInfo_CN = 'Asia/Shanghai'
 
@@ -360,7 +360,7 @@ def QA_util_realtime(strtime, client):
         dict
     """
     time_stamp = QA_util_date_stamp(strtime)
-    coll = client.quantaxis.trade_date
+    coll = client.quanda.trade_date
     temp_str = coll.find_one({'date_stamp': {"$gte": time_stamp}})
     time_real = temp_str['date']
     time_id = temp_str['num']
@@ -385,7 +385,7 @@ def QA_util_id2date(idx, client):
     return:
         str
     """
-    coll = client.quantaxis.trade_date
+    coll = client.quanda.trade_date
     temp_str = coll.find_one({'num': idx})
     return temp_str['date']
 
@@ -412,7 +412,7 @@ def QA_util_is_trade(date, code, client):
     return:
         bool
     """
-    coll = client.quantaxis.stock_day
+    coll = client.quanda.stock_day
     date = str(date)[0:10]
     is_trade = coll.find_one({'code': code, 'date': date})
     try:
@@ -467,7 +467,7 @@ def QA_util_get_index_date(id, trade_list):
 def QA_util_select_hours(time=None, gt=None, lt=None, gte=None, lte=None):
     """
     explanation:
-        quantaxis的时间选择函数,约定时间的范围,比如早上9点到11点
+        quanda的时间选择函数,约定时间的范围,比如早上9点到11点
 
     params:
         * time->

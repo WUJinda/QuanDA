@@ -2,7 +2,7 @@ import pandas as pd
 from qaenv import (clickhouse_ip, clickhouse_password, clickhouse_port,
                    clickhouse_user)
 from quanda.QDFactor.feature import QASingleFactor_DailyBase
-from quanda.QDFetch.QAClickhouse import QACKClient
+from quanda.QDFetch.QDClickhouse import QACKClient
 from quanda.QDIndicator.indicators import QA_indicator_MA
 
 

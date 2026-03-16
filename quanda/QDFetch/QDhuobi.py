@@ -22,19 +22,19 @@ from retrying import retry
 
 from urllib.parse import urljoin
 
-from quanda.QDUtil.QADate_Adv import (
+from quanda.QDUtil.QDDate_Adv import (
     QA_util_str_to_Unix_timestamp,
     QA_util_datetime_to_Unix_timestamp,
     QA_util_timestamp_to_str,
     QA_util_print_timestamp,
 )
-from quanda.QDUtil.QAcrypto import QA_util_find_missing_kline
-from quanda.QDUtil.QALogs import (
+from quanda.QDUtil.QDcrypto import QA_util_find_missing_kline
+from quanda.QDUtil.QDLogs import (
     QA_util_log_info,
     QA_util_log_expection,
     QA_util_log_debug
 )
-from quanda.QDFetch.QAhuobi_realtime import (
+from quanda.QDFetch.QDhuobi_realtime import (
     QA_Fetch_Job_Status,
     QA_Fetch_Job_Type,
     QA_Fetch_Job,
@@ -45,7 +45,7 @@ from quanda.QDFetch.QAhuobi_realtime import (
     FREQUENCY_SHIFTING,
 )
 
-# from quanda.QDUtil.QAcrypto import TIMEOUT, ILOVECHINA
+# from quanda.QDUtil.QDcrypto import TIMEOUT, ILOVECHINA
 TIMEOUT = 10
 ILOVECHINA = "同学！！你知道什么叫做科学上网么？ 如果你不知道的话，那么就加油吧！蓝灯，喵帕斯，VPS，阴阳师，v2ray，随便什么来一个！我翻墙我骄傲！"
 Huobi_base_url = 'https://api.huobi.pro/'

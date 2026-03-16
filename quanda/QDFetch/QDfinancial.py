@@ -8,8 +8,8 @@ import requests
 import pandas as pd
 from pytdx.reader.history_financial_reader import HistoryFinancialReader
 from pytdx.crawler.history_financial_crawler import HistoryFinancialCrawler
-from quanda.QDUtil.QAFile import QA_util_file_md5
-from quanda.QDSetting.QALocalize import qa_path, download_path
+from quanda.QDUtil.QDFile import QA_util_file_md5
+from quanda.QDSetting.QDLocalize import qa_path, download_path
 #from pytdx.crawler.base_crawler import demo_reporthook
 """
 参见PYTDX 1.65

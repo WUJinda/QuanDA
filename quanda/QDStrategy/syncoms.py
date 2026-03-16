@@ -8,7 +8,7 @@ class QAStrategySyncOrders():
     """
     订单同步器
     如何挂实盘账户请看 QATrader
-    http://www.yutiansut.com:3000/topic/5dc865e8c466af76e9e3bdd1
+    https://github.com/WUJinda/QuanDA
     你可以理解成这是一个流处理的过程
     simid  被跟单的策略的id
     realid 实盘账户id

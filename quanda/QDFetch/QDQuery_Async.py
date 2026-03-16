@@ -16,7 +16,7 @@ from quanda.QDUtil import (QA_Setting, QA_util_code_tolist,
                               QA_util_sql_mongo_sort_DESCENDING,
                               QA_util_time_stamp, QA_util_to_json_from_pandas,
                               trade_date_sse)
-from quanda.QDUtil.QASetting import DATABASE, DATABASE_ASYNC
+from quanda.QDUtil.QDSetting import DATABASE, DATABASE_ASYNC
 
 
 

@@ -56,7 +56,7 @@ def QA_fetch_get_stock_block():
         [type] -- [description]
     """
 
-    url='http://data.yutiansut.com/ths_block.csv'
+    url=None  # 需要替换为有效的数据源
     try:
         return pd.read_csv(url).set_index('code', drop=False)
     except:

@@ -4,7 +4,6 @@
 #
 """
 quanda Log Module
-@yutiansut
 
 QA_util_log_x is under [QAStandard#0.0.2@602-x] Protocol
 QA_util_log_info()
@@ -20,9 +19,9 @@ try:
     from zenlog import logging
 except ImportError:
     import logging
-from quanda.QDSetting.QALocalize import log_path, setting_path
+from quanda.QDSetting.QDLocalize import log_path, setting_path
 
-from quanda.QDUtil.QASetting import QA_Setting
+from quanda.QDUtil.QDSetting import QA_Setting
 
 
 """2019-01-03  升级到warning级别 不然大量别的代码的log会批量输出出来
@@ -127,7 +126,6 @@ def QA_util_log_info(logs, ui_log=None, ui_progress=None, ui_progress_int_value=
 
     """
     quanda Log Module
-    @yutiansut
 
     QA_util_log_x is under [QAStandard#0.0.2@602-x] Protocol
     """

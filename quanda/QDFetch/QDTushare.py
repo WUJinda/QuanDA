@@ -24,7 +24,7 @@ def set_token(token=None):
         return
     try:
         if token is None:
-            # 从~/.quantaxis/setting/config.ini中读取配置
+            # 从~/.quanda/setting/config.ini中读取配置
             token = QASETTING.get_config('TSPRO', 'token', None)
         else:
             QASETTING.set_config('TSPRO', 'token', token)

@@ -6,8 +6,8 @@ import subprocess
 
 import pandas as pd
 
-from quanda.QDUtil.QASetting import DATABASE
-from quanda.QDUtil.QALogs import QA_util_log_info
+from quanda.QDUtil.QDSetting import DATABASE
+from quanda.QDUtil.QDLogs import QA_util_log_info
 
 
 def QA_util_mongo_initial(db=DATABASE):

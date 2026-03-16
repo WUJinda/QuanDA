@@ -8,7 +8,7 @@ import math
 import numpy as np
 import pandas as pd
 
-from quanda.QDUtil.QADate_trade import (
+from quanda.QDUtil.QDDate_trade import (
     QA_util_date_gap,
     QA_util_get_real_datelist,
     QA_util_get_trade_range,

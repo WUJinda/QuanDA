@@ -11,7 +11,7 @@ Arrow数据转换器 - Pandas/Polars/Arrow零拷贝转换
 - 内存占用降低50-80%
 - 支持大数据集(GB级)
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 from typing import Union, Optional

@@ -20,8 +20,8 @@ import quanda as QA
 from quanda.QDStrategy.util import QA_data_futuremin_resample
 from quanda.QIFI.QifiAccount import ORDER_DIRECTION, QIFI_Account
 from quanda.QDMarket.market_preset import MARKET_PRESET
-from quanda.QDEngine.QAThreadEngine import QA_Thread
-from quanda.QDUtil.QAParameter import MARKET_TYPE, RUNNING_ENVIRONMENT
+from quanda.QDEngine.QDThreadEngine import QA_Thread
+from quanda.QDUtil.QDParameter import MARKET_TYPE, RUNNING_ENVIRONMENT
 
 
 class QAStrategyCtaBase():
@@ -741,8 +741,9 @@ class QAStrategyCtaBase():
                         for user in self.subscriber_list:
                             QA.QA_util_log_info(self.subscriber_list)
                             try:
-                                requests.post('http://www.yutiansut.com/signal?user_id={}&template={}&strategy_id={}&realaccount={}&code={}&order_direction={}&order_offset={}&price={}&volume={}&order_time={}'.format(
-                                    user, "xiadan_report", self.strategy_id, self.acc.user_id, code.lower(), direction, offset, price, volume, now))
+                                # requests.post('http://example.com/signal?user_id={}&template={}&strategy_id={}&realaccount={}&code={}&order_direction={}&order_offset={}&price={}&volume={}&order_time={}'.format(
+                                #     user, "xiadan_report", self.strategy_id, self.acc.user_id, code.lower(), direction, offset, price, volume, now))
+                                pass
                             except Exception as e:
                                 QA.QA_util_log_info(e)
 

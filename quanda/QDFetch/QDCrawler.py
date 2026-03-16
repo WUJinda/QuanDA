@@ -4,9 +4,9 @@
 #
 import pandas as pd
 import random
-from quanda.QDUtil.QADate_trade import trade_date_sse
-from quanda.QDUtil.QADate import QA_util_date_str2int
-from quanda.QDUtil.QACode import QA_util_code_tostr
+from quanda.QDUtil.QDDate_trade import trade_date_sse
+from quanda.QDUtil.QDDate import QA_util_date_str2int
+from quanda.QDUtil.QDCode import QA_util_code_tostr
 
 _sh_url = 'http://www.sse.com.cn/market/dealingdata/overview/margin/a/rzrqjygk{}.xls'
 _sz_url = 'http://www.szse.cn/api/report/ShowReport.szse?SHOWTYPE=xlsx&CATALOGID=1837_xxpl&txtDate={}&tab2PAGENO=1&ENCODE=1&TABKEY=tab2&random={}'

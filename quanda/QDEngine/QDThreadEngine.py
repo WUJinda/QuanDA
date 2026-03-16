@@ -7,7 +7,7 @@ import threading
 import time
 from queue import Queue
 
-from quanda.QDEngine.QATask import QA_Task
+from quanda.QDEngine.QDTask import QA_Task
 from quanda.QDUtil import QA_util_log_info, QA_util_random_with_topic
 """标准化的QUANATAXIS事件分发,可以快速引入和复用
 每个事件需要携带一个方法,并且是需要立即被执行的时间才能使用这个事件方法"""

@@ -5,7 +5,7 @@
 import datetime
 import pandas as pd
 from quanda.QDUtil import DATABASE, QA_util_to_json_from_pandas
-from quanda.QDUtil.QASql import ASCENDING, DESCENDING
+from quanda.QDUtil.QDSql import ASCENDING, DESCENDING
 
 
 def QA_SU_save_order(orderlist, client=DATABASE):

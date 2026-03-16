@@ -34,7 +34,7 @@ def get_future_list_safe():
 
     try:
         # 尝试从TDX获取
-        from quanda.QDFetch.QATdx import QA_fetch_get_future_list
+        from quanda.QDFetch.QDTdx import QA_fetch_get_future_list
         data = QA_fetch_get_future_list()
         if data is not None and not data.empty:
             return data['code'].tolist()
@@ -87,7 +87,7 @@ def get_future_data_safe(code, start, end, frequence='day', limit=None):
     
     try:
         # 尝试从TDX获取
-        from quanda.QDFetch.QATdx import QA_fetch_get_future_day, QA_fetch_get_future_min
+        from quanda.QDFetch.QDTdx import QA_fetch_get_future_day, QA_fetch_get_future_min
         if frequence in ['day', 'week', 'month']:
             data = QA_fetch_get_future_day(code, start, end, frequence)
         else:
@@ -303,7 +303,7 @@ class QDFutureRealtimeHandler(QDBaseHandler):
             
             # 尝试获取实时数据
             try:
-                from quanda.QDFetch.QATdx import QA_fetch_get_future_realtime
+                from quanda.QDFetch.QDTdx import QA_fetch_get_future_realtime
                 data = QA_fetch_get_future_realtime(code)
                 if data is not None and not data.empty:
                     result = data.reset_index().to_dict('records')[0]

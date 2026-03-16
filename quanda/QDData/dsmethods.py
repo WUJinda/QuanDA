@@ -6,7 +6,7 @@
 """
 import pandas as pd
 import numpy as np
-from quanda.QDData.QADataStruct import (
+from quanda.QDData.QDDataStruct import (
     QA_DataStruct_Index_day,
     QA_DataStruct_Index_min,
     QA_DataStruct_Future_day,
@@ -14,7 +14,7 @@ from quanda.QDData.QADataStruct import (
     QA_DataStruct_Stock_day,
     QA_DataStruct_Stock_min
 )
-from quanda.QDUtil.QAParameter import FREQUENCE, MARKET_TYPE
+from quanda.QDUtil.QDParameter import FREQUENCE, MARKET_TYPE
 
 
 def concat(lists):

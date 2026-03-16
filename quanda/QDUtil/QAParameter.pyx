@@ -2,7 +2,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2016-2021 yutiansut/QUANTAXIS
+# Copyright (c) 2016-2025 QuanDA
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -102,7 +102,7 @@ class ORDER_MODEL():
     NEXT_OPEN 下一个bar的开盘价成交
     STRICT 严格订单 不推荐/仅限回测/是在当前bar的最高价买入/当前bar的最低价卖出
 
-    @yutiansut/2017-12-18
+    QuanDA/2017-12-18
     """
 
     LIMIT = 'LIMIT'  # 限价
@@ -360,7 +360,7 @@ class FREQUENCE():
     REALTIME_MIN = 'realtime_min' # 实时分钟线
     LATEST = 'latest'  # 当前bar/latest
 
-    2019/08/06 @yutiansut
+    2019/08/06 QuanDA
     """
 
     YEAR = 'year'  # 年bar

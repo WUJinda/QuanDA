@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import Collection
 
-from quanda.QDEngine.QAAsyncTask import QA_AsyncTask
+from quanda.QDEngine.QDAsyncTask import QA_AsyncTask
 
 bases = (Collection,)
 

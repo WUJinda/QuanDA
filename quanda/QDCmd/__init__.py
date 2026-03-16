@@ -206,9 +206,8 @@ class CLI(cmd.Cmd):
             ⌨️命令格式：crawl jrj       zjlx  all        : 抓取 金融界   所有股票资金流向   ❤️鸣谢❤️ www.jrj.com.cn    网页提供数据！\n\
             ⌨️命令格式：crawl 10jqka    funds all        : 抓取 同花顺   所有股票资金流向   ❤️鸣谢❤️ www.10jqka.com.cn 网页提供数据！\n\
             -----------------------------------------------------------------------------------------------------------------------\n\
-            @yutiansut\n\
-            @quanda\n\
-            请访问 https://book.yutiansut.com/\n\
+            @QuanDA\n\
+            https://github.com/WUJinda/QuanDA\n\
             "
         )
 
@@ -341,9 +340,8 @@ class CLI(cmd.Cmd):
                 save all+ save stock_block+save stock_info, it about 1G data \n\
             if you want to save save the fully data including min level \n\
                 save x + save stock_info \n \n\
-            @yutiansut\n\
-            @quanda\n\
-            请访问 https://book.yutiansut.com/\n\
+            @QuanDA\n\
+            https://github.com/WUJinda/QuanDA\n\
             "
         )
 

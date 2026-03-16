@@ -10,7 +10,7 @@ try:
 except:
     from pyecharts.charts import Kline
 
-from quanda.QDUtil.QALogs import QA_util_log_info
+from quanda.QDUtil.QDLogs import QA_util_log_info
 
 
 """

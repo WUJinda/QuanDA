@@ -2,4 +2,4 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QDAnalysis.QAAnalysis_block import *
+from quanda.QDAnalysis.QDAnalysis_block import *

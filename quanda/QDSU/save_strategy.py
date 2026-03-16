@@ -3,7 +3,7 @@
 # The MIT License (MIT)
 #
 from quanda.QDUtil import DATABASE
-from quanda.QDSetting.QALocalize import strategy_path
+from quanda.QDSetting.QDLocalize import strategy_path
 import datetime
 import os
 import sys

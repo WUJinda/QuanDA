@@ -9,7 +9,7 @@ QADataBridge性能基准测试
 
 生成性能报告，用于评估QADataSwap的加速效果
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 import sys

@@ -13,8 +13,8 @@ from quanda.QDUtil import (
     QA_util_random_with_topic,
     QA_util_to_json_from_pandas
 )
-from quanda.QDUtil.QADate import QA_util_stamp2datetime
-from quanda.QDUtil.QAParameter import (
+from quanda.QDUtil.QDDate import QA_util_stamp2datetime
+from quanda.QDUtil.QDParameter import (
     AMOUNT_MODEL,
     MARKET_TYPE,
     ORDER_DIRECTION,

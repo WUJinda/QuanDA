@@ -1,7 +1,7 @@
 import datetime
 import calendar
 from dateutil.relativedelta import relativedelta
-from quanda.QDUtil.QASetting import (DATABASE)
+from quanda.QDUtil.QDSetting import (DATABASE)
 try:
     import pymongo
 except ImportError:

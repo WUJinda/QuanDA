@@ -6,7 +6,7 @@ import threading
 
 import tornado
 from quanda.QDUtil import QA_util_log_info
-from quanda.QDUtil.QADict import QA_util_dict_remove_key
+from quanda.QDUtil.QDDict import QA_util_dict_remove_key
 from quanda.QDWebServer.basehandles import QDBaseHandler, QDWebSocketHandler
 from tornado.web import Application, RequestHandler, authenticated
 from tornado.websocket import WebSocketHandler

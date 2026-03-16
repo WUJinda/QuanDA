@@ -12,7 +12,7 @@ import pymongo
 import os
 
 import quanda as QA
-from quanda.QDFetch.QATdx import QA_fetch_get_stock_list
+from quanda.QDFetch.QDTdx import QA_fetch_get_stock_list
 from quanda.QDUtil import (
     DATABASE, QA_util_date_stamp, QA_util_get_real_date, QA_util_log_info,
     QA_util_time_stamp, QA_util_to_json_from_pandas, trade_date_sse)

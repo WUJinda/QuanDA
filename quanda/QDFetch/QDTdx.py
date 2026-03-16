@@ -22,10 +22,10 @@ from quanda.QDUtil import (QA_Setting, QA_util_date_stamp, QA_util_code_tostr,
                               QA_util_time_stamp, QA_util_web_ping,
                               exclude_from_stock_ip_list, future_ip_list,
                               stock_ip_list, trade_date_sse)
-from quanda.QDUtil.QASetting import QASETTING
-from quanda.QDSetting.QALocalize import log_path
+from quanda.QDUtil.QDSetting import QASETTING
+from quanda.QDSetting.QDLocalize import log_path
 from quanda.QDUtil import Parallelism
-from quanda.QDUtil.QACache import QA_util_cache
+from quanda.QDUtil.QDCache import QA_util_cache
 
 
 def init_fetcher():
@@ -612,8 +612,7 @@ def QA_fetch_depth_market_data(code=['000001', '000002'], ip=None, port=None):
 B股买卖的代码是以200打头，如：深中冠B股，代码是200018。
 中小板股票代码以002打头，如：东华合创股票代码是002065。
 创业板股票代码以300打头，如：探路者股票代码是：300005
-更多参见 issue https://github.com/quanda/quanda/issues/158
-@yutiansut
+更多参见 issue https://github.com/WUJinda/QuanDA/issues/158
 '''
 
 

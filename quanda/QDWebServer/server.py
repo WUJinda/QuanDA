@@ -8,7 +8,7 @@ import sys
 
 import tornado
 from quanda import __version__
-from quanda.QDUtil.QASetting import QASETTING
+from quanda.QDUtil.QDSetting import QASETTING
 from quanda.QDWebServer.basehandles import QDBaseHandler
 from quanda.QDWebServer.commandhandler import (CommandHandler,
                                                   CommandHandlerWS,

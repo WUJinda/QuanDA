@@ -14,7 +14,7 @@ except ImportError:
     ts = None
 
 try:
-    from quanda.QDFetch.QATushare import (
+    from quanda.QDFetch.QDTushare import (
         QA_fetch_get_stock_day,
         QA_fetch_get_stock_info,
         QA_fetch_get_stock_list,
@@ -38,7 +38,7 @@ from quanda.QDUtil import (
     QA_util_get_real_date,
     QA_util_get_next_day
 )
-from quanda.QDUtil.QASetting import DATABASE
+from quanda.QDUtil.QDSetting import DATABASE
 
 try:
     import tushare as QATs
@@ -114,7 +114,7 @@ def QA_SU_save_stock_list_to_stock_list(client=DATABASE):
     """从 Tushare 获取股票列表并写入 stock_list（与 TDX 格式兼容）"""
     df = None
     try:
-        from quanda.QDFetch.QATushare import QA_fetch_stock_basic
+        from quanda.QDFetch.QDTushare import QA_fetch_stock_basic
         df = QA_fetch_stock_basic()
         if df is not None and len(df) > 0:
             if 'list_status' in df.columns:
@@ -136,7 +136,7 @@ def QA_SU_save_stock_list_to_stock_list(client=DATABASE):
                 df['name'] = df['name'].fillna('') if 'name' in df.columns else ''
                 df['sse'] = df['code'].apply(lambda c: 'sh' if str(c).startswith('6') else 'sz')
         except Exception as e2:
-            print("请设置 TUSHARE_TOKEN 或环境变量 TUSHARE_TOKEN，或配置 ~/.quantaxis/setting/config.ini [TSPRO] token")
+            print("请设置 TUSHARE_TOKEN 或环境变量 TUSHARE_TOKEN，或配置 ~/.quanda/setting/config.ini [TSPRO] token")
             raise
     if df is None or len(df) == 0:
         raise ValueError("Tushare 未返回数据")
@@ -206,7 +206,7 @@ def QA_SU_save_stock_info_tushare(client=DATABASE):
 
         add by tauruswang
 
-    在命令行工具 quantaxis 中输入 save stock_info_tushare 中的命令
+    在命令行工具 quanda 中输入 save stock_info_tushare 中的命令
     :param client:
     :return:
     '''
@@ -475,5 +475,5 @@ def QA_SU_save_stock_block(client=DATABASE, ui_log=None, ui_progress=None):
 if __name__ == '__main__':
     from pymongo import MongoClient
     client = MongoClient('localhost', 27017)
-    db = client['quantaxis']
+    db = client['quanda']
     QA_SU_save_stock_day(client=db)

@@ -3,7 +3,7 @@ from uuid import uuid4
 from quanda.QDUtil import QA_util_get_last_day, QA_util_get_trade_range, QA_util_code_change_format
 from quanda.QDFactor.featureView import QAFeatureView
 from quanda.QIFI.QifiAccount import QIFI_Account
-from quanda.QDFetch.QAClickhouse import QACKClient
+from quanda.QDFetch.QDClickhouse import QACKClient
 from dateutil import parser
 from qaenv import clickhouse_ip, clickhouse_password, clickhouse_user, clickhouse_port, mongo_ip
 

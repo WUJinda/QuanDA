@@ -22,7 +22,7 @@ except:
 
 from quanda.QDUtil import (QA_util_log_info, QA_util_random_with_topic,
                               QA_util_to_json_from_pandas)
-from quanda.QDUtil.QADate import QA_util_to_datetime
+from quanda.QDUtil.QDDate import QA_util_to_datetime
 
 # todo 🛠基类名字 _quotation_base 小写是因为 不直接初始化， 建议改成抽象类
 

@@ -10,7 +10,7 @@ import pandas as pd
 import pymongo
 
 from quanda.QDFetch import QA_fetch_get_stock_block
-from quanda.QDFetch.QATdx import (
+from quanda.QDFetch.QDTdx import (
     QA_fetch_get_option_day,
     QA_fetch_get_option_min,
     QA_fetch_get_index_day,
@@ -38,7 +38,7 @@ from quanda.QDFetch.QATdx import (
     QA_fetch_get_usstock_min,
 )
 
-from quanda.QDFetch.QATdx import (
+from quanda.QDFetch.QDTdx import (
 
     QA_fetch_get_commodity_option_AL_contract_time_to_market,
     QA_fetch_get_commodity_option_AU_contract_time_to_market,
@@ -63,9 +63,9 @@ from quanda.QDUtil import (
     trade_date_sse
 )
 from quanda.QDData.data_fq import _QA_data_stock_to_fq
-from quanda.QDFetch.QAQuery import QA_fetch_stock_day
+from quanda.QDFetch.QDQuery import QA_fetch_stock_day
 from quanda.QDUtil import Parallelism
-from quanda.QDFetch.QATdx import ping, get_ip_list_by_multi_process_ping, stock_ip_list
+from quanda.QDFetch.QDTdx import ping, get_ip_list_by_multi_process_ping, stock_ip_list
 from multiprocessing import cpu_count
 
 
@@ -172,7 +172,7 @@ def _get_stock_list_with_fallback():
     try:
         return QA_fetch_get_stock_list().code.unique().tolist()
     except Exception:
-        from quanda.QDFetch.QAQuery import QA_fetch_stock_list
+        from quanda.QDFetch.QDQuery import QA_fetch_stock_list
         df = QA_fetch_stock_list()
         if df is None or len(df) == 0:
             raise ValueError(

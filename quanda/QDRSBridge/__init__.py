@@ -18,7 +18,7 @@ quanda/QARSBridge - QARS2 Rust核心桥接层
     >>>     from quanda.QIFI import QIFI_Account
     >>>     account = QIFI_Account("test")
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 __version__ = "2.1.0.alpha1"
@@ -45,9 +45,9 @@ except ImportError:
     warnings.warn(
         "QARS2 Rust核心未安装，将使用纯Python实现。\n"
         "安装方法:\n"
-        "  pip install quantaxis[rust]\n"
+        "  pip install quanda[rust]\n"
         "或者:\n"
-        "  cd /home/quantaxis/qars2 && pip install -e .\n"
+        "  cd /path/to/qars2 && pip install -e .\n"
         "\n"
         "性能对比: Rust版本比Python版本快10-100倍",
         ImportWarning,
@@ -90,16 +90,16 @@ else:
     from ..QIFI.QifiAccount import QIFI_Account as QARSAccount
 
     class QARSBacktest:
-        """占位类: 回测需安装qars3。使用 pip install quantaxis[rust]"""
+        """占位类: 回测需安装qars3。使用 pip install quanda[rust]"""
         def __init__(self, *args, **kwargs):
             raise ImportError(
-                "QARSBacktest 需要 qars3。安装: pip install quantaxis[rust]"
+                "QARSBacktest 需要 qars3。安装: pip install quanda[rust]"
             )
 
     import sys
     if not sys.flags.quiet:
         print("[Python] Using Python implementation (QARS2 not detected)")
-        print("  Install: pip install quantaxis[rust] for 100x performance boost")
+        print("  Install: pip install quanda[rust] for 100x performance boost")
 
 
 # ============================================================================

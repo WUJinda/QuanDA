@@ -20,7 +20,7 @@ from requests.exceptions import ConnectTimeout, SSLError, ReadTimeout, Connectio
 from retrying import retry
 from urllib.parse import urljoin
 
-from quanda.QDUtil.QADate_Adv import (
+from quanda.QDUtil.QDDate_Adv import (
     QA_util_timestamp_to_str,
     QA_util_datetime_to_Unix_timestamp,
     QA_util_timestamp_to_str,

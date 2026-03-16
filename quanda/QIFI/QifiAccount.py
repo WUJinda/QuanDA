@@ -9,8 +9,8 @@ import pymongo
 from pymongo import message
 from qaenv import mongo_ip, clickhouse_ip, clickhouse_password, clickhouse_port, clickhouse_user
 from quanda.QDMarket.market_preset import MARKET_PRESET
-from quanda.QDMarket.QAOrder import ORDER_DIRECTION
-from quanda.QDMarket.QAPosition import QA_Position
+from quanda.QDMarket.QDOrder import ORDER_DIRECTION
+from quanda.QDMarket.QDPosition import QA_Position
 import clickhouse_driver
 
 
@@ -511,7 +511,7 @@ class QIFI_Account():
 
     def create_simaccount(self):
         self._trading_day = str(datetime.date.today())
-        self.wsuri = "ws://www.yutiansut.com:7988"
+        self.wsuri = "ws://localhost:7988"
         self.pre_balance = 0
         self.static_balance = 0
         self.deposit = 0  # 入金

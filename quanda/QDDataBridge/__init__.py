@@ -21,7 +21,7 @@ quanda/QADataBridge - 跨语言零拷贝数据交换桥接层
     >>>     writer = SharedMemoryWriter("my_data")
     >>>     writer.write(df_polars)
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 __version__ = "2.1.0.alpha2"
@@ -52,9 +52,9 @@ except ImportError:
     warnings.warn(
         "QADataSwap未安装，跨语言零拷贝通信功能不可用。\n"
         "安装方法:\n"
-        "  pip install quantaxis[rust]\n"
+        "  pip install quanda[rust]\n"
         "或者:\n"
-        "  cd /home/quantaxis/qars2/libs/qadataswap && pip install -e .\n"
+        "  cd /path/to/qars2/libs/qadataswap && pip install -e .\n"
         "\n"
         "性能对比: 零拷贝传输比传统序列化快5-10倍",
         ImportWarning,
@@ -148,7 +148,7 @@ else:
         def __init__(self, *args, **kwargs):
             raise RuntimeError(
                 "SharedMemoryWriter需要QADataSwap支持\n"
-                "请安装: pip install quantaxis[rust]"
+                "请安装: pip install quanda[rust]"
             )
 
     class SharedMemoryReader:
@@ -156,13 +156,13 @@ else:
         def __init__(self, *args, **kwargs):
             raise RuntimeError(
                 "SharedMemoryReader需要QADataSwap支持\n"
-                "请安装: pip install quantaxis[rust]"
+                "请安装: pip install quanda[rust]"
             )
 
     import sys
     if not sys.flags.quiet:
         print("[OK] 使用Python fallback (未检测到QADataSwap)")
-        print("  建议: pip install quantaxis[rust] 获得5-10x数据传输加速")
+        print("  建议: pip install quanda[rust] 获得5-10x数据传输加速")
 
 
 # ============================================================================

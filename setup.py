@@ -102,7 +102,7 @@ KEYWORDS = ["quanda", "quant", "finance", "Backtest", 'Framework']
 
 """
 
-AUTHOR_EMAIL = "yutiansut@qq.com"
+AUTHOR_EMAIL = "contact@quanda.io"
 
 URL = "https://github.com/WUJinda/QuanDA"
 

@@ -7,13 +7,13 @@ import sys
 
 import pymongo
 
-from quanda.QDFetch.QAfinancial import (download_financialzip, parse_all,
+from quanda.QDFetch.QDfinancial import (download_financialzip, parse_all,
                                            parse_filelist,download_financialzip_fromtdx)
-from quanda.QDSetting.QALocalize import (cache_path, download_path, qa_path,
+from quanda.QDSetting.QDLocalize import (cache_path, download_path, qa_path,
                                             setting_path)
 from quanda.QDUtil import DATABASE, QA_util_date_int2str
-from quanda.QDUtil.QASql import ASCENDING, DESCENDING
-from quanda.QDUtil.QATransform import QA_util_to_json_from_pandas
+from quanda.QDUtil.QDSql import ASCENDING, DESCENDING
+from quanda.QDUtil.QDTransform import QA_util_to_json_from_pandas
 import datetime
 
 

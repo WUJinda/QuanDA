@@ -28,7 +28,7 @@ except ImportError:
     clickhouse_port = 9000
     clickhouse_user = 'default'
 try:
-    from quanda.QDFetch.QAClickhouse import QACKClient
+    from quanda.QDFetch.QDClickhouse import QACKClient
 except ImportError:
     QACKClient = None
 try:

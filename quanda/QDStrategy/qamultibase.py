@@ -14,8 +14,8 @@ from qaenv import (eventmq_ip, eventmq_password, eventmq_port,
 
 import quanda as QA
 
-from quanda.QDEngine.QAThreadEngine import QA_Thread
-from quanda.QDUtil.QAParameter import MARKET_TYPE, RUNNING_ENVIRONMENT, ORDER_DIRECTION
+from quanda.QDEngine.QDThreadEngine import QA_Thread
+from quanda.QDUtil.QDParameter import MARKET_TYPE, RUNNING_ENVIRONMENT, ORDER_DIRECTION
 from QDPUBSUB.consumer import subscriber_topic,  subscriber_routing
 from QDPUBSUB.producer import publisher_routing
 from quanda.QDStrategy.qactabase import QAStrategyCtaBase

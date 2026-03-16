@@ -2,8 +2,8 @@
 import time
 
 from quanda.QDARP.QAStrategy import QA_Strategy
-from quanda.QDUtil.QALogs import QA_util_log_info
-from quanda.QDUtil.QAParameter import (AMOUNT_MODEL, FREQUENCE, MARKET_TYPE,
+from quanda.QDUtil.QDLogs import QA_util_log_info
+from quanda.QDUtil.QDParameter import (AMOUNT_MODEL, FREQUENCE, MARKET_TYPE,
                                           ORDER_DIRECTION, ORDER_MODEL)
 from quanda.QDSU.save_strategy import QA_SU_save_strategy
 

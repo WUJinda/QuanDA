@@ -3,7 +3,7 @@ from quanda.QDPubSub.setting import qapubsub_ip, qapubsub_port, qapubsub_user, q
 
 # v2.1.0+: 引入统一资源管理器
 try:
-    from quanda.QDUtil.QAResourceManager import QARabbitMQResourceManager
+    from quanda.QDUtil.QDResourceManager import QARabbitMQResourceManager
     HAS_RESOURCE_MANAGER = True
 except ImportError:
     HAS_RESOURCE_MANAGER = False

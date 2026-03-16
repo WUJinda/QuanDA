@@ -92,12 +92,8 @@ print(f"总保证金: {total_margin}")
 
 ## QIFI协议兼容
 
-QAMarket模块的订单/持仓结构完全兼容QIFI (QuantAxis Interoperable Financial Interface)协议,
+QAMarket模块的订单/持仓结构完全兼容QIFI协议,
 支持跨语言(Python/Rust/C++)和跨系统的数据交换。
-
-## 作者
-
-@yutiansut @quantaxis
 
 ## 版本
 
@@ -108,13 +104,13 @@ v2.1.0+ (2025)
 from quanda.QDMarket.market_preset import MARKET_PRESET
 
 # 订单管理
-from quanda.QDMarket.QAOrder import (
+from quanda.QDMarket.QDOrder import (
     QA_Order,
     QA_OrderQueue
 )
 
 # 持仓管理
-from quanda.QDMarket.QAPosition import (
+from quanda.QDMarket.QDPosition import (
     QA_Position,
     QA_PMS
 )

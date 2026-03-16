@@ -1046,7 +1046,7 @@ def QA_fetch_stock_name(code, collections=DATABASE.stock_list, ):
             return res['name']
         except Exception as e:
             if (res is None):
-                QA_util_log_info(u'请检查mongodb quantaxis.stock_list collection 是否为空。')
+                QA_util_log_info(u'请检查mongodb quanda.stock_list collection 是否为空。')
             QA_util_log_info(e)
             return code
     elif isinstance(code, list):

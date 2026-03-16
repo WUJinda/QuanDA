@@ -153,12 +153,12 @@ from quanda.QDFetch import (
 )
 # fetch methods
 from quanda.QDFetch.Fetcher import QA_quotation
-from quanda.QDFetch.QACrawler import (
+from quanda.QDFetch.QDCrawler import (
     QA_fetch_get_sh_margin,
     QA_fetch_get_sz_margin,
     QA_fetch_get_margin_all
 )
-from quanda.QDFetch.QAQuery import (
+from quanda.QDFetch.QDQuery import (
     QA_fetch_account,
     QA_fetch_backtest_history,
     QA_fetch_backtest_info,
@@ -192,12 +192,12 @@ from quanda.QDFetch.QAQuery import (
     QA_fetch_cryptocurrency_min,
     QA_fetch_cryptocurrency_list
 )
-from quanda.QDFetch.QAQuery_Advance import *
+from quanda.QDFetch.QDQuery_Advance import *
 from quanda.QDIndicator import *
 # market
-from quanda.QDFetch.QAClickhouse import QACKClient
+from quanda.QDFetch.QDClickhouse import QACKClient
 
-from quanda.QDSetting.QALocalize import (
+from quanda.QDSetting.QDLocalize import (
     cache_path,
     download_path,
     log_path,
@@ -259,7 +259,7 @@ from quanda.QDUtil import (  # QAPARAMETER
 
 # QAResourceManager - 统一资源管理器 (MongoDB/RabbitMQ/ClickHouse/Redis)
 try:
-    from quanda.QDUtil.QAResourceManager import (
+    from quanda.QDUtil.QDResourceManager import (
         QAMongoResourceManager,
         QARabbitMQResourceManager,
         QAClickHouseResourceManager,
@@ -355,7 +355,7 @@ def __repr__():
             ``#########``````########```##``````````````###`##``````````##```````##``##````````````##`##``````##````##`````###``### \n \
             ````````#####`````````````````````````````````````````````````````````````````````````````````````````````````````##``  \n \
             ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````` \n \
-            ``````````````````````````Copyright``yutiansut``2018``````QUANTITATIVE FINANCIAL FRAMEWORK````````````````````````````` \n \
+            ``````````````````````````Copyright``QuanDA``2025``````QUANTITATIVE FINANCIAL FRAMEWORK````````````````````````````` \n \
             ``````````````````````````````````````````````````````````````````````````````````````````````````````````````````````` \n \
             ```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````` \n \
             ```````````````````````````````````````````````````````````````````````````````````````````````````````````````````````` \n '

@@ -1,12 +1,12 @@
 from quanda.QDUtil import (QASETTING, DATABASE, QA_util_log_info)
-from quanda.QDUtil.QAParameter import (FREQUENCE)
+from quanda.QDUtil.QDParameter import (FREQUENCE)
 import pandas as pd
 from datetime import datetime
 import time
 from dateutil.tz import tzutc
 import pymongo
 
-from quanda.QDUtil.QADate_Adv import (
+from quanda.QDUtil.QDDate_Adv import (
     QA_util_str_to_Unix_timestamp,
     QA_util_datetime_to_Unix_timestamp,
     QA_util_timestamp_to_str,

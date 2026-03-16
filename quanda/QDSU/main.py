@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QDFetch.QAQuery import QA_fetch_stock_list
+from quanda.QDFetch.QDQuery import QA_fetch_stock_list
 # from quanda.QDSU import crawl_eastmoney as crawl_eastmoney_file
 from quanda.QDSU import save_tdx as stdx
 from quanda.QDSU import save_tdx_parallelism as stdx_parallelism

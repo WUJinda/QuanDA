@@ -20,7 +20,7 @@ try:
     from quanda.QDIndicator.talib_numpy import *
     import quanda as QA
     from quanda.QDIndicator.base import *
-    from quanda.QDUtil.QADate_Adv import (
+    from quanda.QDUtil.QDDate_Adv import (
         QA_util_timestamp_to_str,
         QA_util_datetime_to_Unix_timestamp,
         QA_util_print_timestamp

@@ -3,7 +3,7 @@
 # The MIT License (MIT)
 #
 from datetime import time
-from quanda.QDUtil.QAParameter import EXCHANGE_ID
+from quanda.QDUtil.QDParameter import EXCHANGE_ID
 import pandas as pd
 from pandas.tseries.frequencies import to_offset
 import numpy as np

@@ -4,7 +4,7 @@ from functools import wraps
 
 from janus import Queue as QA_AsyncQueue
 
-from quanda.QDEngine.QAEvent import QA_Event
+from quanda.QDEngine.QDEvent import QA_Event
 from quanda.QDUtil import QA_util_log_info, QA_util_random_with_topic, RUNNING_STATUS
 
 

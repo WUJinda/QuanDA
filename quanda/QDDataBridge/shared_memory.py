@@ -7,7 +7,7 @@
 - 跨语言通信 (Python/Rust/C++)
 - 支持Pandas/Polars DataFrame
 
-@yutiansut @quantaxis
+QuanDA Project
 """
 
 from typing import Optional, Union
@@ -70,7 +70,7 @@ class SharedMemoryWriter:
         if not HAS_DATASWAP:
             raise RuntimeError(
                 "SharedMemoryWriter需要QADataSwap支持\n"
-                "请安装: pip install quantaxis[rust]"
+                "请安装: pip install quanda[rust]"
             )
 
         self.name = name
@@ -179,7 +179,7 @@ class SharedMemoryReader:
         if not HAS_DATASWAP:
             raise RuntimeError(
                 "SharedMemoryReader需要QADataSwap支持\n"
-                "请安装: pip install quantaxis[rust]"
+                "请安装: pip install quanda[rust]"
             )
 
         self.name = name

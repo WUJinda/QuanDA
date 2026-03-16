@@ -48,7 +48,7 @@ def QA_save_tdx_to_mongo(file_dir, client=DATABASE):
 
 
 if __name__ == '__main__':
-    file_dir = ['C:\\users\\yutiansut\\desktop\\sh5fz',
-                'C:\\users\\yutiansut\\desktop\\sz5fz']
+    file_dir = ['C:\\data\\sh5fz',
+                'C:\\data\\sz5fz']
     for item in file_dir:
         QA_save_tdx_to_mongo(item)

@@ -17,7 +17,7 @@ QAResourceManager - quanda统一资源管理器
 
 ### 1. MongoDB资源管理
 ```python
-from quanda.QDUtil.QAResourceManager import QAMongoResourceManager
+from quanda.QDUtil.QDResourceManager import QAMongoResourceManager
 
 # 使用上下文管理器(推荐)
 with QAMongoResourceManager() as mongo:
@@ -37,7 +37,7 @@ finally:
 
 ### 2. RabbitMQ资源管理
 ```python
-from quanda.QDUtil.QAResourceManager import QARabbitMQResourceManager
+from quanda.QDUtil.QDResourceManager import QARabbitMQResourceManager
 
 with QARabbitMQResourceManager() as rabbitmq:
     channel = rabbitmq.get_channel()
@@ -51,7 +51,7 @@ with QARabbitMQResourceManager() as rabbitmq:
 
 ### 3. ClickHouse资源管理
 ```python
-from quanda.QDUtil.QAResourceManager import QAClickHouseResourceManager
+from quanda.QDUtil.QDResourceManager import QAClickHouseResourceManager
 
 with QAClickHouseResourceManager() as clickhouse:
     df = clickhouse.execute("SELECT * FROM stock_day LIMIT 10")
@@ -61,7 +61,7 @@ with QAClickHouseResourceManager() as clickhouse:
 
 ### 4. Redis资源管理
 ```python
-from quanda.QDUtil.QAResourceManager import QARedisResourceManager
+from quanda.QDUtil.QDResourceManager import QARedisResourceManager
 
 with QARedisResourceManager() as redis:
     redis.set('test_key', 'test_value')
@@ -72,7 +72,7 @@ with QARedisResourceManager() as redis:
 
 ### 5. 统一资源池管理器
 ```python
-from quanda.QDUtil.QAResourceManager import QAResourcePool
+from quanda.QDUtil.QDResourceManager import QAResourcePool
 
 # 创建资源池(单例模式)
 pool = QAResourcePool.get_instance()
@@ -88,10 +88,6 @@ redis = pool.get_redis()
 # 关闭所有资源
 pool.close_all()
 ```
-
-## 作者
-
-@yutiansut @quantaxis
 
 ## 版本
 
@@ -240,7 +236,7 @@ class QAMongoResourceManager(QABaseResourceManager):
         # 从环境变量或配置文件获取URI
         if uri is None:
             import os
-            from quanda.QDUtil.QASetting import QA_Setting
+            from quanda.QDUtil.QDSetting import QA_Setting
             try:
                 uri = QA_Setting().mongo_uri
             except:
