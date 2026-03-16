@@ -1,9 +1,9 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QDCmd import QA_cmd
 
 if __name__ == '__main__':
+    # 命令行工具已移除，请使用 Web 界面或 API
+    print("命令行工具已移除。请使用 Web 界面或 API 来运行 QuanDA。")
+    print("启动 Web 服务器: python -m quanda.QDWebServer.server")
 
-    # 确保用户的当前目录是 在根目录下执行
-    QA_cmd()
