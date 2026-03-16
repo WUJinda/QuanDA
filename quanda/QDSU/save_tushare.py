@@ -8,16 +8,27 @@ import re
 import time
 import pymongo
 
-import tushare as ts
+try:
+    import tushare as ts
+except ImportError:
+    ts = None
 
-from quanda.QDFetch.QATushare import (
-    QA_fetch_get_stock_day,
-    QA_fetch_get_stock_info,
-    QA_fetch_get_stock_list,
-    QA_fetch_get_stock_block,
-    QA_fetch_get_trade_date,
-    QA_fetch_get_lhb,
-)
+try:
+    from quanda.QDFetch.QATushare import (
+        QA_fetch_get_stock_day,
+        QA_fetch_get_stock_info,
+        QA_fetch_get_stock_list,
+        QA_fetch_get_stock_block,
+        QA_fetch_get_trade_date,
+        QA_fetch_get_lhb,
+    )
+except ImportError:
+    QA_fetch_get_stock_day = None
+    QA_fetch_get_stock_info = None
+    QA_fetch_get_stock_list = None
+    QA_fetch_get_stock_block = None
+    QA_fetch_get_trade_date = None
+    QA_fetch_get_lhb = None
 from quanda.QDUtil import (
     QA_util_date_stamp,
     QA_util_log_info,
@@ -29,7 +40,10 @@ from quanda.QDUtil import (
 )
 from quanda.QDUtil.QASetting import DATABASE
 
-import tushare as QATs
+try:
+    import tushare as QATs
+except ImportError:
+    QATs = None
 
 
 def date_conver_to_new_format(date_str):

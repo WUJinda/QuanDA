@@ -5,7 +5,10 @@
 import json
 import pandas as pd
 import time
-import tushare as ts
+try:
+    import tushare as ts
+except ImportError:
+    ts = None
 from quanda.QDUtil import (
     QA_util_date_int2str,
     QA_util_date_stamp,
@@ -16,6 +19,9 @@ from quanda.QDUtil import (
 
 
 def set_token(token=None):
+    if ts is None:
+        print('tushare 未安装，请运行: pip install tushare')
+        return
     try:
         if token is None:
             # 从~/.quantaxis/setting/config.ini中读取配置
@@ -31,6 +37,9 @@ def set_token(token=None):
 
 
 def get_pro():
+    if ts is None:
+        print('tushare 未安装，请运行: pip install tushare')
+        return None
     try:
         set_token()
         pro = ts.pro_api()

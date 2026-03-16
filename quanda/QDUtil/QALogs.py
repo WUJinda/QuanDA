@@ -16,7 +16,10 @@ import configparser
 import datetime
 import os
 import sys
-from zenlog import logging
+try:
+    from zenlog import logging
+except ImportError:
+    import logging
 from quanda.QDSetting.QALocalize import log_path, setting_path
 
 from quanda.QDUtil.QASetting import QA_Setting

@@ -280,8 +280,7 @@ from quanda.QDPubSub.base import base_ps
 from quanda.QDPubSub.debugtoool import debug_sub, debug_pub
 
 
-from quanda.QDWebServer.basehandles import QABaseHandler, QAWebSocketHandler
-from quanda.QDWebServer.schedulehandler import QAScheduleQuery, QASchedulerHandler
+from quanda.QDWebServer.basehandles import QDBaseHandler, QDWebSocketHandler
 from quanda.QDWebServer.server import start_server
 
 from quanda.QIFI.QifiAccount import QIFI_Account

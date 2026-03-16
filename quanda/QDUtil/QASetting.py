@@ -187,8 +187,42 @@ class QA_Setting():
 
 
 QASETTING = QA_Setting()
-DATABASE = QASETTING.client.quanda
-DATABASE_ASYNC = QASETTING.client_async.quanda
+
+# 延迟初始化数据库连接，避免在 pymongo 未安装时出错
+_DATABASE = None
+_DATABASE_ASYNC = None
+
+def get_database():
+    """获取数据库连接"""
+    global _DATABASE
+    if _DATABASE is None:
+        _DATABASE = QASETTING.client.quanda
+    return _DATABASE
+
+def get_database_async():
+    """获取异步数据库连接"""
+    global _DATABASE_ASYNC
+    if _DATABASE_ASYNC is None:
+        _DATABASE_ASYNC = QASETTING.client_async.quanda
+    return _DATABASE_ASYNC
+
+# 向后兼容的属性
+DATABASE = property(lambda self: get_database())
+DATABASE_ASYNC = property(lambda self: get_database_async())
+
+# 模块级别的默认值（延迟加载）
+class _DatabaseProxy:
+    """数据库代理，延迟初始化"""
+    def __getattr__(self, name):
+        return getattr(get_database(), name)
+
+class _DatabaseAsyncProxy:
+    """异步数据库代理，延迟初始化"""
+    def __getattr__(self, name):
+        return getattr(get_database_async(), name)
+
+DATABASE = _DatabaseProxy()
+DATABASE_ASYNC = _DatabaseAsyncProxy()
 
 
 def exclude_from_stock_ip_list(exclude_ip_list):

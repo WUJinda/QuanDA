@@ -29,33 +29,80 @@ QAFetch - quanda 数据获取模块
 @license: MIT
 """
 
-from quanda.QDFetch import QATushare as QATushare
-from quanda.QDFetch import QATdx as QATdx
-from quanda.QDFetch import QAThs as QAThs
-from quanda.QDFetch import QACrawler as QACL
-from quanda.QDFetch import QAEastMoney as QAEM
-from quanda.QDFetch import QAHexun as QAHexun
-from quanda.QDFetch import QAfinancial
-from quanda.QDFetch.base import get_stock_market
-from quanda.QDFetch import QAQAWEB as QAWEB
-from quanda.QDFetch import QAKQ as QAKQ
-from quanda.QDFetch import QABaostock as QABaostock
+try:
+    from quanda.QDFetch import QATushare as QATushare
+except ImportError:
+    QATushare = None
+try:
+    from quanda.QDFetch import QATdx as QATdx
+except ImportError:
+    QATdx = None
+try:
+    from quanda.QDFetch import QAThs as QAThs
+except ImportError:
+    QAThs = None
+try:
+    from quanda.QDFetch import QACrawler as QACL
+except ImportError:
+    QACL = None
+try:
+    from quanda.QDFetch import QAEastMoney as QAEM
+except ImportError:
+    QAEM = None
+try:
+    from quanda.QDFetch import QAHexun as QAHexun
+except ImportError:
+    QAHexun = None
+try:
+    from quanda.QDFetch import QAfinancial
+except ImportError:
+    QAfinancial = None
+try:
+    from quanda.QDFetch.base import get_stock_market
+except ImportError:
+    get_stock_market = None
+try:
+    from quanda.QDFetch import QAQAWEB as QAWEB
+except ImportError:
+    QAWEB = None
+try:
+    from quanda.QDFetch import QAKQ as QAKQ
+except ImportError:
+    QAKQ = None
+try:
+    from quanda.QDFetch import QABaostock as QABaostock
+except ImportError:
+    QABaostock = None
 
 
 def use(package):
 
     if package in ["tushare", "ts"]:
+        if QATushare is None:
+            raise RuntimeError("tushare 未安装，请运行: pip install tushare")
         return QATushare
     elif package in ["tdx", "pytdx"]:
+        if QATdx is None:
+            raise RuntimeError("pytdx 未安装，请运行: pip install pytdx")
         return QATdx
     elif package in ["baostock", "bs", "bao"]:
+        if QABaostock is None:
+            raise RuntimeError("baostock 未安装，请运行: pip install baostock")
         return QABaostock
     elif package in ["ths", "THS"]:
+        if QAThs is None:
+            raise RuntimeError("lxml 未安装，请运行: pip install lxml")
         return QAThs
     elif package in ["HEXUN", "Hexun", "hexun"]:
+        if QAHexun is None:
+            raise RuntimeError("hexun 数据源模块不可用")
         return QAHexun
     elif package in ["QA"]:
+        if QAWEB is None:
+            raise RuntimeError("QA WEB 数据源模块不可用")
         return QAWEB
+    else:
+        raise RuntimeError(f"不支持的数据源: {package}")
 
 
 def QA_fetch_get_stock_day(

@@ -1,3 +1,2 @@
-from quanda.QDWebServer.basehandles import QABaseHandler, QAWebSocketHandler
-from quanda.QDWebServer.schedulehandler import QAScheduleQuery, QASchedulerHandler
+from quanda.QDWebServer.basehandles import QDBaseHandler, QDWebSocketHandler
 from quanda.QDWebServer.server import start_server

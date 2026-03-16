@@ -2,7 +2,10 @@ import datetime
 import calendar
 from dateutil.relativedelta import relativedelta
 from quanda.QDUtil.QASetting import (DATABASE)
-import pymongo
+try:
+    import pymongo
+except ImportError:
+    pymongo = None
 import pandas as pd
 def QA_util_getBetweenMonth(from_date, to_date):
 

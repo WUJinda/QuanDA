@@ -16,5 +16,11 @@
 from quanda.QDFactor.feature import QASingleFactor_DailyBase
 from quanda.QDFactor.featurepool import MA10
 from quanda.QDFactor.featureView import QAFeatureView
-from quanda.QDFactor.featureAnalysis import QAFeatureAnalysis
-from quanda.QDFactor.featurebacktest import QAFeatureBacktest
+try:
+    from quanda.QDFactor.featureAnalysis import QAFeatureAnalysis
+except ImportError:
+    QAFeatureAnalysis = None
+try:
+    from quanda.QDFactor.featurebacktest import QAFeatureBacktest
+except ImportError:
+    QAFeatureBacktest = None

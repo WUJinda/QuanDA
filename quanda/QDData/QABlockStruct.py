@@ -6,7 +6,10 @@ from copy import deepcopy, copy
 
 import pandas as pd
 
-from quanda.QDFetch.QATdx import QA_fetch_get_stock_realtime
+try:
+    from quanda.QDFetch.QATdx import QA_fetch_get_stock_realtime
+except ImportError:
+    QA_fetch_get_stock_realtime = None
 
 
 class QA_DataStruct_Stock_block():

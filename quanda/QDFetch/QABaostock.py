@@ -13,7 +13,10 @@ import time
 import datetime
 from typing import List
 
-import baostock as bs
+try:
+    import baostock as bs
+except ImportError:
+    bs = None
 import pandas as pd
 
 from quanda.QDUtil import (
@@ -25,6 +28,8 @@ from quanda.QDUtil import (
 
 def _bs_login() -> None:
     """登录 baostock，失败时重试几次。"""
+    if bs is None:
+        raise RuntimeError("baostock 未安装，请运行: pip install baostock")
     last_err = None
     for i in range(3):
         lg = bs.login()

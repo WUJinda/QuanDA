@@ -8,9 +8,12 @@ import numpy as np
 import time
 import datetime
 import pymongo
-import tushare as ts
+try:
+    import tushare as ts
+except ImportError:
+    ts = None
 from sqlalchemy import create_engine
-import psycopg2  
+import psycopg2
 import warnings
 warnings.filterwarnings("ignore")
 import quanda as QA
@@ -22,7 +25,10 @@ from quanda.QDUtil.QADate import (QA_util_date_str2int,QA_util_date_int2str)
 
 
 token='xxxx'  #你的tusharepro token
-pro=ts.pro_api(token)
+if ts is not None:
+    pro=ts.pro_api(token)
+else:
+    pro = None
 def cilent_pg():
     Account='postgres'#pg账号
     Password='xxxxx'   #pg密码

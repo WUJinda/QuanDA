@@ -1,16 +1,44 @@
 from copy import deepcopy
 from functools import lru_cache
 
-import clickhouse_driver
-import pandas as pd
-import statsmodels.api as sm
-from alphalens.tears import create_full_tear_sheet
-from alphalens.utils import get_clean_factor_and_forward_returns
-from qaenv import (clickhouse_ip, clickhouse_password, clickhouse_port,
-                   clickhouse_user)
-from quanda.QDFetch.QAClickhouse import QACKClient
-from quanda.QDUtil import QA_util_get_next_day
-from scipy import stats
+try:
+    import clickhouse_driver
+except ImportError:
+    clickhouse_driver = None
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+try:
+    import statsmodels.api as sm
+except ImportError:
+    sm = None
+try:
+    from alphalens.tears import create_full_tear_sheet
+    from alphalens.utils import get_clean_factor_and_forward_returns
+except ImportError:
+    create_full_tear_sheet = None
+    get_clean_factor_and_forward_returns = None
+try:
+    from qaenv import (clickhouse_ip, clickhouse_password, clickhouse_port,
+                       clickhouse_user)
+except ImportError:
+    clickhouse_ip = 'localhost'
+    clickhouse_password = ''
+    clickhouse_port = 9000
+    clickhouse_user = 'default'
+try:
+    from quanda.QDFetch.QAClickhouse import QACKClient
+except ImportError:
+    QACKClient = None
+try:
+    from quanda.QDUtil import QA_util_get_next_day
+except ImportError:
+    QA_util_get_next_day = None
+try:
+    from scipy import stats
+except ImportError:
+    stats = None
 
 """
 本模块大量基于 QACkClient 目前 ck 的公共服务器暂时尚未开放, 仅供参考和测试使用
