@@ -36,14 +36,14 @@ import argparse
 import sys
 
 # CMD and Cli
-import quanda.QACmd
+import quanda.QDCmd
 
 
 # Backtest
 
-from quanda.QACmd import QA_cmd
+from quanda.QDCmd import QA_cmd
 # Data
-from quanda.QAData import (
+from quanda.QDData import (
     QA_data_calc_marketvalue,
     QA_data_ctptick_resample,
     QA_data_day_resample,
@@ -80,9 +80,9 @@ from quanda.QAData import (
     QDS_StockMinWarpper,
     from_tushare
 )
-from quanda.QAData.dsmethods import *
+from quanda.QDData.dsmethods import *
 # ENGINE
-from quanda.QAEngine import (
+from quanda.QDEngine import (
     QA_AsyncQueue,
     QA_AsyncScheduler,
     QA_AsyncTask,
@@ -93,7 +93,7 @@ from quanda.QAEngine import (
     QA_Thread,
     QA_Worker
 )
-from quanda.QAFetch import (
+from quanda.QDFetch import (
     QA_fetch_get_chibor,
     QA_fetch_get_exchangerate_day,
     QA_fetch_get_exchangerate_list,
@@ -152,13 +152,13 @@ from quanda.QAFetch import (
     get_stock_market
 )
 # fetch methods
-from quanda.QAFetch.Fetcher import QA_quotation
-from quanda.QAFetch.QACrawler import (
+from quanda.QDFetch.Fetcher import QA_quotation
+from quanda.QDFetch.QACrawler import (
     QA_fetch_get_sh_margin,
     QA_fetch_get_sz_margin,
     QA_fetch_get_margin_all
 )
-from quanda.QAFetch.QAQuery import (
+from quanda.QDFetch.QAQuery import (
     QA_fetch_account,
     QA_fetch_backtest_history,
     QA_fetch_backtest_info,
@@ -192,12 +192,12 @@ from quanda.QAFetch.QAQuery import (
     QA_fetch_cryptocurrency_min,
     QA_fetch_cryptocurrency_list
 )
-from quanda.QAFetch.QAQuery_Advance import *
-from quanda.QAIndicator import *
+from quanda.QDFetch.QAQuery_Advance import *
+from quanda.QDIndicator import *
 # market
-from quanda.QAFetch.QAClickhouse import QACKClient
+from quanda.QDFetch.QAClickhouse import QACKClient
 
-from quanda.QASetting.QALocalize import (
+from quanda.QDSetting.QALocalize import (
     cache_path,
     download_path,
     log_path,
@@ -205,7 +205,7 @@ from quanda.QASetting.QALocalize import (
     setting_path
 )
 # save
-from quanda.QASU.main import (
+from quanda.QDSU.main import (
     QA_SU_save_etf_day,
     QA_SU_save_etf_min,
     QA_SU_save_financialfiles,
@@ -222,9 +222,9 @@ from quanda.QASU.main import (
     QA_SU_save_stock_min_5,
     QA_SU_save_stock_xdxr
 )
-from quanda.QASU.save_strategy import QA_SU_save_strategy
-from quanda.QASU.user import QA_user_sign_in, QA_user_sign_up
-from quanda.QAUtil import (  # QAPARAMETER
+from quanda.QDSU.save_strategy import QA_SU_save_strategy
+from quanda.QDSU.user import QA_user_sign_in, QA_user_sign_up
+from quanda.QDUtil import (  # QAPARAMETER
     AMOUNT_MODEL, BROKER_EVENT, BROKER_TYPE, DATABASE, DATASOURCE,
     ENGINE_EVENT, EXCHANGE_ID, FREQUENCE, MARKET_ERROR, MARKET_EVENT,
     MARKET_TYPE, ORDER_DIRECTION, ORDER_EVENT, ORDER_MODEL, ORDER_STATUS,
@@ -259,7 +259,7 @@ from quanda.QAUtil import (  # QAPARAMETER
 
 # QAResourceManager - 统一资源管理器 (MongoDB/RabbitMQ/ClickHouse/Redis)
 try:
-    from quanda.QAUtil.QAResourceManager import (
+    from quanda.QDUtil.QAResourceManager import (
         QAMongoResourceManager,
         QARabbitMQResourceManager,
         QAClickHouseResourceManager,
@@ -274,21 +274,21 @@ except ImportError:
     # 资源管理器依赖可选,不阻塞主模块加载
     pass
 
-from quanda.QAPubSub.consumer import subscriber, subscriber_topic, subscriber_routing
-from quanda.QAPubSub.producer import publisher, publisher_topic, publisher_routing
-from quanda.QAPubSub.base import base_ps
-from quanda.QAPubSub.debugtoool import debug_sub, debug_pub
+from quanda.QDPubSub.consumer import subscriber, subscriber_topic, subscriber_routing
+from quanda.QDPubSub.producer import publisher, publisher_topic, publisher_routing
+from quanda.QDPubSub.base import base_ps
+from quanda.QDPubSub.debugtoool import debug_sub, debug_pub
 
 
-from quanda.QAWebServer.basehandles import QABaseHandler, QAWebSocketHandler
-from quanda.QAWebServer.schedulehandler import QAScheduleQuery, QASchedulerHandler
-from quanda.QAWebServer.server import start_server
+from quanda.QDWebServer.basehandles import QABaseHandler, QAWebSocketHandler
+from quanda.QDWebServer.schedulehandler import QAScheduleQuery, QASchedulerHandler
+from quanda.QDWebServer.server import start_server
 
 from quanda.QIFI.QifiAccount import QIFI_Account
 from quanda.QIFI.QifiManager import QA_QIFIMANAGER, QA_QIFISMANAGER
 
 # QAMarket - 市场预设和订单/持仓管理
-from quanda.QAMarket import (
+from quanda.QDMarket import (
     MARKET_PRESET,
     QA_Order,
     QA_OrderQueue,
@@ -298,7 +298,7 @@ from quanda.QAMarket import (
 
 # QARSBridge - Rust高性能账户和回测 (如果可用)
 try:
-    from quanda.QARSBridge import (
+    from quanda.QDRSBridge import (
         QARSAccount,
         QARSBacktest,
         has_qars_support,
@@ -309,7 +309,7 @@ except ImportError:
 
 # QADataBridge - 跨语言零拷贝数据交换 (如果可用)
 try:
-    from quanda.QADataBridge import (
+    from quanda.QDDataBridge import (
         has_dataswap_support,
         convert_pandas_to_polars,
         convert_polars_to_pandas,
@@ -322,14 +322,14 @@ except ImportError:
     # QADataBridge未安装，跨语言通信不可用
     pass
 
-from quanda.QAStrategy.qactabase import QAStrategyCtaBase
+from quanda.QDStrategy.qactabase import QAStrategyCtaBase
 
 
-from quanda.QAFactor.feature import QASingleFactor_DailyBase
-from quanda.QAFactor.featurepool import MA10
-from quanda.QAFactor.featureView import QAFeatureView
-from quanda.QAFactor.featureAnalysis import QAFeatureAnalysis
-from quanda.QAFactor.featurebacktest import QAFeatureBacktest
+from quanda.QDFactor.feature import QASingleFactor_DailyBase
+from quanda.QDFactor.featurepool import MA10
+from quanda.QDFactor.featureView import QAFeatureView
+from quanda.QDFactor.featureAnalysis import QAFeatureAnalysis
+from quanda.QDFactor.featurebacktest import QAFeatureBacktest
 
 # Python 3.9-3.12 (与 setup.py 及 QARS2 对齐)
 if sys.version_info < (3, 9) or sys.version_info >= (4, 0):

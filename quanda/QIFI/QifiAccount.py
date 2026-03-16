@@ -8,9 +8,9 @@ import pandas as pd
 import pymongo
 from pymongo import message
 from qaenv import mongo_ip, clickhouse_ip, clickhouse_password, clickhouse_port, clickhouse_user
-from quanda.QAMarket.market_preset import MARKET_PRESET
-from quanda.QAMarket.QAOrder import ORDER_DIRECTION
-from quanda.QAMarket.QAPosition import QA_Position
+from quanda.QDMarket.market_preset import MARKET_PRESET
+from quanda.QDMarket.QAOrder import ORDER_DIRECTION
+from quanda.QDMarket.QAPosition import QA_Position
 import clickhouse_driver
 
 

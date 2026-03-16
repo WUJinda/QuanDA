@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-from quanda.QACmd import QA_cmd
+from quanda.QDCmd import QA_cmd
 
 if __name__ == '__main__':
 
