@@ -1,0 +1,101 @@
+# coding:utf-8
+#
+# The MIT License (MIT)
+#
+try:
+    import pymongo
+except ImportError:
+    pymongo = None
+try:
+    from motor.motor_asyncio import AsyncIOMotorClient
+except ImportError:
+    AsyncIOMotorClient = None
+try:
+    from motor import MotorClient
+except ImportError:
+    MotorClient = None
+import asyncio
+
+
+def QA_util_sql_mongo_setting(uri='mongodb://localhost:27017/quanda'):
+    """
+    explanation:
+        根据给定的uri返回一个MongoClient实例，采用@几何建议以使用加密
+
+    params:
+        * uri ->:
+            meaning: mongodb连接uri
+            type: str
+            optional: [null]
+
+    return:
+        MongoClient
+
+    demonstrate:
+        Not described
+
+    output:
+        Not described
+    """
+    if pymongo is None:
+        raise RuntimeError("pymongo 未安装，请运行: pip install pymongo")
+
+    # 采用@几何的建议,使用uri代替ip,port的连接方式
+    # 这样可以对mongodb进行加密:
+    # uri=mongodb://user:passwor@ip:port
+    client = pymongo.MongoClient(uri)
+    return client
+
+# async
+
+
+def QA_util_sql_async_mongo_setting(uri='mongodb://localhost:27017/quanda'):
+    """
+    explanation:
+        根据给定的uri返回一个异步AsyncIOMotorClient实例
+
+    params:
+        * uri ->:
+            meaning: mongodb连接uri
+            type: str
+            optional: [null]
+
+    return:
+        AsyncIOMotorClient
+
+    demonstrate:
+        Not described
+
+    output:
+        Not described
+    """
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    # async def client():
+    return AsyncIOMotorClient(uri, io_loop=loop)
+    # yield  client()
+
+
+# MongoDB 排序常量
+if pymongo is not None:
+    ASCENDING = pymongo.ASCENDING
+    DESCENDING = pymongo.DESCENDING
+    QA_util_sql_mongo_sort_ASCENDING = pymongo.ASCENDING
+    QA_util_sql_mongo_sort_DESCENDING = pymongo.DESCENDING
+else:
+    # 如果 pymongo 未安装，提供默认值
+    ASCENDING = 1
+    DESCENDING = -1
+    QA_util_sql_mongo_sort_ASCENDING = 1
+    QA_util_sql_mongo_sort_DESCENDING = -1
+
+if __name__ == '__main__':
+    # test async_mongo
+    client = QA_util_sql_async_mongo_setting().quanda.stock_day
+    print(client)

@@ -1,0 +1,12 @@
+{
+  "name": "@quanda/backend",
+  "version": "1.0.0",
+  "description": "QuanDA Python 后端",
+  "private": true,
+  "scripts": {
+    "build": "python scripts/build.py",
+    "build:spec": "pyinstaller pyinstaller.config.py --clean"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

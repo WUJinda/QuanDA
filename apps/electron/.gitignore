@@ -1,0 +1,24 @@
+# 构建输出
+dist/
+build/
+out/
+
+# 日志
+*.log
+
+# 依赖
+node_modules/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp

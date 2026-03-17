@@ -1,0 +1,96 @@
+import json
+import os
+import shlex
+import subprocess
+import threading
+
+import tornado
+from quanda.QDUtil import QA_util_log_info
+from quanda.QDUtil.QDDict import QA_util_dict_remove_key
+from quanda.QDWebServer.basehandles import QDBaseHandler, QDWebSocketHandler
+from tornado.web import Application, RequestHandler, authenticated
+from tornado.websocket import WebSocketHandler
+
+
+def background_task(command):
+    cmd = shlex.split(command)
+    p = subprocess.Popen(
+        cmd, shell=False, close_fds=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    while p.poll() is None:
+        line = p.stdout.readline()
+    raise Exception
+
+
+class CommandHandler(QDBaseHandler):
+    x = {}
+
+    def post(self):
+        print('get message')
+        try:
+            command = self.get_argument('command')
+            print(command)
+
+            threading.Thread(target=background_task, args=(
+                command,), daemon=True).start()
+            self.write({'result': 'true'})
+        except Exception as e:
+            self.write({'result': 'wrong', 'reason': str(e)})
+
+
+class CommandHandlerWS(QDWebSocketHandler):
+
+    def on_message(self, shell_cmd):
+        self.write_message({'quanda RUN ': shell_cmd})
+        cmd = shlex.split(shell_cmd)
+        p = subprocess.Popen(
+            cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        while p.poll() is None:
+            line = p.stdout.readline()
+            line = line.strip()
+            if line:
+                self.write_message(line)
+
+        if p.returncode == 0:
+            self.write_message('backtest run  success')
+
+        else:
+            self.write_message('Subprogram failed')
+
+    def on_close(self):
+        pass
+
+
+class RunnerHandler(QDWebSocketHandler):
+
+    def on_message(self, shell_cmd):
+        shell_cmd = 'python "{}"'.format(shell_cmd)
+        self.write_message({'quanda RUN ': shell_cmd})
+        cmd = shlex.split(shell_cmd)
+        p = subprocess.Popen(
+            cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        while p.poll() is None:
+            line = p.stdout.readline()
+            line = line.strip()
+            if line:
+                self.write_message(line)
+
+        if p.returncode == 0:
+            self.write_message('backtest run  success')
+
+        else:
+            self.write_message('Subprogram failed')
+
+    def on_close(self):
+        pass
+
+
+if __name__ == "__main__":
+
+    app = Application(
+        handlers=[
+            (r"/test",  CommandHandler),
+        ],
+        debug=True
+    )
+    app.listen(8011)
+    tornado.ioloop.IOLoop.current().start()

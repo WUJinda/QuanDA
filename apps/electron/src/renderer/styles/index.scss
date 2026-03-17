@@ -1,0 +1,8 @@
+// QuanDA 样式入口
+// 使用 @use 而不是 @import
+
+// 先导入设计系统（定义变量和函数）
+@use './design-system.scss';
+
+// 再导入全局样式（使用设计系统的变量）
+@use './global.scss';

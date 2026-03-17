@@ -210,6 +210,15 @@ book/
 changelogs/
 doc/
 
+# Electron 构建输出
+apps/electron/dist/
+apps/electron/out/
+apps/electron/build/
+
+# Python 后端构建输出
+packages/backend/dist/
+packages/backend/build/
+
 # 测试目录
 scripts/fortest/
 scripts/update/

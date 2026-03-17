@@ -1,0 +1,194 @@
+// QuanDA CSS 变量定义
+// 扩展设计系统，提供额外的设计令牌
+
+// ==================== 颜色变量 ====================
+:root {
+  // 主色调 - 低饱和度科技蓝
+  --color-primary: #5B8FF9;
+  --color-primary-light: #7AA5FF;
+  --color-primary-lighter: #A3C0FF;
+  --color-primary-dark: #4A7AD8;
+  --color-primary-darker: #3A6BC7;
+  --color-primary-hover: #4A7AD8;
+
+  // 功能色
+  --color-success: #73D13D;
+  --color-success-light: #95DE64;
+  --color-success-dark: #5B8E2D;
+  --color-warning: #FFA940;
+  --color-warning-light: #FFBF66;
+  --color-warning-dark: #D48806;
+  --color-danger: #FF7A7E;
+  --color-danger-light: #FF9D9F;
+  --color-danger-dark: #D9363E;
+  --color-info: #9254DE;
+  --color-info-light: #B37FEB;
+  --color-info-dark: #722ED1;
+
+  // 涨跌色
+  --color-up: #FF7A7E;
+  --color-down: #73D13D;
+
+  // 中性色
+  --color-text-primary: #262626;
+  --color-text-secondary: #595959;
+  --color-text-tertiary: #8C8C8C;
+  --color-text-disabled: #BFBFBF;
+
+  // 背景色
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F5F7FA;
+  --color-bg-tertiary: #E8ECF0;
+  --color-bg-hover: #F0F2F5;
+
+  // 边框色
+  --color-border-light: #E8E8E8;
+  --color-border-base: #D9D9D9;
+  --color-border-dark: #BFBFBF;
+
+  // ==================== 渐变 ====================
+  --gradient-primary: linear-gradient(135deg, #5B8FF9 0%, #7AA5FF 100%);
+  --gradient-primary-hover: linear-gradient(135deg, #4A7AD8 0%, #6B94E8 100%);
+  --gradient-soft-blue: linear-gradient(135deg, rgba(91, 143, 249, 0.05) 0%, rgba(122, 165, 255, 0.02) 100%);
+  --gradient-warm: linear-gradient(135deg, #FFA940 0%, #FFD666 100%);
+  --gradient-cool: linear-gradient(135deg, #9254DE 0%, #B37FEB 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 100%);
+
+  // ==================== 毛玻璃效果 ====================
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-bg-weak: rgba(255, 255, 255, 0.5);
+  --glass-blur: blur(20px);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+
+  // ==================== 阴影 ====================
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-xxl: 0 16px 48px rgba(0, 0, 0, 0.18);
+
+  // 彩色阴影
+  --shadow-primary: 0 4px 16px rgba(91, 143, 249, 0.2);
+  --shadow-primary-hover: 0 6px 20px rgba(91, 143, 249, 0.3);
+  --shadow-success: 0 4px 16px rgba(115, 209, 61, 0.2);
+  --shadow-warning: 0 4px 16px rgba(255, 169, 64, 0.2);
+  --shadow-danger: 0 4px 16px rgba(255, 122, 126, 0.2);
+
+  // ==================== 圆角 ====================
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-xxl: 20px;
+  --radius-round: 50%;
+  --radius-circle: 9999px;
+
+  // ==================== 间距 ====================
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-base: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 32px;
+  --spacing-xxxl: 48px;
+  --spacing-huge: 64px;
+
+  // ==================== 字体 ====================
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-family-code: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-xxl: 20px;
+  --font-size-xxxl: 24px;
+  --font-size-huge: 32px;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  // ==================== 过渡动画 ====================
+  --transition-fast: 0.15s;
+  --transition-base: 0.25s;
+  --transition-slow: 0.35s;
+
+  --easing-linear: linear;
+  --easing-ease: ease;
+  --easing-ease-in: ease-in;
+  --easing-ease-out: ease-out;
+  --easing-ease-in-out: ease-in-out;
+  --easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  // ==================== Z-index ====================
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  --z-index-notification: 1080;
+
+  // ==================== 布局 ====================
+  --header-height: 60px;
+  --sidebar-width: 200px;
+  --sidebar-collapsed-width: 64px;
+  --footer-height: 48px;
+
+  // ==================== 组件特定 ====================
+  // 卡片
+  --card-padding: var(--spacing-lg);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+  --card-shadow-hover: var(--shadow-md);
+
+  // 按钮
+  --btn-padding-sm: 6px 12px;
+  --btn-padding-md: 10px 20px;
+  --btn-padding-lg: 14px 24px;
+  --btn-radius: var(--radius-md);
+  --btn-font-weight: var(--font-weight-medium);
+
+  // 输入框
+  --input-padding: var(--spacing-sm) var(--spacing-base);
+  --input-radius: var(--radius-md);
+  --input-height: 36px;
+
+  // 表格
+  --table-header-bg: var(--color-bg-secondary);
+  --table-row-hover: var(--color-bg-hover);
+  --table-border: var(--color-border-light);
+
+  // 对话框
+  --dialog-radius: var(--radius-xl);
+  --dialog-shadow: var(--shadow-xl);
+  --dialog-padding: var(--spacing-xl);
+}
+
+// ==================== 暗色主题支持（可选）====================
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #E8E8E8;
+    --color-text-secondary: #BFBFBF;
+    --color-text-tertiary: #8C8C8C;
+    --color-bg-primary: #1F1F1F;
+    --color-bg-secondary: #141414;
+    --color-bg-tertiary: #0A0A0A;
+    --color-border-light: #303030;
+    --color-border-base: #404040;
+    --glass-bg: rgba(31, 31, 31, 0.7);
+  }
+}
