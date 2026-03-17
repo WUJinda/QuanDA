@@ -1,0 +1,10 @@
+{
+  "name": "@quanda/resources",
+  "version": "1.0.0",
+  "description": "QuanDA 资源文件",
+  "private": true,
+  "scripts": {
+    "build": "echo 'No build needed for resources'",
+    "typecheck": "echo 'No typecheck needed for resources'"
+  }
+}
