@@ -9,11 +9,12 @@
     "apps/*"
   ],
   "scripts": {
-    "dev": "pnpm --filter='@quanda/electron' dev",
+    "dev": "pnpm --filter=quanda-frontend dev",
+    "frontend:dev": "pnpm --filter=quanda-frontend dev",
     "electron:dev": "pnpm --filter='@quanda/electron' dev",
     "electron:build": "pnpm --filter='@quanda/electron' build",
     "electron:start": "pnpm --filter='@quanda/electron' start",
-    "build": "pnpm --filter=@quanda/shared build && pnpm --filter=@quanda/resources build && pnpm --filter=@quanda/electron build",
+    "build": "pnpm --filter=@quanda/shared build && pnpm --filter=@quanda/resources build && pnpm --filter=quanda-frontend build && pnpm --filter=@quanda/electron build",
     "backend:build": "pnpm --filter=@quanda/backend build",
     "typecheck": "pnpm --filter=@quanda/shared typecheck && pnpm --filter=@quanda/electron typecheck",
     "dist": "pnpm --filter='@quanda/electron' dist"
