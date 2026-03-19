@@ -7,9 +7,11 @@ import asyncio
 import copy
 import importlib.util
 import json
+import logging
 import os
 import sys
 import threading
+import time
 import traceback
 import uuid
 from datetime import datetime, timedelta
@@ -24,18 +26,36 @@ from quanda.QIFI.QifiAccount import QIFI_Account, ORDER_DIRECTION
 from quanda.QDMarket.market_preset import MARKET_PRESET
 import quanda as QA
 
+# 配置日志
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 
 # 全局数据库连接池 (复用连接)
 _db_client = None
 _db_instance = None
+_db_lock = threading.Lock()
 
 
 def get_database():
-    """获取数据库连接（单例模式）"""
+    """获取数据库连接（单例模式，线程安全）"""
     global _db_client, _db_instance
     if _db_client is None:
-        _db_client = pymongo.MongoClient(mongo_ip)
-        _db_instance = _db_client.quanda
+        with _db_lock:
+            if _db_client is None:
+                # 使用连接池配置
+                _db_client = pymongo.MongoClient(
+                    mongo_ip,
+                    maxPoolSize=50,
+                    minPoolSize=10,
+                    maxIdleTimeMS=30000,
+                    waitQueueTimeoutMS=5000,
+                    serverSelectionTimeoutMS=5000
+                )
+                _db_instance = _db_client.quanda
     return _db_instance
 
 
@@ -45,7 +65,8 @@ class BacktestRunner:
     def __init__(self, backtest_id: str, strategy_path: str, strategy_class_name: str = None,
                  start_date: str = None, end_date: str = None, init_cash: float = 1000000,
                  code: str = None, frequence: str = '1min',
-                 progress_callback: Callable[[int, str], None] = None):
+                 progress_callback: Callable[[int, str], None] = None,
+                 timeout: int = 3600):
         """
         初始化回测执行器
 
@@ -59,6 +80,7 @@ class BacktestRunner:
             code: 回测标的
             frequence: 回测频率
             progress_callback: 进度回调函数
+            timeout: 超时时间（秒），默认1小时
         """
         self.backtest_id = backtest_id
         self.strategy_path = strategy_path
@@ -69,12 +91,14 @@ class BacktestRunner:
         self.code = code
         self.frequence = frequence
         self.progress_callback = progress_callback
+        self.timeout = timeout
 
         # 回测状态
         self.status = 'pending'
         self.progress = 0
         self.message = ''
         self.is_running = False
+        self.start_time = None
 
         # 结果数据
         self.account_history = []
@@ -92,9 +116,27 @@ class BacktestRunner:
             self.progress_callback(progress, message)
 
     def load_strategy_class(self):
-        """动态加载策略类"""
+        """动态加载策略类（带安全验证）"""
         if not os.path.exists(self.strategy_path):
             raise FileNotFoundError(f"策略文件不存在: {self.strategy_path}")
+        
+        # 安全验证：检查路径遍历
+        abs_path = os.path.abspath(self.strategy_path)
+        if '..' in self.strategy_path:
+            raise ValueError("非法的策略文件路径：包含路径遍历")
+        
+        if not self.strategy_path.endswith('.py'):
+            raise ValueError("非法的策略文件：必须是 .py 文件")
+        
+        # 读取并验证代码
+        with open(self.strategy_path, 'r', encoding='utf-8') as f:
+            code = f.read()
+        
+        # 基本安全检查
+        dangerous_patterns = ['__import__', 'eval(', 'exec(', 'compile(']
+        for pattern in dangerous_patterns:
+            if pattern in code:
+                logger.warning(f"策略代码包含潜在危险操作: {pattern}")
 
         # 动态导入策略模块
         spec = importlib.util.spec_from_file_location("strategy_module", self.strategy_path)
@@ -127,11 +169,13 @@ class BacktestRunner:
         """执行回测"""
         self.is_running = True
         self.status = 'running'
+        self.start_time = time.time()
         self.report_progress(0, "开始回测...")
 
         try:
             # 加载策略
             self.report_progress(5, "加载策略...")
+            logger.info(f"回测 {self.backtest_id} 开始执行")
             strategy_class = self.load_strategy_class()
 
             # 创建策略实例
@@ -167,6 +211,7 @@ class BacktestRunner:
 
             # 执行回测
             self.report_progress(20, f"开始回测，共 {total_bars} 根K线...")
+            logger.info(f"回测数据加载完成，共 {total_bars} 根K线")
 
             # 初始化账户历史记录
             self.account_history = []
@@ -179,25 +224,30 @@ class BacktestRunner:
             def custom_bar_handler(item):
                 nonlocal bar_count
                 bar_count += 1
+                
+                # 检查超时
+                if time.time() - self.start_time > self.timeout:
+                    raise TimeoutError(f"回测超时 ({self.timeout}秒)")
 
                 # 更新进度
                 if bar_count % progress_interval == 0 or bar_count == total_bars:
                     progress = 20 + int((bar_count / total_bars) * 60)
                     self.report_progress(progress, f"处理中 {bar_count}/{total_bars}...")
 
-                # 记录账户状态
-                try:
-                    acc_msg = strategy.acc.account_msg
-                    self.account_history.append({
-                        'datetime': str(item.name[0]),
-                        'balance': acc_msg.get('balance', self.init_cash),
-                        'available': acc_msg.get('available', self.init_cash),
-                        'margin': acc_msg.get('margin', 0),
-                        'float_profit': acc_msg.get('float_profit', 0),
-                        'close_profit': acc_msg.get('close_profit', 0),
-                    })
-                except Exception as e:
-                    pass
+                # 记录账户状态（采样记录，减少内存占用）
+                if bar_count % 10 == 0 or bar_count == total_bars:
+                    try:
+                        acc_msg = strategy.acc.account_msg
+                        self.account_history.append({
+                            'datetime': str(item.name[0]),
+                            'balance': acc_msg.get('balance', self.init_cash),
+                            'available': acc_msg.get('available', self.init_cash),
+                            'margin': acc_msg.get('margin', 0),
+                            'float_profit': acc_msg.get('float_profit', 0),
+                            'close_profit': acc_msg.get('close_profit', 0),
+                        })
+                    except Exception as e:
+                        logger.warning(f"记录账户状态失败: {e}")
 
                 # 调用原始处理函数
                 strategy.x1(item)
@@ -252,12 +302,50 @@ class BacktestRunner:
 
             self.report_progress(100, "回测完成!")
             self.status = 'completed'
+            logger.info(f"回测 {self.backtest_id} 执行完成，收益率: {metrics.get('profit', 0)}%")
 
             return self.result
+
+        except TimeoutError as e:
+            self.status = 'failed'
+            self.message = str(e)
+            logger.error(f"回测 {self.backtest_id} 超时: {e}")
+            self.report_progress(0, f"回测超时: {e}")
+            return {
+                'backtest_id': self.backtest_id,
+                'status': 'failed',
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
+        
+        except FileNotFoundError as e:
+            self.status = 'failed'
+            self.message = str(e)
+            logger.error(f"回测 {self.backtest_id} 文件不存在: {e}")
+            self.report_progress(0, f"策略文件不存在: {e}")
+            return {
+                'backtest_id': self.backtest_id,
+                'status': 'failed',
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
+        
+        except ValueError as e:
+            self.status = 'failed'
+            self.message = str(e)
+            logger.error(f"回测 {self.backtest_id} 参数错误: {e}")
+            self.report_progress(0, f"参数错误: {e}")
+            return {
+                'backtest_id': self.backtest_id,
+                'status': 'failed',
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
 
         except Exception as e:
             self.status = 'failed'
             self.message = str(e)
+            logger.exception(f"回测 {self.backtest_id} 执行失败: {e}")
             traceback.print_exc()
             self.report_progress(0, f"回测失败: {e}")
             return {
@@ -269,6 +357,20 @@ class BacktestRunner:
 
         finally:
             self.is_running = False
+            self.cleanup()
+    
+    def cleanup(self):
+        """清理资源"""
+        try:
+            # 清理大对象，释放内存
+            if len(self.account_history) > 10000:
+                logger.info(f"清理账户历史记录，释放内存")
+                self.account_history = []
+            if len(self.trade_history) > 10000:
+                logger.info(f"清理交易历史记录，释放内存")
+                self.trade_history = []
+        except Exception as e:
+            logger.warning(f"清理资源失败: {e}")
 
     def save_result(self):
         """保存回测结果到数据库"""
@@ -287,12 +389,28 @@ class BacktestRunner:
 
 
 class BacktestManager:
-    """回测任务管理器"""
+    """回测任务管理器（线程安全）"""
 
     def __init__(self):
         self.runners: Dict[str, BacktestRunner] = {}
         self._lock = threading.Lock()  # 线程安全锁
         self.database = get_database()
+    
+    def get_runner(self, backtest_id: str) -> Optional[BacktestRunner]:
+        """线程安全地获取 runner"""
+        with self._lock:
+            return self.runners.get(backtest_id)
+    
+    def set_runner(self, backtest_id: str, runner: BacktestRunner):
+        """线程安全地设置 runner"""
+        with self._lock:
+            self.runners[backtest_id] = runner
+    
+    def remove_runner(self, backtest_id: str):
+        """线程安全地移除 runner"""
+        with self._lock:
+            if backtest_id in self.runners:
+                del self.runners[backtest_id]
 
     def create_backtest(self, strategy_path: str, strategy_class_name: str = None,
                         start_date: str = None, end_date: str = None,
@@ -363,26 +481,25 @@ class BacktestManager:
             init_cash=task['init_cash'],
             code=task.get('code'),
             frequence=task.get('frequence', '1min'),
-            progress_callback=progress_callback
+            progress_callback=progress_callback,
+            timeout=task.get('timeout', 3600)
         )
 
-        with self._lock:
-            self.runners[backtest_id] = runner
+        self.set_runner(backtest_id, runner)
         return runner
 
     def get_backtest_status(self, backtest_id: str) -> Dict:
-        """获取回测任务状态"""
+        """获取回测任务状态（线程安全）"""
         task = self.database.backtest_tasks.find_one({'backtest_id': backtest_id})
         if not task:
             return None
 
         # 如果任务正在运行，获取最新进度
-        with self._lock:
-            if backtest_id in self.runners:
-                runner = self.runners[backtest_id]
-                task['progress'] = runner.progress
-                task['message'] = runner.message
-                task['status'] = runner.status
+        runner = self.get_runner(backtest_id)
+        if runner:
+            task['progress'] = runner.progress
+            task['message'] = runner.message
+            task['status'] = runner.status
 
         return task
 
@@ -407,23 +524,21 @@ class BacktestManager:
         return self.database.backtest_tasks.count_documents({})
 
     def delete_backtest(self, backtest_id: str) -> bool:
-        """删除回测任务"""
+        """删除回测任务（线程安全）"""
         # 检查任务是否正在运行
-        with self._lock:
-            if backtest_id in self.runners:
-                runner = self.runners[backtest_id]
-                if runner.is_running:
-                    return False  # 不能删除正在运行的任务
+        runner = self.get_runner(backtest_id)
+        if runner and runner.is_running:
+            logger.warning(f"无法删除正在运行的回测任务: {backtest_id}")
+            return False  # 不能删除正在运行的任务
 
         # 删除任务记录
         self.database.backtest_tasks.delete_one({'backtest_id': backtest_id})
         # 删除结果记录
         self.database.backtest_results.delete_one({'backtest_id': backtest_id})
         # 从运行器中移除
-        with self._lock:
-            if backtest_id in self.runners:
-                del self.runners[backtest_id]
+        self.remove_runner(backtest_id)
 
+        logger.info(f"回测任务已删除: {backtest_id}")
         return True
 
 

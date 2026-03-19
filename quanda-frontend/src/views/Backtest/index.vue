@@ -157,6 +157,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { backtestApi } from '@/api/backtest'
+import { useWebSocket } from '@/composables/useWebSocket'
 import type { BacktestTask, WSMessage } from '@/types/backtest'
 
 const router = useRouter()

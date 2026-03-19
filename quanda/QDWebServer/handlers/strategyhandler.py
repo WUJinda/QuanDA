@@ -49,11 +49,21 @@ def validate_strategy_path(strategy_path: str) -> bool:
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
     # 规范化路径
-    strategy_path = os.path.normpath(strategy_path)
-    project_root = os.path.normpath(project_root)
+    strategy_path_normalized = os.path.normpath(strategy_path)
+    project_root_normalized = os.path.normpath(project_root)
+    
+    # 转换为绝对路径
+    if not os.path.isabs(strategy_path_normalized):
+        strategy_path_normalized = os.path.abspath(strategy_path_normalized)
 
     # 检查是否在项目目录内
-    if not strategy_path.startswith(project_root):
+    try:
+        os.path.commonpath([strategy_path_normalized, project_root_normalized])
+    except ValueError:
+        # 不在同一驱动器或路径
+        return False
+    
+    if not strategy_path_normalized.startswith(project_root_normalized):
         return False
 
     # 检查是否包含路径遍历

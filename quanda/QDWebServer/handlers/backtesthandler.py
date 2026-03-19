@@ -5,15 +5,22 @@
 """
 import asyncio
 import json
+import logging
 import threading
+import time
 import traceback
 from datetime import datetime
 from typing import Dict, List
 
 import tornado.websocket
 from tornado.web import RequestHandler
+from pydantic import ValidationError
 
 from quanda.QDSU.backtest_runner import backtest_manager, BacktestRunner
+from quanda.QDSU.backtest_models import BacktestConfig
+
+# 配置日志
+logger = logging.getLogger(__name__)
 
 
 class BacktestListHandler(RequestHandler):
@@ -55,46 +62,36 @@ class BacktestCreateHandler(RequestHandler):
         try:
             data = json.loads(self.request.body.decode('utf-8'))
 
-            strategy_path = data.get('strategy_path')
-            strategy_class_name = data.get('strategy_class_name')
-            start_date = data.get('start_date')
-            end_date = data.get('end_date')
-            init_cash = float(data.get('init_cash', 1000000))
-            code = data.get('code')
-            frequence = data.get('frequence', '1min')
-
-            if not strategy_path:
+            # 使用 Pydantic 验证参数
+            try:
+                config = BacktestConfig(**data)
+            except ValidationError as e:
+                logger.warning(f"参数验证失败: {e}")
                 self.write({
                     'status': 400,
-                    'message': '策略文件路径不能为空',
-                    'res': None
-                })
-                return
-
-            if not start_date or not end_date:
-                self.write({
-                    'status': 400,
-                    'message': '开始日期和结束日期不能为空',
+                    'message': f'参数验证失败: {e.errors()[0]["msg"]}',
                     'res': None
                 })
                 return
 
             backtest_id = backtest_manager.create_backtest(
-                strategy_path=strategy_path,
-                strategy_class_name=strategy_class_name,
-                start_date=start_date,
-                end_date=end_date,
-                init_cash=init_cash,
-                code=code,
-                frequence=frequence
+                strategy_path=config.strategy_path,
+                strategy_class_name=config.strategy_class_name,
+                start_date=config.start_date,
+                end_date=config.end_date,
+                init_cash=config.init_cash,
+                code=config.code,
+                frequence=config.frequence
             )
 
+            logger.info(f"回测任务创建成功: {backtest_id}")
             self.write({
                 'status': 200,
                 'message': '回测任务创建成功',
                 'res': {'backtest_id': backtest_id}
             })
         except Exception as e:
+            logger.exception(f"创建回测任务失败: {e}")
             traceback.print_exc()
             self.write({
                 'status': 500,
@@ -244,7 +241,7 @@ class BacktestDeleteHandler(RequestHandler):
 
 
 class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
-    """WebSocket 实时回测进度推送"""
+    """WebSocket 实时回测进度推送（带心跳检测）"""
 
     clients: Dict[str, List['BacktestWebSocketHandler']] = {}
     _clients_lock = threading.Lock()  # 线程安全锁
@@ -256,6 +253,8 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
     def open(self, backtest_id: str):
         """WebSocket 连接打开"""
         self.backtest_id = backtest_id
+        self.last_ping = time.time()
+        self.is_alive = True
 
         with BacktestWebSocketHandler._clients_lock:
             if backtest_id not in BacktestWebSocketHandler.clients:
@@ -263,6 +262,12 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
             BacktestWebSocketHandler.clients[backtest_id].append(self)
 
         print(f"WebSocket 连接已建立: {backtest_id}")
+
+        # 启动心跳检测
+        self.ping_callback = tornado.ioloop.PeriodicCallback(
+            self.send_ping, 30000  # 30秒
+        )
+        self.ping_callback.start()
 
         # 检查任务状态并发送当前状态
         task = backtest_manager.get_backtest_status(backtest_id)
@@ -272,12 +277,42 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
                 'data': task
             })
 
+    def send_ping(self):
+        """发送心跳包"""
+        try:
+            if not self.is_alive:
+                return
+            
+            self.ping(b'')
+            
+            # 检查超时（90秒无响应）
+            if time.time() - self.last_ping > 90:
+                print(f"WebSocket 连接超时，关闭连接: {self.backtest_id}")
+                self.close()
+        except Exception as e:
+            print(f"发送心跳失败: {e}")
+            self.close()
+
+    def on_pong(self, data):
+        """收到 pong 响应"""
+        self.last_ping = time.time()
+
     def on_close(self):
         """WebSocket 连接关闭"""
+        self.is_alive = False
+        
+        # 停止心跳检测
+        if hasattr(self, 'ping_callback'):
+            self.ping_callback.stop()
+        
         with BacktestWebSocketHandler._clients_lock:
             if self.backtest_id in BacktestWebSocketHandler.clients:
                 if self in BacktestWebSocketHandler.clients[self.backtest_id]:
                     BacktestWebSocketHandler.clients[self.backtest_id].remove(self)
+                
+                # 如果没有客户端了，清理字典
+                if not BacktestWebSocketHandler.clients[self.backtest_id]:
+                    del BacktestWebSocketHandler.clients[self.backtest_id]
 
         print(f"WebSocket 连接已关闭: {self.backtest_id}")
 
