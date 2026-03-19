@@ -14,7 +14,7 @@ from quanda.QDWebServer.commandhandler import (CommandHandler,
                                                   CommandHandlerWS,
                                                   RunnerHandler)
 from quanda.QDWebServer.qifiserver import QDQIFI_Handler, QDQIFIS_Handler, QDQIFIS_REALTIME_Handler
-from quanda.QDWebServer.handlers import ALL_API_ROUTES
+from quanda.QDWebServer.handlers import ALL_API_ROUTES, BACKTEST_HANDLERS, STRATEGY_HANDLERS
 from tornado.options import (define, options, parse_command_line,
                              parse_config_file)
 from tornado.web import Application, RequestHandler, authenticated
