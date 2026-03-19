@@ -61,7 +61,8 @@ const menuRoutes = [
   { path: '/futures', meta: { title: '期货分析', icon: 'Histogram' } },
   { path: '/backtest', meta: { title: '回测系统', icon: 'Operation' } },
   { path: '/strategy', meta: { title: '策略管理', icon: 'Document' } },
-  { path: '/strategy-reference', meta: { title: '策略参考库', icon: 'Collection' } }
+  { path: '/strategy-reference', meta: { title: '策略参考库', icon: 'Collection' } },
+  { path: '/settings', meta: { title: '系统设置', icon: 'Setting' } }
 ]
 </script>
 

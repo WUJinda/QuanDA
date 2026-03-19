@@ -60,6 +60,12 @@ const routes: RouteRecordRaw[] = [
         name: 'Reference',
         component: () => import('@/views/Reference/index.vue'),
         meta: { title: '策略参考库', icon: 'Collection' }
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/Settings/index.vue'),
+        meta: { title: '系统设置', icon: 'Setting' }
       }
     ]
   }

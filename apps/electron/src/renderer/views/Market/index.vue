@@ -35,6 +35,22 @@
       </div>
     </div>
 
+    <!-- 演示模式提示 -->
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="demo-alert"
+    >
+      <template #title>
+        <span class="alert-title">
+          <el-icon><InfoFilled /></el-icon>
+          演示模式
+        </span>
+      </template>
+      当前使用模拟数据，仅供演示使用。如需使用真实数据，请前往系统设置中配置数据源。
+    </el-alert>
+
     <!-- 工具栏 -->
     <div class="toolbar-card">
       <div class="toolbar-section">
@@ -309,9 +325,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { 
-  Search, 
-  Refresh, 
+import {
+  Search,
+  Refresh,
   Filter,
   Download,
   Grid,
@@ -324,7 +340,8 @@ import {
   Star,
   CaretTop,
   CaretBottom,
-  Money
+  Money,
+  InfoFilled
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -502,6 +519,21 @@ onUnmounted(() => {
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  // ==================== 演示模式提示 ====================
+  .demo-alert {
+    margin-bottom: spacing(lg);
+    border-radius: radius(lg);
+    box-shadow: shadow(sm);
+
+    .alert-title {
+      display: flex;
+      align-items: center;
+      gap: spacing(sm);
+      font-weight: font-weight(bold);
+      font-size: font-size(base);
     }
   }
 

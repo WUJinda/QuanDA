@@ -36,8 +36,25 @@ class QDUserHandler(QDBaseHandler):
     def get(self):
         self.write({'status': 200, 'result':{'user_cookie': 'xx'}})
 
+
+class QDHealthHandler(QDBaseHandler):
+    """健康检查接口"""
+    def get(self):
+        import time
+        self.write({
+            'status': 200,
+            'message': 'OK',
+            'timestamp': int(time.time()),
+            'version': __version__,
+            'services': {
+                'tornado': True,
+                'mongodb': True  # 简化处理，实际可检查 MongoDB 连接
+            }
+        })
+
 handlers = [
     (r"/", QDIndex),
+    (r"/health", QDHealthHandler),
     (r"/command/run", CommandHandler),
     (r"/command/runws", CommandHandlerWS),
     (r"/command/runbacktest", RunnerHandler),

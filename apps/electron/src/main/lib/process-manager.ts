@@ -3,7 +3,7 @@
  * 负责管理数据库和 Python 后端进程
  */
 
-import { spawn, ChildProcess } from 'child_process'
+import { spawn, ChildProcess, exec } from 'child_process'
 import { join } from 'path'
 import { existsSync } from 'fs'
 import type { ProcessInfo, ProcessType, ProcessStatus } from '@quanda/shared'
@@ -148,18 +148,47 @@ export class ProcessManager {
 
   /**
    * 启动 MongoDB
+   * 注意：Demo 版本假设 MongoDB 由用户自己管理（系统服务或手动启动）
    */
   private async startMongoDB(): Promise<boolean> {
     const dataPath = getDatabasePath('mongo')
     const port = 27017
 
-    // TODO: 实际应该使用打包的 MongoDB 绿色版
-    // 这里先跳过，等待用户配置数据库路径
-    console.log(`[进程管理] MongoDB 启动 (端口: ${port}, 数据目录: ${dataPath})`)
-    this.updateStatus('mongodb', { port, path: dataPath })
+    console.log(`[进程管理] MongoDB 检查 (端口: ${port}, 数据目录: ${dataPath})`)
 
-    // 模拟启动成功
-    return true
+    // 检查 MongoDB 连接是否可用
+    const isAvailable = await this.checkMongoDBConnection()
+
+    if (isAvailable) {
+      this.updateStatus('mongodb', { status: 'running', port, path: dataPath })
+      console.log('[进程管理] MongoDB 连接成功')
+      return true
+    } else {
+      this.updateStatus('mongodb', { status: 'stopped', port, path: dataPath })
+      console.warn('[进程管理] MongoDB 不可用，请在设置中配置或启动 MongoDB')
+      return false
+    }
+  }
+
+  /**
+   * 检查 MongoDB 连接是否可用
+   */
+  private async checkMongoDBConnection(): Promise<boolean> {
+    return new Promise((resolve) => {
+      // 使用 mongosh 或 mongo 命令检查连接
+      const mongoCmd = process.platform === 'win32' ? 'mongosh' : 'mongosh'
+
+      exec(`${mongoCmd} --eval "db.version()" --quiet`, (error) => {
+        if (error) {
+          // 尝试旧版的 mongo 命令
+          exec(`mongo --eval "db.version()" --quiet`, (error2) => {
+            resolve(!error2)
+          })
+        } else {
+          resolve(true)
+        }
+      })
+    })
   }
 
   /**
@@ -225,7 +254,7 @@ export class ProcessManager {
         throw new Error('找不到 Python 后端脚本')
       }
 
-      const pythonPath = process.env.PYTHON_PATH || 'python'
+      const pythonPath = process.env.PYTHON_PATH || 'D:\\Programs\\Python\\Python313\\python.exe'
       const port = 8010
 
       console.log(`[进程管理] 启动 Python 后端: ${pythonPath} ${scriptPath}`)
