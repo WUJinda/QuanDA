@@ -134,8 +134,20 @@ const cleanup = () => {
   }
 }
 
-const updateChart = () => {
+const updateChart = (preserveZoom = false) => {
   if (!chartInstance || !props.data.length) return
+
+  // 保存当前的缩放状态
+  let savedZoomState: { start: number; end: number } | null = null
+  if (preserveZoom && chartInstance) {
+    const currentOption = chartInstance.getOption() as any
+    if (currentOption?.dataZoom?.[0]) {
+      savedZoomState = {
+        start: currentOption.dataZoom[0].start,
+        end: currentOption.dataZoom[0].end
+      }
+    }
+  }
 
   // 数据抽样优化：当数据量过大时，进行抽样显示
   let displayData = props.data
@@ -292,9 +304,9 @@ const updateChart = () => {
       {
         type: 'inside',
         xAxisIndex: [0, 1],
-        // 如果有高亮区间，显示全部数据；否则显示最后30%
-        start: props.highlightRange ? 0 : 70,
-        end: 100,
+        // 如果保持缩放状态，使用保存的值；否则使用默认值
+        start: savedZoomState?.start ?? (props.highlightRange ? 0 : 70),
+        end: savedZoomState?.end ?? 100,
         disabled: props.enableBrush  // 启用截取时禁用内部缩放，避免冲突
       },
       {
@@ -302,9 +314,9 @@ const updateChart = () => {
         xAxisIndex: [0, 1],
         type: 'slider',
         top: '96%',
-        // 如果有高亮区间，显示全部数据；否则显示最后30%
-        start: props.highlightRange ? 0 : 70,
-        end: 100,
+        // 如果保持缩放状态，使用保存的值；否则使用默认值
+        start: savedZoomState?.start ?? (props.highlightRange ? 0 : 70),
+        end: savedZoomState?.end ?? 100,
         height: 15
       }
     ],
@@ -484,9 +496,9 @@ watch(() => props.data, async (newData) => {
   }
 }, { deep: true, immediate: true })
 
-// 监听showBoll变化，实时更新图表
+// 监听showBoll变化，实时更新图表（保持缩放状态）
 watch(() => props.showBoll, () => {
-  updateChart()
+  updateChart(true)
 })
 
 // 监听enableBrush变化，实时更新图表
