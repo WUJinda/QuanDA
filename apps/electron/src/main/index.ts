@@ -8,7 +8,7 @@ import { existsSync } from 'fs'
 import { createApplicationMenu } from './menu'
 import { registerIpcHandlers } from './ipc'
 import { ProcessManager } from './lib/process-manager'
-import { getUserDataPath, getLogsPath } from './lib/paths'
+import { getUserDataPath, getLogsPath, validateDatabaseResources } from './lib/paths'
 import { IPC_CHANNELS } from '@quanda/shared'
 
 let mainWindow: BrowserWindow | null = null
@@ -80,7 +80,12 @@ function createWindow(): void {
     mainWindow.loadURL('http://localhost:3000')
     mainWindow.webContents.openDevTools()
   } else {
-    mainWindow.loadFile(join(__dirname, 'renderer', 'index.html'))
+    // 生产环境：从打包后的 dist 目录加载
+    const rendererPath = join(__dirname, 'renderer', 'index.html')
+    console.log('[窗口] 加载渲染进程:', rendererPath)
+    console.log('[窗口] __dirname:', __dirname)
+    console.log('[窗口] 文件是否存在:', existsSync(rendererPath))
+    mainWindow.loadFile(rendererPath)
   }
 
   mainWindow.once('ready-to-show', () => {
@@ -115,6 +120,11 @@ async function initializeApp() {
   console.log('[初始化] QuanDA 桌面应用启动中...')
   console.log('[初始化] 用户数据目录:', getUserDataPath())
   console.log('[初始化] 日志目录:', getLogsPath())
+  console.log('[初始化] app.isPackaged:', app.isPackaged)
+  console.log('[初始化] process.resourcesPath:', process.resourcesPath)
+
+  // 验证数据库资源文件
+  validateDatabaseResources()
 
   // 创建进程管理器
   processManager = new ProcessManager()
@@ -134,24 +144,40 @@ async function startBackendServices() {
   console.log('[后台服务] 启动数据库和后端服务...')
 
   try {
-    // 启动 MongoDB
-    await processManager?.startDatabase('mongo')
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    // 启动 MongoDB（不阻塞）
+    try {
+      await processManager?.startDatabase('mongo')
+      await new Promise(resolve => setTimeout(resolve, 2000))
+    } catch (error) {
+      console.warn('[后台服务] MongoDB 启动失败，继续启动其他服务:', error)
+    }
 
-    // 启动 ClickHouse
-    await processManager?.startDatabase('clickhouse')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 启动 ClickHouse（不阻塞）
+    try {
+      await processManager?.startDatabase('clickhouse')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } catch (error) {
+      console.warn('[后台服务] ClickHouse 启动失败，继续启动其他服务:', error)
+    }
 
-    // 启动 Redis
-    await processManager?.startDatabase('redis')
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // 启动 Redis（不阻塞）
+    try {
+      await processManager?.startDatabase('redis')
+      await new Promise(resolve => setTimeout(resolve, 1000))
+    } catch (error) {
+      console.warn('[后台服务] Redis 启动失败，继续启动其他服务:', error)
+    }
 
-    // 启动 Python 后端
-    await processManager?.startBackend()
+    // 启动 Python 后端（不阻塞）
+    try {
+      await processManager?.startBackend()
+    } catch (error) {
+      console.warn('[后台服务] Python 后端启动失败:', error)
+    }
 
-    console.log('[后台服务] 所有服务启动完成')
+    console.log('[后台服务] 服务启动流程完成')
   } catch (error) {
-    console.error('[后台服务] 启动失败:', error)
+    console.error('[后台服务] 启动过程出错:', error)
   }
 }
 

@@ -229,3 +229,20 @@ utils/
 # 本地脚本目录
 bin/
 uploads/
+apps/electron/resources/icon.ico
+apps/electron/resources/databases/mongodb/mongodb-win32-x86_64-windows-7.0.14/LICENSE-Community.txt
+apps/electron/resources/databases/mongodb/mongodb-win32-x86_64-windows-7.0.14/MPL-2
+apps/electron/resources/databases/mongodb/mongodb-win32-x86_64-windows-7.0.14/README
+apps/electron/resources/databases/mongodb/mongodb-win32-x86_64-windows-7.0.14/sbom_from_silk.json
+apps/electron/resources/databases/mongodb/mongodb-win32-x86_64-windows-7.0.14/THIRD-PARTY-NOTICES
+apps/electron/resources/databases/redis/EventLog.dll
+apps/electron/resources/databases/redis/Redis on Windows Release Notes.docx
+apps/electron/resources/databases/redis/Redis on Windows.docx
+apps/electron/resources/databases/redis/redis-benchmark.pdb
+apps/electron/resources/databases/redis/redis-check-aof.pdb
+apps/electron/resources/databases/redis/redis-check-dump.pdb
+apps/electron/resources/databases/redis/redis-cli.pdb
+apps/electron/resources/databases/redis/redis-server.pdb
+apps/electron/resources/databases/redis/redis.windows-service.conf
+apps/electron/resources/databases/redis/redis.windows.conf
+apps/electron/resources/databases/redis/Windows Service Documentation.docx

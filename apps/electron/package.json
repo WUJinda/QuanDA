@@ -21,21 +21,23 @@
     "build": "pnpm build:main && pnpm build:preload && pnpm build:renderer && pnpm build:resources",
     "start": "pnpm build && electron .",
     "typecheck": "tsc --noEmit",
+    "prebuild": "pnpm build:backend",
+    "build:backend": "cd ../backend && python scripts/build.py",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win"
   },
   "dependencies": {
-    "@quanda/shared": "workspace:*",
-    "vue": "^3.4.0",
-    "vue-router": "^4.2.5",
-    "pinia": "^2.1.7",
-    "axios": "^1.6.5",
-    "echarts": "^5.4.3",
-    "vue-echarts": "^6.6.8",
-    "element-plus": "^2.5.2",
     "@element-plus/icons-vue": "^2.3.1",
-    "dayjs": "^1.11.10"
+    "@quanda/shared": "workspace:*",
+    "axios": "^1.6.5",
+    "dayjs": "^1.11.10",
+    "echarts": "^5.4.3",
+    "element-plus": "^2.5.2",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.0",
+    "vue-echarts": "^6.6.8",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -51,7 +53,10 @@
     "vue-tsc": "^1.8.27"
   },
   "electronmon": {
-    "patterns": ["dist/main.cjs", "dist/preload.cjs"],
+    "patterns": [
+      "dist/main.cjs",
+      "dist/preload.cjs"
+    ],
     "logLevel": "verbose"
   },
   "build": {

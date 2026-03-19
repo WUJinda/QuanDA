@@ -20,11 +20,29 @@ asar: false
 # 跳过 npm install
 npmRebuild: false
 
+# 额外资源文件（包含数据库绿色版和 Python 后端）
+extraResources:
+  # 数据库绿色版
+  - from: "resources/databases"
+    to: "databases"
+    filter: ["**/*"]
+  # Python 后端可执行文件（PyInstaller 编译后的独立可执行文件）
+  - from: "../backend/dist/quanda-backend.exe"
+    to: "backend/quanda-backend.exe"
+    # 如果可执行文件不存在，构建时会警告但不会失败
+  # Python 后端的配置文件和数据目录（如果需要）
+  - from: "../../quanda/config"
+    to: "backend/config"
+    filter: ["**/*"]
+    ignore:
+      - "**/__pycache__"
+      - "**/*.pyc"
+
 # 通用文件配置
 files:
   - dist/**/*
   - package.json
-  - 排除 workspace 包的 symlink
+  # 排除 workspace 包的 symlink
   - "!node_modules/@quanda/**"
 
 # Windows 配置
@@ -34,6 +52,8 @@ win:
     - target: nsis
       arch:
         - x64
+  # 跳过代码签名（beta 测试版）
+  sign: null
 
 # NSIS 安装程序配置
 nsis:

@@ -42,6 +42,8 @@ export default defineConfig({
     outDir: resolve(__dirname, 'dist/renderer'),
     emptyOutDir: true,
     sourcemap: true,
+    // Electron 需要使用相对路径
+    base: './',
     rollupOptions: {
       output: {
         manualChunks: {
