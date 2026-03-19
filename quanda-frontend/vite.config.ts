@@ -36,8 +36,7 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:8010',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        changeOrigin: true
       },
       '/uploads': {
         target: 'http://localhost:8010',
