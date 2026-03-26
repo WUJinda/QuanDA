@@ -30,60 +30,41 @@
 
     <!-- 工具栏 -->
     <div class="toolbar-card">
-      <div class="toolbar-section">
-        <div class="section-title">
-          <el-icon><Filter /></el-icon>
-          数据筛选
-        </div>
-        <div class="toolbar-controls">
-          <div class="control-group">
-            <label>选择合约</label>
-            <FutureSelector @change="handleFutureChange" class="future-selector" />
-          </div>
-          
-          <div class="control-group">
-            <label>时间范围</label>
-            <DateRangePicker @change="handleDateChange" class="date-picker" />
-          </div>
-        </div>
+      <!-- 合约选择器（平铺展示） -->
+      <div class="selector-row">
+        <FutureSelector @change="handleFutureChange" />
       </div>
 
-      <div class="toolbar-section period-section">
-        <div class="section-title">
-          <el-icon><Clock /></el-icon>
-          周期
+      <!-- 周期和操作 -->
+      <div class="action-row">
+        <div class="period-group">
+          <span class="group-label">周期</span>
+          <el-button
+            v-for="period in quickPeriods"
+            :key="period.value"
+            :type="frequence === period.value ? 'primary' : ''"
+            @click="handlePeriodChange(period.value)"
+            size="small"
+          >
+            {{ period.label }}
+          </el-button>
         </div>
-        <div class="period-controls">
-          <el-button-group class="period-group">
-            <el-button
-              v-for="period in quickPeriods"
-              :key="period.value"
-              :type="frequence === period.value ? 'primary' : ''"
-              @click="handlePeriodChange(period.value)"
-              class="period-btn"
-              size="default"
-            >
-              {{ period.label }}
-            </el-button>
-          </el-button-group>
-        </div>
-      </div>
 
-      <div class="toolbar-actions">
-        <el-checkbox v-model="showBoll" class="boll-checkbox">
-          <el-icon><DataLine /></el-icon>
-          显示BOLL
-        </el-checkbox>
-        <el-button 
-          type="primary" 
-          class="refresh-btn" 
-          @click="fetchData" 
-          :loading="loading" 
-          :disabled="loading"
-        >
-          <el-icon><Refresh /></el-icon>
-          {{ loading ? '加载中...' : '刷新数据' }}
-        </el-button>
+        <div class="action-group">
+          <el-checkbox v-model="showBoll" size="small">
+            显示BOLL
+          </el-checkbox>
+          <el-button
+            type="primary"
+            size="small"
+            @click="fetchData"
+            :loading="loading"
+            :disabled="loading"
+          >
+            <el-icon><Refresh /></el-icon>
+            刷新
+          </el-button>
+        </div>
       </div>
     </div>
 
@@ -312,6 +293,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
+import dayjs from 'dayjs'
 import { useMarketStore } from '@/stores/market'
 import { ElMessage } from 'element-plus'
 import {
@@ -319,8 +301,6 @@ import {
   Setting,
   Loading,
   TrendCharts,
-  Filter,
-  Clock,
   Download,
   Star,
   DataLine,
@@ -330,7 +310,6 @@ import {
   Picture
 } from '@element-plus/icons-vue'
 import FutureSelector from '@/components/Market/FutureSelector.vue'
-import DateRangePicker from '@/components/Common/DateRangePicker.vue'
 import KLineChart from '@/components/Charts/KLineChart.vue'
 import { strategyReferenceApi } from '@/api/strategy-reference'
 import type { KLineData, FutureData } from '@/types/market'
@@ -342,8 +321,6 @@ const loading = ref(true)
 const isInitialLoad = ref(true)
 let fetchDataTimer: ReturnType<typeof setTimeout> | null = null
 const currentFuture = ref('')
-const startDate = ref('')
-const endDate = ref('')
 const frequence = ref('day')
 const showBoll = ref(false)
 const klineData = ref<KLineData[]>([])
@@ -392,14 +369,9 @@ const handleFutureChange = (code: string) => {
   currentFuture.value = code
 }
 
-const handleDateChange = (start: string, end: string) => {
-  startDate.value = start
-  endDate.value = end
-}
-
 const handlePeriodChange = (period: string) => {
   frequence.value = period
-  if (currentFuture.value && startDate.value && endDate.value) {
+  if (currentFuture.value) {
     if (fetchDataTimer) {
       clearTimeout(fetchDataTimer)
       fetchDataTimer = null
@@ -409,7 +381,7 @@ const handlePeriodChange = (period: string) => {
 }
 
 const fetchData = async () => {
-  if (!currentFuture.value || !startDate.value || !endDate.value) return
+  if (!currentFuture.value) return
 
   if (fetchDataTimer) {
     clearTimeout(fetchDataTimer)
@@ -417,11 +389,15 @@ const fetchData = async () => {
 
   loading.value = true
 
+  // 使用固定的默认时间范围（过去2年）
+  const endDate = dayjs().format('YYYY-MM-DD')
+  const startDate = dayjs().subtract(2, 'year').format('YYYY-MM-DD')
+
   try {
     const data: FutureData[] = await marketStore.fetchFutureData(
       currentFuture.value,
-      startDate.value,
-      endDate.value,
+      startDate,
+      endDate,
       frequence.value
     )
 
@@ -592,8 +568,8 @@ const confirmSave = async () => {
   }
 }
 
-watch([currentFuture, startDate, endDate], () => {
-  if (currentFuture.value && startDate.value && endDate.value) {
+watch(currentFuture, () => {
+  if (currentFuture.value) {
     debouncedFetchData()
   }
 }, { immediate: true })
@@ -777,84 +753,40 @@ onMounted(async () => {
             color: color(text-tertiary);
             font-weight: font-weight(medium);
           }
-
-          .future-selector,
-          .date-picker {
-            :deep(.el-input__wrapper),
-            :deep(.el-select) {
-              border-radius: radius(md);
-            }
-          }
-        }
-      }
-
-      .period-controls {
-        display: flex;
-        gap: spacing(xs);
-        align-items: center;
-
-        .period-group {
-          display: flex;
-          gap: 2px;
-
-          .period-btn {
-            padding: 6px 10px;
-            font-size: font-size(sm);
-            border-radius: radius(sm);
-            font-weight: font-weight(medium);
-            transition: all transition(fast) easing(smooth);
-            min-width: auto;
-
-            &:hover {
-              transform: translateY(-1px);
-            }
-          }
         }
       }
     }
 
-    .toolbar-actions {
-      display: flex;
-      gap: spacing(base);
-      align-items: flex-end;
+    // 新的工具栏布局
+    .selector-row {
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid color(border-light);
+    }
 
-      .boll-checkbox {
+    .action-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      .period-group {
         display: flex;
         align-items: center;
-        gap: spacing(xs);
-        padding: spacing(md) spacing(lg);
-        background: color(bg-secondary);
-        border-radius: radius(md);
-        font-weight: font-weight(medium);
-        transition: all transition(fast) easing(smooth);
+        gap: 8px;
 
-        &:hover {
-          background: color(bg-hover);
-        }
-
-        :deep(.el-checkbox__label) {
-          display: flex;
-          align-items: center;
-          gap: spacing(xs);
+        .group-label {
+          font-size: 12px;
+          color: color(text-tertiary);
+          font-weight: font-weight(medium);
         }
       }
 
-      .refresh-btn {
-        padding: spacing(md) spacing(xl);
-        border-radius: radius(md);
-        font-weight: font-weight(semibold);
+      .action-group {
         display: flex;
         align-items: center;
-        gap: spacing(sm);
-        background: linear-gradient(135deg, #5B8FF9 0%, #7AA5FF 100%);
-        border: none;
-        transition: all transition(base) easing(smooth);
-        box-shadow: shadow(sm);
-
-        &:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: shadow(md);
-        }
+        gap: 12px;
       }
     }
   }
