@@ -189,15 +189,15 @@ const filteredContracts = computed(() => {
     // 搜索模式：匹配合约代码或品种
     const keyword = searchKeyword.value.toUpperCase()
     return allContracts.filter(contract => {
-      // 直接匹配合约代码
+      // 直接匹配合约代码（忽略大小写）
       if (contract.toUpperCase().includes(keyword)) return true
       // 匹配品种名称
       for (const category of categories.value) {
         for (const product of category.products) {
           if (product.code.toUpperCase().includes(keyword) ||
               product.name.includes(keyword)) {
-            // 如果品种匹配，返回该品种的所有合约
-            if (contract.startsWith(product.code)) return true
+            // 如果品种匹配，返回该品种的所有合约（忽略大小写）
+            if (contract.toUpperCase().startsWith(product.code.toUpperCase())) return true
           }
         }
       }
@@ -205,9 +205,10 @@ const filteredContracts = computed(() => {
     }).slice(0, SEARCH_LIMIT)
   }
 
-  // 非搜索模式：显示选中品种的合约
+  // 非搜索模式：显示选中品种的合约（忽略大小写）
   if (selectedProduct.value) {
-    return allContracts.filter(c => c.startsWith(selectedProduct.value))
+    const productCode = selectedProduct.value.toUpperCase()
+    return allContracts.filter(c => c.toUpperCase().startsWith(productCode))
   }
 
   return []
@@ -224,7 +225,7 @@ const hasMoreResults = computed(() => {
       for (const product of category.products) {
         if (product.code.toUpperCase().includes(keyword) ||
             product.name.includes(keyword)) {
-          if (contract.startsWith(product.code)) return true
+          if (contract.toUpperCase().startsWith(product.code.toUpperCase())) return true
         }
       }
     }

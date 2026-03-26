@@ -12,7 +12,7 @@ import quanda as QA
 
 # 尝试从不同数据源获取数据
 def get_future_list_safe():
-    """安全获取期货列表，优先使用MongoDB，失败则返回常用期货代码"""
+    """安全获取期货列表，优先使用MongoDB，失败则返回静态合约列表"""
     try:
         # 尝试从MongoDB获取
         from qaenv import mongo_ip
@@ -41,15 +41,19 @@ def get_future_list_safe():
     except:
         pass
 
-    # 返回常用期货代码作为fallback
+    # 返回静态合约列表作为fallback
+    try:
+        from quanda.QDData.future_contracts import get_all_contracts
+        return get_all_contracts()
+    except:
+        pass
+
+    # 最终fallback
     return [
-        'IF2403', 'IF2404', 'IF2406', 'IF2409',  # 沪深300股指期货
-        'IC2403', 'IC2404', 'IC2406', 'IC2409',  # 中证500股指期货
-        'IH2403', 'IH2404', 'IH2406', 'IH2409',  # 上证50股指期货
-        'IM2403', 'IM2404', 'IM2406', 'IM2409',  # 中证1000股指期货
-        'T2403', 'T2406', 'T2409', 'T2412',      # 10年期国债期货
-        'TF2403', 'TF2406', 'TF2409', 'TF2412',  # 5年期国债期货
-        'TS2403', 'TS2406', 'TS2409', 'TS2412',  # 2年期国债期货
+        'IF2504', 'IF2505', 'IF2506', 'IF2509', 'IF2512',
+        'IC2504', 'IC2505', 'IC2506', 'IC2509', 'IC2512',
+        'IH2504', 'IH2505', 'IH2506', 'IH2509', 'IH2512',
+        'IM2504', 'IM2505', 'IM2506', 'IM2509', 'IM2512',
     ]
 
 
