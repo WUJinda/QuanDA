@@ -48,59 +48,24 @@
         </div>
       </div>
 
-      <div class="toolbar-section">
+      <div class="toolbar-section period-section">
         <div class="section-title">
           <el-icon><Clock /></el-icon>
-          周期设置
+          周期
         </div>
         <div class="period-controls">
           <el-button-group class="period-group">
-            <el-button 
-              v-for="period in quickPeriods" 
+            <el-button
+              v-for="period in quickPeriods"
               :key="period.value"
               :type="frequence === period.value ? 'primary' : ''"
               @click="handlePeriodChange(period.value)"
               class="period-btn"
+              size="default"
             >
               {{ period.label }}
             </el-button>
           </el-button-group>
-          
-          <el-popover placement="bottom" :width="320" trigger="click">
-            <template #reference>
-              <el-button class="custom-btn">
-                <el-icon><Setting /></el-icon>
-                自定义
-              </el-button>
-            </template>
-            <div class="custom-period-panel">
-              <div class="panel-title">自定义周期</div>
-              <el-form :model="customPeriodForm" label-width="80px" size="default">
-                <el-form-item label="周期类型">
-                  <el-select v-model="customPeriodForm.type" style="width: 100%;">
-                    <el-option label="分钟" value="min" />
-                    <el-option label="小时" value="hour" />
-                    <el-option label="日线" value="day" />
-                    <el-option label="周线" value="week" />
-                    <el-option label="月线" value="month" />
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="周期数值" v-if="customPeriodForm.type !== 'day'">
-                  <el-input-number 
-                    v-model="customPeriodForm.value" 
-                    :min="1" 
-                    :max="customPeriodForm.type === 'min' ? 60 : 24"
-                    style="width: 100%;"
-                  />
-                </el-form-item>
-                <el-form-item>
-                  <el-button type="primary" @click="applyCustomPeriod" style="width: 100%;">
-                    应用设置
-                  </el-button>
-                </el-form-item>
-              </el-form>
-            </div>
-          </el-popover>
         </div>
       </div>
 
@@ -403,21 +368,19 @@ const captureForm = ref({
   tags: [] as string[]
 })
 
-// 快捷周期选项
+// 快捷周期选项 - 紧凑简约的按钮布局
 const quickPeriods = [
-  { label: '1分', value: '1min' },
-  { label: '5分', value: '5min' },
-  { label: '15分', value: '15min' },
-  { label: '30分', value: '30min' },
-  { label: '60分', value: '60min' },
-  { label: '日线', value: 'day' }
+  { label: '5', value: '5min' },
+  { label: '15', value: '15min' },
+  { label: '30', value: '30min' },
+  { label: '45', value: '45min' },
+  { label: '1H', value: '60min' },
+  { label: '2H', value: '120min' },
+  { label: '4H', value: '240min' },
+  { label: '日', value: 'day' },
+  { label: '周', value: 'week' },
+  { label: '月', value: 'month' }
 ]
-
-// 自定义周期表单
-const customPeriodForm = ref({
-  type: 'min',
-  value: 1
-})
 
 // 当前周期标签
 const currentPeriodLabel = computed(() => {
@@ -436,28 +399,6 @@ const handleDateChange = (start: string, end: string) => {
 
 const handlePeriodChange = (period: string) => {
   frequence.value = period
-  if (currentFuture.value && startDate.value && endDate.value) {
-    if (fetchDataTimer) {
-      clearTimeout(fetchDataTimer)
-      fetchDataTimer = null
-    }
-    fetchData()
-  }
-}
-
-const applyCustomPeriod = () => {
-  const { type, value } = customPeriodForm.value
-  if (type === 'day') {
-    frequence.value = 'day'
-  } else if (type === 'week') {
-    frequence.value = 'week'
-  } else if (type === 'month') {
-    frequence.value = 'month'
-  } else if (type === 'hour') {
-    frequence.value = `${value * 60}min`
-  } else {
-    frequence.value = `${value}min`
-  }
   if (currentFuture.value && startDate.value && endDate.value) {
     if (fetchDataTimer) {
       clearTimeout(fetchDataTimer)
@@ -849,30 +790,25 @@ onMounted(async () => {
 
       .period-controls {
         display: flex;
-        gap: spacing(base);
+        gap: spacing(xs);
         align-items: center;
 
         .period-group {
           display: flex;
-          gap: spacing(xs);
+          gap: 2px;
 
           .period-btn {
-            border-radius: radius(md);
+            padding: 6px 10px;
+            font-size: font-size(sm);
+            border-radius: radius(sm);
             font-weight: font-weight(medium);
             transition: all transition(fast) easing(smooth);
+            min-width: auto;
 
             &:hover {
               transform: translateY(-1px);
             }
           }
-        }
-
-        .custom-btn {
-          border-radius: radius(md);
-          font-weight: font-weight(medium);
-          display: flex;
-          align-items: center;
-          gap: spacing(xs);
         }
       }
     }
@@ -920,20 +856,6 @@ onMounted(async () => {
           box-shadow: shadow(md);
         }
       }
-    }
-  }
-
-  // 自定义周期面板
-  .custom-period-panel {
-    padding: spacing(base);
-
-    .panel-title {
-      font-size: font-size(lg);
-      font-weight: font-weight(semibold);
-      color: color(text-primary);
-      margin-bottom: spacing(md);
-      padding-bottom: spacing(sm);
-      border-bottom: 2px solid color(bg-secondary);
     }
   }
 

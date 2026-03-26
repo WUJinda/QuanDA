@@ -9,7 +9,8 @@ from quanda.QDWebServer.handlers.datahandler import (
     QDFutureListHandler,
     QDFutureDayHandler,
     QDFutureMinHandler,
-    QDFutureRealtimeHandler
+    QDFutureRealtimeHandler,
+    QDFutureCategoryHandler
 )
 
 # 策略参考库接口
@@ -53,6 +54,7 @@ DATA_HANDLERS = [
     (r"/api/future/day", QDFutureDayHandler),
     (r"/api/future/min", QDFutureMinHandler),
     (r"/api/future/realtime", QDFutureRealtimeHandler),
+    (r"/api/future/category", QDFutureCategoryHandler),
 ]
 
 # 所有策略参考库 Handler
@@ -97,6 +99,7 @@ __all__ = [
     'QDFutureDayHandler',
     'QDFutureMinHandler',
     'QDFutureRealtimeHandler',
+    'QDFutureCategoryHandler',
     # Strategy Reference Handlers
     'StrategyReferenceListHandler',
     'StrategyReferenceDetailHandler',

@@ -294,9 +294,68 @@ class QDFutureMinHandler(QDBaseHandler):
             })
 
 
+class QDFutureCategoryHandler(QDBaseHandler):
+    """获取期货品种分类数据"""
+
+    def get(self):
+        """返回按交易所分类的品种数据"""
+        try:
+            from quanda.QDMarket.market_preset import MARKET_PRESET
+            from quanda.QDUtil.QDParameter import EXCHANGE_ID
+
+            preset = MARKET_PRESET()
+
+            # 交易所中文名映射
+            exchange_names = {
+                EXCHANGE_ID.SHFE: '上期所',
+                EXCHANGE_ID.DCE: '大商所',
+                EXCHANGE_ID.CZCE: '郑商所',
+                EXCHANGE_ID.CFFEX: '中金所',
+                EXCHANGE_ID.INE: '能源中心'
+            }
+
+            # 按交易所分组
+            categories = {}
+            for code, info in preset.table.items():
+                exchange = info.get('exchange', 'OTHER')
+                if exchange not in categories:
+                    categories[exchange] = {
+                        'name': exchange_names.get(exchange, exchange),
+                        'products': []
+                    }
+                categories[exchange]['products'].append({
+                    'code': code,           # 品种代码：RB
+                    'name': info['name'],   # 中文名：螺纹钢
+                })
+
+            # 转换为数组格式，按固定顺序排列
+            exchange_order = [EXCHANGE_ID.SHFE, EXCHANGE_ID.DCE, EXCHANGE_ID.CZCE, EXCHANGE_ID.CFFEX, EXCHANGE_ID.INE]
+            result = []
+            for exchange in exchange_order:
+                if exchange in categories:
+                    result.append({
+                        'exchange': exchange,
+                        'name': categories[exchange]['name'],
+                        'products': sorted(categories[exchange]['products'], key=lambda x: x['code'])
+                    })
+
+            self.write({
+                'status': 200,
+                'res': result
+            })
+        except Exception as e:
+            import traceback
+            self.write({
+                'status': 500,
+                'message': f'获取品种分类失败: {str(e)}',
+                'error': traceback.format_exc(),
+                'res': []
+            })
+
+
 class QDFutureRealtimeHandler(QDBaseHandler):
     """获取期货实时数据"""
-    
+
     def get(self):
         try:
             code = self.get_argument('code')

@@ -1,10 +1,15 @@
 import request from './request'
-import type { FutureData, RealtimeData } from '@/types/market'
+import type { FutureData, RealtimeData, FutureCategory } from '@/types/market'
 
 export const marketApi = {
   // 获取期货列表
   getFutureList: () => {
     return request.get<any, string[]>('/future/list')
+  },
+
+  // 获取期货品种分类
+  getFutureCategory: () => {
+    return request.get<any, FutureCategory[]>('/future/category')
   },
 
   // 获取期货日线数据

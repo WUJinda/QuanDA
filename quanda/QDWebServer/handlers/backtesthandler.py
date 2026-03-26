@@ -362,8 +362,16 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
             """进度回调"""
             self.broadcast_progress(self.backtest_id, progress, message)
 
+        def ws_callback(data: dict):
+            """WebSocket数据推送回调"""
+            self.broadcast_data(self.backtest_id, data)
+
         try:
-            runner = backtest_manager.start_backtest(self.backtest_id, progress_callback)
+            runner = backtest_manager.start_backtest(
+                self.backtest_id,
+                progress_callback=progress_callback,
+                ws_callback=ws_callback
+            )
 
             def run_backtest():
                 try:
@@ -444,5 +452,22 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         for client in clients:
             try:
                 client.write_message(json.dumps(data, ensure_ascii=False))
+            except:
+                pass
+
+    @classmethod
+    def broadcast_data(cls, backtest_id: str, data: dict):
+        """广播数据（K线、账户状态等）"""
+        with cls._clients_lock:
+            clients = cls.clients.get(backtest_id, []).copy()
+
+        # 添加时间戳
+        if 'timestamp' not in data:
+            data['timestamp'] = datetime.now().isoformat()
+
+        message = json.dumps(data, ensure_ascii=False)
+        for client in clients:
+            try:
+                client.write_message(message)
             except:
                 pass

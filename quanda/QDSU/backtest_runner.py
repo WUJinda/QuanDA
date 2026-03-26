@@ -66,6 +66,7 @@ class BacktestRunner:
                  start_date: str = None, end_date: str = None, init_cash: float = 1000000,
                  code: str = None, frequence: str = '1min',
                  progress_callback: Callable[[int, str], None] = None,
+                 ws_callback: Callable[[dict], None] = None,
                  timeout: int = 3600):
         """
         初始化回测执行器
@@ -80,6 +81,7 @@ class BacktestRunner:
             code: 回测标的
             frequence: 回测频率
             progress_callback: 进度回调函数
+            ws_callback: WebSocket推送回调函数，用于实时推送K线和交易信号
             timeout: 超时时间（秒），默认1小时
         """
         self.backtest_id = backtest_id
@@ -91,6 +93,7 @@ class BacktestRunner:
         self.code = code
         self.frequence = frequence
         self.progress_callback = progress_callback
+        self.ws_callback = ws_callback
         self.timeout = timeout
 
         # 回测状态
@@ -220,11 +223,12 @@ class BacktestRunner:
             # 自定义处理函数
             bar_count = 0
             progress_interval = max(1, total_bars // 100)  # 动态调整进度更新频率
+            kline_push_interval = max(1, total_bars // 500)  # K线推送频率（最多推送500次）
 
             def custom_bar_handler(item):
                 nonlocal bar_count
                 bar_count += 1
-                
+
                 # 检查超时
                 if time.time() - self.start_time > self.timeout:
                     raise TimeoutError(f"回测超时 ({self.timeout}秒)")
@@ -234,18 +238,47 @@ class BacktestRunner:
                     progress = 20 + int((bar_count / total_bars) * 60)
                     self.report_progress(progress, f"处理中 {bar_count}/{total_bars}...")
 
+                # 推送K线数据（用于可视化监察）
+                if self.ws_callback and (bar_count % kline_push_interval == 0 or bar_count == total_bars):
+                    try:
+                        kline_data = {
+                            'type': 'kline',
+                            'data': {
+                                'time': str(item.name[0]),
+                                'open': float(item.get('open', 0)),
+                                'high': float(item.get('high', 0)),
+                                'low': float(item.get('low', 0)),
+                                'close': float(item.get('close', 0)),
+                                'volume': float(item.get('volume', 0)),
+                            },
+                            'progress': bar_count / total_bars,
+                            'bar_count': bar_count,
+                            'total_bars': total_bars
+                        }
+                        self.ws_callback(kline_data)
+                    except Exception as e:
+                        logger.warning(f"推送K线数据失败: {e}")
+
                 # 记录账户状态（采样记录，减少内存占用）
                 if bar_count % 10 == 0 or bar_count == total_bars:
                     try:
                         acc_msg = strategy.acc.account_msg
-                        self.account_history.append({
+                        account_state = {
                             'datetime': str(item.name[0]),
                             'balance': acc_msg.get('balance', self.init_cash),
                             'available': acc_msg.get('available', self.init_cash),
                             'margin': acc_msg.get('margin', 0),
                             'float_profit': acc_msg.get('float_profit', 0),
                             'close_profit': acc_msg.get('close_profit', 0),
-                        })
+                        }
+                        self.account_history.append(account_state)
+
+                        # 推送账户状态
+                        if self.ws_callback:
+                            self.ws_callback({
+                                'type': 'account',
+                                'data': account_state
+                            })
                     except Exception as e:
                         logger.warning(f"记录账户状态失败: {e}")
 
