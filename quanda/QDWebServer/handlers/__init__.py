@@ -49,10 +49,10 @@ from quanda.QDWebServer.handlers.backtesthandler import (
 
 # 所有数据接口 Handler
 DATA_HANDLERS = [
-    (r"/future/list", QDFutureListHandler),
-    (r"/future/day", QDFutureDayHandler),
-    (r"/future/min", QDFutureMinHandler),
-    (r"/future/realtime", QDFutureRealtimeHandler),
+    (r"/api/future/list", QDFutureListHandler),
+    (r"/api/future/day", QDFutureDayHandler),
+    (r"/api/future/min", QDFutureMinHandler),
+    (r"/api/future/realtime", QDFutureRealtimeHandler),
 ]
 
 # 所有策略参考库 Handler
