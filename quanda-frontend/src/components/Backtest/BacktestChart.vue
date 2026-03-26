@@ -66,6 +66,12 @@ const formatNumber = (num: number) => {
 const initChart = () => {
   if (!chartRef.value) return
 
+  // 先销毁旧实例，防止重复实例化
+  if (chartInstance) {
+    chartInstance.dispose()
+    chartInstance = null
+  }
+
   chartInstance = echarts.init(chartRef.value)
   updateChart()
 }

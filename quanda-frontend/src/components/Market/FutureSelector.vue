@@ -90,6 +90,10 @@
             <span class="contract-code">{{ contract }}</span>
             <el-icon v-if="selectedFuture === contract" class="check-icon"><Check /></el-icon>
           </div>
+          <!-- 更多结果提示 -->
+          <div v-if="hasMoreResults" class="more-results-tip">
+            仅显示前 {{ SEARCH_LIMIT }} 条结果，请输入更精确的关键词
+          </div>
         </div>
         <div class="empty-result" v-else-if="searchKeyword">
           <el-icon><Warning /></el-icon>
@@ -119,12 +123,23 @@ const selectedProduct = ref('')
 const selectedFuture = ref('IF2512')
 const recentUsed = ref<string[]>([])
 
+// localStorage 配置
+const STORAGE_KEY = 'future_recent_used'
+const STORAGE_VERSION = 1
+
 // 从 localStorage 加载最近使用
 const loadRecentUsed = () => {
   try {
-    const saved = localStorage.getItem('future_recent_used')
+    const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
-      recentUsed.value = JSON.parse(saved)
+      const data = JSON.parse(saved)
+      // 版本检查，防止数据格式变更导致解析错误
+      if (data.version === STORAGE_VERSION && Array.isArray(data.items)) {
+        recentUsed.value = data.items
+      } else {
+        // 版本不匹配，重置数据
+        recentUsed.value = []
+      }
     }
   } catch {
     recentUsed.value = []
@@ -139,7 +154,10 @@ const saveRecentUsed = (code: string) => {
   }
   recentUsed.value.unshift(code)
   recentUsed.value = recentUsed.value.slice(0, 10)
-  localStorage.setItem('future_recent_used', JSON.stringify(recentUsed.value))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    version: STORAGE_VERSION,
+    items: recentUsed.value
+  }))
 }
 
 // 品种分类
@@ -159,6 +177,9 @@ const getProductName = (productCode: string) => {
   }
   return productCode
 }
+
+// 搜索结果限制
+const SEARCH_LIMIT = 50
 
 // 过滤的合约列表
 const filteredContracts = computed(() => {
@@ -181,7 +202,7 @@ const filteredContracts = computed(() => {
         }
       }
       return false
-    }).slice(0, 50) // 限制搜索结果数量
+    }).slice(0, SEARCH_LIMIT)
   }
 
   // 非搜索模式：显示选中品种的合约
@@ -190,6 +211,26 @@ const filteredContracts = computed(() => {
   }
 
   return []
+})
+
+// 是否有更多搜索结果
+const hasMoreResults = computed(() => {
+  if (!searchKeyword.value) return false
+  const allContracts = marketStore.futureList
+  const keyword = searchKeyword.value.toUpperCase()
+  const total = allContracts.filter(contract => {
+    if (contract.toUpperCase().includes(keyword)) return true
+    for (const category of categories.value) {
+      for (const product of category.products) {
+        if (product.code.toUpperCase().includes(keyword) ||
+            product.name.includes(keyword)) {
+          if (contract.startsWith(product.code)) return true
+        }
+      }
+    }
+    return false
+  }).length
+  return total > SEARCH_LIMIT
 })
 
 // 选择品种
@@ -414,6 +455,16 @@ onMounted(async () => {
           font-size: 12px;
         }
       }
+    }
+
+    .more-results-tip {
+      grid-column: 1 / -1;
+      padding: 8px;
+      text-align: center;
+      font-size: 11px;
+      color: #909399;
+      background: #fafafa;
+      border-radius: 4px;
     }
 
     .empty-result {

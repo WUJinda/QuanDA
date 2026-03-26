@@ -400,8 +400,8 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         """发送消息"""
         try:
             self.write_message(json.dumps(data, ensure_ascii=False))
-        except:
-            pass
+        except Exception as e:
+            logger.warning(f"[send_message] 发送消息失败: {e}")
 
     @classmethod
     def broadcast_progress(cls, backtest_id: str, progress: int, message: str):
@@ -418,8 +418,8 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         for client in clients:
             try:
                 client.write_message(json.dumps(data, ensure_ascii=False))
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"[broadcast_progress] 发送消息失败: {e}")
 
     @classmethod
     def broadcast_result(cls, backtest_id: str, result: dict):
@@ -435,8 +435,8 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         for client in clients:
             try:
                 client.write_message(json.dumps(data, ensure_ascii=False))
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"[broadcast_result] 发送消息失败: {e}")
 
     @classmethod
     def broadcast_error(cls, backtest_id: str, error: str):
@@ -452,8 +452,8 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         for client in clients:
             try:
                 client.write_message(json.dumps(data, ensure_ascii=False))
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"[broadcast_error] 发送消息失败: {e}")
 
     @classmethod
     def broadcast_data(cls, backtest_id: str, data: dict):
@@ -469,5 +469,5 @@ class BacktestWebSocketHandler(tornado.websocket.WebSocketHandler):
         for client in clients:
             try:
                 client.write_message(message)
-            except:
-                pass
+            except Exception as e:
+                logger.warning(f"[broadcast_data] 发送消息失败: {e}")

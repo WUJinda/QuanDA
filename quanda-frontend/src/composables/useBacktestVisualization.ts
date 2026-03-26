@@ -1,6 +1,13 @@
 // 回测可视化逻辑
 import { ref, reactive, onUnmounted } from 'vue'
-import type { BacktestKLine, BacktestSignal, VisualizationState, WSMessage } from '@/types/backtest-visualization'
+import type { BacktestKLine, BacktestSignal, VisualizationState, WSMessage, BacktestAccount } from '@/types/backtest-visualization'
+
+// 配置常量
+const WS_CONFIG = {
+  maxReconnectAttempts: 5,
+  reconnectDelay: 3000,
+  checkInterval: 100
+}
 
 export function useBacktestVisualization() {
   // 状态
@@ -18,7 +25,6 @@ export function useBacktestVisualization() {
   let ws: WebSocket | null = null
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
   let reconnectAttempts = 0
-  const maxReconnectAttempts = 5
 
   // 连接 WebSocket
   const connect = (backtestId: string) => {
@@ -26,10 +32,9 @@ export function useBacktestVisualization() {
       ws.close()
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    const host = window.location.hostname
-    const port = '8010'
-    const wsUrl = `${protocol}//${host}:${port}/api/backtest/ws/${backtestId}`
+    // 从环境变量获取 WebSocket 基础地址
+    const wsBaseUrl = import.meta.env.VITE_APP_WS_URL || `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
+    const wsUrl = `${wsBaseUrl}/api/backtest/ws/${backtestId}`
 
     try {
       ws = new WebSocket(wsUrl)
@@ -46,6 +51,7 @@ export function useBacktestVisualization() {
           handleMessage(data)
         } catch (e) {
           console.error('[BacktestWS] 消息解析错误:', e)
+          state.message = '数据解析异常'
         }
       }
 
@@ -58,12 +64,12 @@ export function useBacktestVisualization() {
       ws.onclose = () => {
         console.log('[BacktestWS] 连接已关闭')
         // 尝试重连
-        if (reconnectAttempts < maxReconnectAttempts && state.status === 'running') {
+        if (reconnectAttempts < WS_CONFIG.maxReconnectAttempts && state.status === 'running') {
           reconnectTimer = setTimeout(() => {
             reconnectAttempts++
-            console.log(`[BacktestWS] 尝试重连 (${reconnectAttempts}/${maxReconnectAttempts})`)
+            console.log(`[BacktestWS] 尝试重连 (${reconnectAttempts}/${WS_CONFIG.maxReconnectAttempts})`)
             connect(backtestId)
-          }, 3000)
+          }, WS_CONFIG.reconnectDelay)
         }
       }
     } catch (e) {
@@ -105,7 +111,7 @@ export function useBacktestVisualization() {
 
       case 'account':
         if (data.data) {
-          state.account = data.data as any
+          state.account = data.data as BacktestAccount
         }
         break
 
@@ -140,7 +146,7 @@ export function useBacktestVisualization() {
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({ action: 'start' }))
       } else {
-        setTimeout(checkAndStart, 100)
+        setTimeout(checkAndStart, WS_CONFIG.checkInterval)
       }
     }
     checkAndStart()
